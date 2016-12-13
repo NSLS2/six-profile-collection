@@ -23,10 +23,10 @@ class VirtualCenter(PVPositioner):
 
 class VirtualMotorCenterAndGap(Device):
     "Center and gap with virtual motors"
-    xc = Cpt(VirtualCenter, '-Ax:X}')
-    yc = Cpt(VirtualCenter, '-Ax:Y}')
-    xg = Cpt(VirtualGap, '-Ax:X}')
-    yg = Cpt(VirtualGap, '-Ax:Y}')
+    hc = Cpt(VirtualCenter, '-Ax:X}')
+    vc = Cpt(VirtualCenter, '-Ax:Y}')
+    hg = Cpt(VirtualGap, '-Ax:X}')
+    vg = Cpt(VirtualGap, '-Ax:Y}')
  
     
 class ExitSlit(Device):
