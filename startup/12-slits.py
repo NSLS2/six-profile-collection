@@ -1,4 +1,4 @@
-from ophyd import Device, Component as Cpt, EpicsMotor
+from ophyd import Device, Component as Cpt, EpicsMotor, PVPositioner
 
 class BaffleSlit(Device):
     hg = Cpt(EpicsMotor, '-Ax:HG}Mtr')
@@ -7,12 +7,27 @@ class BaffleSlit(Device):
     vc = Cpt(EpicsMotor, '-Ax:VC}Mtr')
 
 
-class FESlits(Device):
-    hg = Cpt(EpicsMotor, '-Ax:X}size')
-    hc = Cpt(EpicsMotor, '-Ax:X}center')
-    vg = Cpt(EpicsMotor, '-Ax:Y}size')
-    vc = Cpt(EpicsMotor, '-Ax:Y}center')
+class VirtualGap(PVPositioner):
+    readback = Cpt(EpicsSignalRO, 't2.C')
+    setpoint = Cpt(EpicsSignal, 'size')
+    done = Cpt(EpicsSignalRO, 'DMOV')
+    done_value = 1
 
+
+class VirtualCenter(PVPositioner):
+    readback = Cpt(EpicsSignalRO, 't2.D')
+    setpoint = Cpt(EpicsSignal, 'center')
+    done = Cpt(EpicsSignalRO, 'DMOV')
+    done_value = 1
+
+
+class VirtualMotorCenterAndGap(Device):
+    "Center and gap with virtual motors"
+    xc = Cpt(VirtualCenter, '-Ax:X}')
+    yc = Cpt(VirtualCenter, '-Ax:Y}')
+    xg = Cpt(VirtualGap, '-Ax:X}')
+    yg = Cpt(VirtualGap, '-Ax:Y}')
+ 
     
 class ExitSlit(Device):
     hg = Cpt(EpicsMotor, '_HG}Mtr')
@@ -20,7 +35,7 @@ class ExitSlit(Device):
     hc = Cpt(EpicsMotor, '_HT}Mtr')
 
     
-feslt = FESlits('FE:C02A-OP{Slt:12', name='fe_slits')
+feslt = VirtualMotorCenterAndGap('FE:C02A-OP{Slt:12', name='fe_slits')
 
 m1slt = BaffleSlit('XF:02IDA-OP{Mir:1-Slt:4_D_1', name='m1slt')
 
