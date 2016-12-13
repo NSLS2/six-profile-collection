@@ -35,7 +35,7 @@ class ExitSlit(Device):
     hc = Cpt(EpicsMotor, '_HT}Mtr')
 
     
-feslt = VirtualMotorCenterAndGap('FE:C02A-OP{Slt:12', name='fe_slits')
+feslt = VirtualMotorCenterAndGap('FE:C02A-OP{Slt:12', name='feslt')
 
 m1slt = BaffleSlit('XF:02IDA-OP{Mir:1-Slt:4_D_1', name='m1slt')
 
