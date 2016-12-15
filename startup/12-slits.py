@@ -1,4 +1,4 @@
-from ophyd import Device, Component as Cpt, EpicsMotor, PVPositioner
+from ophyd import Device, Component as Cpt, EpicsMotor, PVPositioner, EpicsSignal, EpicsSignalRO
 
 class BaffleSlit(Device):
     hg = Cpt(EpicsMotor, '-Ax:HG}Mtr')
