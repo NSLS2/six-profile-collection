@@ -11,7 +11,13 @@ class BaffleSlit(BaffleSlitBase):
     out = Cpt(EpicsMotor, '-Ax:O}Mtr')
     bot = Cpt(EpicsMotor, '-Ax:B}Mtr')
     top = Cpt(EpicsMotor, '-Ax:T}Mtr')
-    
+
+class BaffleSlitSA(BaffleSlitBase):    
+    hs = Cpt(EpicsMotor, '-Ax:HS}Mtr')
+    ha = Cpt(EpicsMotor, '-Ax:HA}Mtr')
+    vs = Cpt(EpicsMotor, '-Ax:VS}Mtr')
+    va = Cpt(EpicsMotor, '-Ax:VA}Mtr')
+
 
 class VirtualGap(PVPositioner):
     readback = Cpt(EpicsSignalRO, 't2.C')
@@ -48,7 +54,7 @@ m1slt = BaffleSlit('XF:02IDA-OP{Mir:1-Slt:4_D_1', name='m1slt')
 pgmslt_u = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:8_U_1', name='pgmslt_u')
 pgmslt_d = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:9_D_1', name='pgmslt_d')
 
-m3slt = BaffleSlitBase('XF:02IDC-OP{Mir:3-Slt:12_U_1', name='m3slt')
+m3slt = BaffleSlitSA('XF:02IDC-OP{Mir:3-Slt:12_U_1', name='m3slt')
 m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
 
 extslt = ExitSlit('XF:02IDC-OP{Slt:1-Ax:15', name='extslt')
