@@ -86,3 +86,6 @@ qem06 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:6}EM180:', name='qem06'),
                  
 qem07 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:7}EM180:', name='qem07'),
                  ['gc_diag_{}'.format(s) for s in ('diode', 'grid')])
+
+qem08 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:8}EM180:', name='qem08'),
+                 ['rs_diag_{}_tey'.format(s) for s in ('1','2','3')])
