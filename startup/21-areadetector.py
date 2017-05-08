@@ -11,7 +11,8 @@ from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV
 class StandardProsilica(SingleTrigger, ProsilicaDetector):
     # tiff = Cpt(TIFFPluginWithFileStore,
     #           suffix='TIFF1:',
-    #           write_path_template='/XF11ID/data/')
+    #           write_path_template='/XF02ID/data/%Y/%m/%d',
+    #           root='/XF02ID/data')
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
@@ -20,12 +21,12 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
     stats5 = Cpt(StatsPlugin, 'Stats5:')
     trans1 = Cpt(TransformPlugin, 'Trans1:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
-    
+
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     # proc1 = Cpt(ProcessPlugin, 'Proc1:')
-    
+
 diagon_h_cam = StandardProsilica('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilica('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
 m3_diag_cam = StandardProsilica('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
@@ -42,7 +43,7 @@ for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam]:
         st.nd_array_port.set('ROI{}'.format(j))
         st.read_attrs = sts_readattrs
     cam.stats5.read_attrs = sts_readattrs
-                      
+
 class SIXQuadEM(QuadEM):
     port_name = Cpt(Signal, value='EM180')
     em_range = Cpt(EpicsSignalWithRBV, 'Range', string=True)
@@ -51,7 +52,7 @@ class SIXQuadEM(QuadEM):
 
         #for c in ['current{}'.format(j) for j in range(1, 5)]:
         #     getattr(self, c).read_attrs = ['mean_value']
-            
+
         # self.read_attrs = ['current{}'.format(j) for j in range(1, 5)]
         self.stage_sigs.update([(self.acquire_mode, 'One-shot')  # single mode
                                 ])
@@ -65,7 +66,7 @@ def name_qem(qem, chan_name):
         read_attrs.append(nm)
     qem.read_attrs = read_attrs
     return qem
-        
+
 qem01 = name_qem(SIXQuadEM('XF:02IDA-BI{EM:1}EM180:', name='qem01'),
                  ['m1slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
@@ -83,7 +84,7 @@ qem05 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:5}EM180:', name='qem05'),
 
 qem06 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:6}EM180:', name='qem06'),
                  ['extslt_{}_tey'.format(s) for s in ('hdsl', 'hdsr')])
-                 
+
 qem07 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:7}EM180:', name='qem07'),
                  ['gc_diag_{}'.format(s) for s in ('diode', 'grid')])
 
