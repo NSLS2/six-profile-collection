@@ -12,7 +12,8 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
     # tiff = Cpt(TIFFPluginWithFileStore,
     #           suffix='TIFF1:',
     #           write_path_template='/XF02ID/data/%Y/%m/%d',
-    #           root='/XF02ID/data')
+    #           root='/XF02ID/data',
+    #           fs=db.fs)
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
