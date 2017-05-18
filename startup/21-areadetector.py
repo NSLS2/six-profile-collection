@@ -55,7 +55,7 @@ class SIXQuadEM(QuadEM):
         #     getattr(self, c).read_attrs = ['mean_value']
 
         # self.read_attrs = ['current{}'.format(j) for j in range(1, 5)]
-        self.stage_sigs.update([(self.acquire_mode, 'One-shot')  # single mode
+        self.stage_sigs.update([(self.acquire_mode, 'Single')  # single mode
                                 ])
         self.configuration_attrs = ['integration_time', 'averaging_time','em_range','num_averaged','values_per_read']
 
