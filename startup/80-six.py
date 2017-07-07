@@ -170,5 +170,32 @@ def monoInfo2(eV, k0, mm, cff):
 
     return
 
+def gr500mv1(eV, cff):
+    # move the 500 mm-1 BL grating based on energy and cff value
+    # thru bluesky
+    # Upm, Ugr are the EPICS user values for the premirr and grating pitch
+    # OFFpm and OFFgr are the angular offsets for premirr and grating pitch
 
+    # right now I list these in addition to EPICS offsets
+    # at some point these could be incoorporated into the EPICS values
+    # and then these should be set to zero   
+    OFFpm = -0.46801   # value in deg, these are in addition to EPICS offsets
+    OFFgr = -0.35772   # value in deg, these are in addition to EPICS offsets
+    wl = 0.0012398/eV  # wavelength in mm
+    k0 = 500 # grating central line density, hard coded
+    mm = 1 # diffraction order, hard coded
+    pi=3.14159265359
+    A0 = mm*k0*wl   
+    term4=(cff*A0)/(cff*cff-1)
+    alpha=np.arcsin(-A0/(cff*cff-1)+np.sqrt(1+np.power(term4,2)))
+    beta=np.arcsin(A0-np.sin(alpha))
+    phi=0.5*(alpha-beta)
+    # this changes depending on angular conventions, these are for SIX
+    # U stands for EPICS user value
+    Upm = phi*(180./pi) + OFFpm
+    Ugr = -beta*(180./pi) + OFFgr
+
+    yield from bp.mv(pgm.m2_pit, Upm) 
+    yield from bp.mv(pgm.gr_pit, Ugr)
+    
 

@@ -23,6 +23,9 @@ mds_readonly = MDS(mds_config)
 fs_readonly = FileStoreRO(fs_config)
 db = Broker(mds_readonly, fs_readonly)
 
+from databroker.core import register_builtin_handlers
+register_builtin_handlers(db.fs)
+
 # Subscribe metadatastore to documents.
 # If this is removed, data is not saved to metadatastore.
 from bluesky.global_state import gs
@@ -67,3 +70,13 @@ RE.subscribe('start', cb)
 # This is for ophyd.commands.get_logbook, which simply looks for
 # a variable called 'logbook' in the global IPython namespace.
 logbook = simple_olog_client
+
+# Adding this for more convienient tools
+
+from bluesky.plan_tools import print_summary
+from bluesky.callbacks.scientific import plot_peak_stats
+
+# New figure title so no overplot.
+def relabel_fig(fig, new_label):
+    fig.set_label(new_label)
+    fig.canvas.manager.set_window_title(fig.get_label())
