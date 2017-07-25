@@ -1,8 +1,12 @@
 from ophyd.areadetector import AreaDetector, HDF5Plugin
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5BulkWrite, FileStorePlugin
+from ophyd.areadetector.filestore_mixins import FileStoreHDF5BulkWrite
 
+print(writeable_fs, db.fs.config)
 
-class RIXSCamHDF5PluginWithFileStore(SIXHDF5Plugin, FileStoreHDF5BulkWrite):
+class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5BulkWrite):
+
+    file_number_sync = None
+    file_number_write = None
 
     def get_frames_per_point(self):
         return 1  # HACK
@@ -29,6 +33,5 @@ class RIXSCam(AreaDetector):
 
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
-rixscam.hdf5.read_attrs.remove('file_number_sync')# temp hack, do not sue me
-rixscam.hdf5.read_attrs.remove('file_number_write')# temp hack, do not sue me
-
+rixscam.hdf5.read_attrs.remove('file_number_sync')
+rixscam.hdf5.read_attrs.remove('file_number_write')
