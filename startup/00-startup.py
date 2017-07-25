@@ -74,6 +74,8 @@ logbook = simple_olog_client
 # Adding this for more convienient tools
 
 from bluesky.plan_tools import print_summary
+
+from bluesky.callbacks.scientific import PeakStats
 from bluesky.callbacks.scientific import plot_peak_stats
 
 # New figure title so no overplot.

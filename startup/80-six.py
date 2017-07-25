@@ -1,5 +1,7 @@
-import numpy as np
+﻿import numpy as np
 from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
+
 	
 									# DATA FROM OLEG	
 	
@@ -62,9 +64,25 @@ def e2g(ph_en):
 	etog = interp1d(energy, gap)
 	if (ph_en >= 140 and ph_en <= 1390.7): 
 		print('\t gap = %5.3f' %(etog(ph_en)))
+		return etog(ph_en)
 	else:
 		print('energy out of range (140, 1390)')
+
+def e2g_1390(ph_en):
+	''' usage: e2g_1390(photon_energy) 
+			Select the photon_energy and returns the corresponding 
+			gap interpolated from Oleg data. This allows for extrapolation E>1390.7eV
+	'''								
 	
+	etog = interp1d(energy, gap,fill_value="extrapolate")
+	if (ph_en >= 140 and ph_en <= 1390.7): 
+		print('\t gap = %5.3f' %(etog(ph_en)))
+		return etog(ph_en)
+	else:
+		print('\t using extrapolated output from e2g_1390')	
+		print('\t gap = %5.3f' %(etog(ph_en)))
+		return etog(ph_en)	
+
 def g2e(g):
 	''' usage: g2e(gap) 
 			Select the gap (16,60) and returns the corresponding 
@@ -103,6 +121,8 @@ def Sic2f(ph_en, i):
 		print("Energy out of range")
 
 	print('flux = %.4g ph/sec' %((i)/(1.6E-19)/Sictof(ph_en)))	
+
+# above functions and data is from ESM
 	
       
 def gr500_info(eV, r2=42636):
@@ -175,6 +195,7 @@ def gr500mv1(eV, cff):
     # thru bluesky
     # Upm, Ugr are the EPICS user values for the premirr and grating pitch
     # OFFpm and OFFgr are the angular offsets for premirr and grating pitch
+    # untested
 
     # right now I list these in addition to EPICS offsets
     # at some point these could be incoorporated into the EPICS values
@@ -197,5 +218,77 @@ def gr500mv1(eV, cff):
 
     yield from bp.mv(pgm.m2_pit, Upm) 
     yield from bp.mv(pgm.gr_pit, Ugr)
-    
 
+def getThetaPMdeg(eV, thetaGR_deg, k_invmm, m):
+    """
+    calculate premirror angle from energy and grating angle, in degrees
+        eV - energy in eV
+        thetaGR_deg - grating angle in degrees
+        k_invmm - central line density in mm-1
+        m - diffraction order, + is inside order
+    """
+    # error check ok
+    thetaGR = thetaGR_deg*(np.pi/180)
+    lambda_mm = 0.001239842/eV  # wavelength in mm
+    if (m==0):
+        thetaPM = thetaGR
+    else:    
+        thetaPM = 0.5*(np.arcsin(m*k_invmm*lambda_mm+np.sin(thetaGR))+thetaGR)
+    thetaPM_deg = thetaPM*(180/np.pi)
+    return thetaPM_deg
+
+def generatePGMscan(eV, k_invmm, 
+                 startGR=84.0, stopGR=90.0, 
+                 startPM=84.0, stopPM=90.0, gridDelta=0.2,
+                 fineRange=0.02, fineDelta=0.001,
+                 mm=[1,0], collAng=2, info=False):
+    """
+    visualize a PGM smart mesh scan before running it
+        input description (all angles in deg)
+        eV: undulator fixed energy in eV
+        k_invmm: grating line density in mm^-1
+        GR range: startGR, stopGR
+        PM range: startPM, stopPM
+        gridDelta: course step size
+        fine range: fineRange, fineDelta determine fine grating scan about
+            the constant energy contour
+        mm: list of orders to scan
+        collAng: safety collision angle, 4 deg appropriate for SIX
+        info: print out scan information
+    """
+
+    # this part should run without modification
+    GRang=np.zeros(0)
+    PMang=np.zeros(0)
+    diffAng=np.zeros(0)
+    order=np.zeros(0)
+    nPntsGrid = int((stopGR-startGR)/gridDelta+1)
+    for j in mm: # loop for orders
+        # for one value of m, calculate the constant energy contour
+        GRangTmp = np.linspace(startGR, stopGR, nPntsGrid)
+        PMangTmp = getThetaPMdeg(eV, GRangTmp, k_invmm, j)
+        diffAngTmp = PMangTmp-GRangTmp
+        orderTmp = np.full(len(GRangTmp), j)
+        # check and remove nan pnts, collision pnts, and angles > 90 deg
+        GRangTmp2 = GRangTmp
+        PMangTmp2 = PMangTmp
+        diffAngTmp2 = diffAngTmp
+        orderTmp2 = orderTmp
+        hits = 0
+        for i in range(len(GRangTmp)):  
+            if (np.isnan(GRangTmp[i]) or np.isnan(PMangTmp[i]) or 
+                diffAngTmp[i]>collAng or np.isinf(PMangTmp[i]) or 
+                GRangTmp[i]>90.0 or PMangTmp[i]>90.0):
+                # remove that point from array
+                GRangTmp2=np.delete(GRangTmp2,i-hits)
+                PMangTmp2=np.delete(PMangTmp2,i-hits)
+                diffAngTmp2=np.delete(diffAngTmp2,i-hits)
+                orderTmp2=np.delete(orderTmp2,i-hits)
+                hits = hits + 1            
+        GRang=np.append(GRang, GRangTmp2)            
+        PMang=np.append(PMang, PMangTmp2)            
+        diffAng=np.append(diffAng, diffAngTmp2)            
+        order=np.append(order,orderTmp2)  # possible to use for later
+    if info==True:
+        print('tot number of pnts = ', len(GRang)*(int(fineRange/fineDelta)+1))
+    return GRang, PMang

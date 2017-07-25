@@ -25,7 +25,7 @@ def gcd_diode():
     return (yield from bp.mv(gc_diag, -71.4))
 
 def gcd_grid():
-    return (yield from bp.mv(gc_diag, -94.4))
+    return (yield from bp.mv(gc_diag, -95.4))
 
 def gcd_out():
     return (yield from bp.mv(gc_diag, -1))            
