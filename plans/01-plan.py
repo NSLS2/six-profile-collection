@@ -134,8 +134,84 @@ def epu_calib_gs_4():
     yield from bp.mv(feslt.hg,1.2)
     yield from bp.mv(feslt.vg,1.2)
 
+def joescan2():
+
+    # read gas cell Au grid
+    # yield from gcd_grid()
+    # yield from bp.sleep(120)
+    qem07.read_attrs=['current3.mean_value']
+    gs.DETS=[]
+    gs.DETS.append(qem07)
+    gs.DETS.append(pgm.m2_pit)
+    gs.DETS.append(pgm.gr_pit)
+    gs.DETS.append(pgm.en)
+    gs.MONITORS=[]
+    gs.TABLE_COLS=['gc_diag_grid']
+    gs.PLOT_Y='gc_diag_grid'
+
+    GRang, PMang = generatePGMscan(400.8, 500, startGR=89.0, stopGR=90.0, 
+                    startPM=89.0, stopPM=90.0, gridDelta=0.2,
+                    fineRange=0.02, fineDelta=0.0005,
+                    mm=[0], collAng=4, info=False)
+
+    for i, j in zip(PMang, GRang):
+        yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)
+        yield from dscan(pgm.gr_pit,-0.015,0.015,61)
+
 
 def joescan1():
+    # read gas cell photodiode
+    yield from gcd_diode()
+    yield from bp.sleep(120)
+    qem07.read_attrs=['current1.mean_value']
+    gs.DETS=[]
+    gs.DETS.append(qem07)
+    gs.DETS.append(pgm.m2_pit)
+    gs.DETS.append(pgm.gr_pit)
+    gs.DETS.append(pgm.en)
+    gs.MONITORS=[]
+    gs.TABLE_COLS=['gc_diag_diode']
+    gs.PLOT_Y='gc_diag_diode'
+
+    GRang, PMang = generatePGMscan(400.8, 500, startGR=85.0, stopGR=90.0, 
+                    startPM=84.0, stopPM=90.0, gridDelta=0.2,
+                    fineRange=0.02, fineDelta=0.0005,
+                    mm=[2], collAng=4, info=False)
+
+    for i, j in zip(PMang, GRang):
+        yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)
+        yield from dscan(pgm.gr_pit,-0.015,0.015,61)
+
+    GRang, PMang = generatePGMscan(400.8, 500, startGR=85.0, stopGR=90.0, 
+                    startPM=84.0, stopPM=90.0, gridDelta=0.2,
+                    fineRange=0.02, fineDelta=0.0005,
+                    mm=[1], collAng=4, info=False)
+
+    for i, j in zip(PMang, GRang):
+        yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)
+        yield from dscan(pgm.gr_pit,-0.015,0.015,61)
+
+    GRang, PMang = generatePGMscan(400.8, 500, startGR=85.0, stopGR=90.0, 
+                    startPM=84.0, stopPM=90.0, gridDelta=0.2,
+                    fineRange=0.02, fineDelta=0.0005,
+                    mm=[-1], collAng=4, info=False)
+
+    for i, j in zip(PMang, GRang):
+        yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)
+        yield from dscan(pgm.gr_pit,-0.015,0.015,61)
+
+    GRang, PMang = generatePGMscan(400.8, 500, startGR=85.0, stopGR=90.0, 
+                    startPM=84.0, stopPM=90.0, gridDelta=0.2,
+                    fineRange=0.02, fineDelta=0.0005,
+                    mm=[-2], collAng=4, info=False)
+
+    for i, j in zip(PMang, GRang):
+        yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)
+        yield from dscan(pgm.gr_pit,-0.015,0.015,61)
+
+    # read gas cell Au grid
+    yield from gcd_grid()
+    yield from bp.sleep(120)
     qem07.read_attrs=['current3.mean_value']
     gs.DETS=[]
     gs.DETS.append(qem07)
@@ -149,7 +225,7 @@ def joescan1():
     GRang, PMang = generatePGMscan(400.8, 500, startGR=85.0, stopGR=90.0, 
                     startPM=84.0, stopPM=90.0, gridDelta=0.2,
                     fineRange=0.02, fineDelta=0.0005,
-                    mm=[1,0-1,-2], collAng=4, info=False)
+                    mm=[0], collAng=4, info=False)
 
     for i, j in zip(PMang, GRang):
         yield from bp.mv(pgm.m2_pit, i, pgm.gr_pit, j)

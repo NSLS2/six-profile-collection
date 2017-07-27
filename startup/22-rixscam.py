@@ -1,8 +1,9 @@
 from ophyd.areadetector import AreaDetector, HDF5Plugin
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5BulkWrite, FileStorePlugin
+from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
+from ophyd.areadetector.trigger_mixins import SingleTrigger
 
 
-class RIXSCamHDF5PluginWithFileStore(SIXHDF5Plugin, FileStoreHDF5BulkWrite):
+class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
     def get_frames_per_point(self):
         return 1  # HACK
@@ -18,7 +19,7 @@ class RIXSCamHDF5PluginWithFileStore(SIXHDF5Plugin, FileStoreHDF5BulkWrite):
         self._naive_write_path_template = val
 
 
-class RIXSCam(AreaDetector):
+class RIXSCam(SingleTrigger, AreaDetector):
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
               suffix='HDF1:',
               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
@@ -29,6 +30,9 @@ class RIXSCam(AreaDetector):
 
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
-rixscam.hdf5.read_attrs.remove('file_number_sync')# temp hack, do not sue me
-rixscam.hdf5.read_attrs.remove('file_number_write')# temp hack, do not sue me
-
+rixscam.hdf5.read_attrs = []
+rixscam.read_attrs = ['hdf5']
+rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
+                               'cam.num_exposures',
+                               'cam.temperature', 'cam.temperature_actual',
+                               'cam.trigger_mode']
