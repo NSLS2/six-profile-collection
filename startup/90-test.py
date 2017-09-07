@@ -1,8 +1,6 @@
 ## Some useful functions for remembering how to put diagnostics in the beam
 
-
 # M3 diagnostic
-
 # m3d means m3 diode in
 def m3d_diode():
     return (yield from bp.mv(m3_diag, -76.4))

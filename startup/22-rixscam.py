@@ -36,3 +36,5 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode']
+
+
