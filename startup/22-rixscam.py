@@ -25,7 +25,7 @@ class RIXSCam(SingleTrigger, AreaDetector):
               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
               root='/XF02ID1',
-              fs=writeable_fs)
+              reg=db.reg)
     
 
 

@@ -77,3 +77,7 @@ RE.subscribe(print_scan_ids, 'start')
 def relabel_fig(fig, new_label):
     fig.set_label(new_label)
     fig.canvas.manager.set_window_title(fig.get_label())
+
+# Implementing grid on plots:
+import matplotlib as mpl
+mpl.rcParams['axes.grid'] = True
