@@ -3,30 +3,33 @@
 # M3 diagnostic
 # m3d means m3 diode in
 def m3d_diode():
-    return (yield from bp.mv(m3_diag, -76.4))
+    return (yield from mv(m3_diag, -76.4))
 
 # m3d_yag means m3 yag in
 def m3d_yag():
-    return (yield from bp.mv(m3_diag, -49.4))
+    return (yield from mv(m3_diag, -49.4))
+
+def m3d_grid():
+    return (yield from mv(m3_diag, -97.5))
 
 # m3d_out means m3diagnostic fully retracted
 def m3d_out():
-    return (yield from bp.mv(m3_diag, -1))
+    return (yield from mv(m3_diag, -1))
 
 
             
 # Gas Cell diagnostic
 def gcd_yag():
-    return (yield from bp.mv(gc_diag, -43.4))
+    return (yield from mv(gc_diag, -43.4))
 
 def gcd_diode():
-    return (yield from bp.mv(gc_diag, -71.4))
+    return (yield from mv(gc_diag, -71.4))
 
 def gcd_grid():
-    return (yield from bp.mv(gc_diag, -95.4))
+    return (yield from mv(gc_diag, -95.4))
 
 def gcd_out():
-    return (yield from bp.mv(gc_diag, -1))            
+    return (yield from mv(gc_diag, -1))            
 
 def master_plan():
     yield from m3d_diode()
