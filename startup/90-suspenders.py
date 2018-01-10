@@ -2,9 +2,7 @@
 from bluesky.suspenders import (SuspendBoolHigh,
                                 SuspendBoolLow,
                                 SuspendFloor,
-                                SuspendCeil,
-                                SuspendInBand,
-                                SuspendOutBand)
+                                SuspendCeil)
 
 ring_suspender = SuspendFloor(ring_curr, 290, resume_thresh=300, sleep=120)
 # Is this the right PV???
