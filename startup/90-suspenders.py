@@ -1,10 +1,6 @@
 
-from bluesky.suspenders import (SuspendBoolHigh,
-                                SuspendBoolLow,
-                                SuspendFloor,
-                                SuspendCeil,
-                                SuspendInBand,
-                                SuspendOutBand)
+from bluesky.suspenders import SuspendFloor
+               
 
 ring_suspender = SuspendFloor(ring_curr, 290, resume_thresh=300, sleep=120)
 # Is this the right PV???
@@ -16,3 +12,6 @@ ring_suspender = SuspendFloor(ring_curr, 290, resume_thresh=300, sleep=120)
 
 RE.install_suspender(ring_suspender)
 #RE.install_suspender(fe_shut_suspender)
+
+print("")
+print("You can safely ignore the 'SuspendOutBand' warning - this is a known issue that is fixed in a newer version.")
