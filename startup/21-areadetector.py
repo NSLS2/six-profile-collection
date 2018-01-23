@@ -53,8 +53,7 @@ diagon_v_cam = StandardProsilica('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam
 m3_diag_cam = StandardProsilica('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
 extslt_cam = StandardProsilicaSaving('XF:02IDC-BI{Slt:1-Cam:15_1}', name='extslt_cam')
 gc_diag_cam = StandardProsilica('XF:02IDC-BI{Mir:4-Cam:18_1}', name='gc_diag_cam')
-sc_navitar_cam = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
-
+sc_navitar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
 
 
 #####just commenting out this portion to see if it is breaking the ability to use the camera as a det
@@ -136,11 +135,11 @@ qem10 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:10}EM180:', name='qem10'),
 #                 ['m4'.format(s) for s in ('mir')])
 
 qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
-                 ['sc_diode'.format(s) for s in ('1')])
+                 ['sc_diode_{}'.format(s) for s in ('1','2','3','4')])
 
 # Device is disconnected (physically) for now
 #qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
-#                 ['sample_tey_'.format(s) for s in ('top','bot')])
+#                 ['sample_tey_{}'.format(s) for s in ('top','bot')])
 
 qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
