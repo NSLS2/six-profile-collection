@@ -1,3 +1,5 @@
+from bluesky.magics import BlueskyMagics
+
 BlueskyMagics.positioners = [
  cryo.x,
  cryo.y,
