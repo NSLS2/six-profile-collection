@@ -173,6 +173,3 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'sensor_binning_x', 'sensor_binning_y'] 
 
 
-
-
-
