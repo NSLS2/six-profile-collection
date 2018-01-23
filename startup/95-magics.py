@@ -62,6 +62,7 @@ BlueskyMagics.positioners = [
  m4slt.out,
  m4slt.bot,
  m4slt.top,
+ ow,
  pgm.cff,
  pgm.en,
  pgm.gr_x,
