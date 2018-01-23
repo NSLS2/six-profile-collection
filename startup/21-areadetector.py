@@ -138,8 +138,9 @@ qem10 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:10}EM180:', name='qem10'),
 qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
                  ['sc_diode'.format(s) for s in ('1')])
 
-qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
-                 ['sample_tey_'.format(s) for s in ('top','bot')])
+# Device is disconnected (physically) for now
+#qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
+#                 ['sample_tey_'.format(s) for s in ('top','bot')])
 
 qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
