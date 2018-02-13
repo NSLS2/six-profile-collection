@@ -1,21 +1,58 @@
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
                    Device)
+from ophyd.status import MoveStatus
+from ophyd.positioner import PositionerBase
 from ophyd.utils import ReadOnlyError
 import time as ttime
 
 
+# path for the new standby mode
+epu_sb = EpicsSignal('SR:C02-ID:G1A{EPU:1}Cmd:SBy-Cmd', name = 'epu_standby')
 
+epu_sb_ao = EpicsSignal('XF:02ID-ID{Ping}Enbl-SP', name = 'epu_standby_auto')
+# 
 
-class UgapPositioner(PVPositioner):
+class DeadBandPositioner(PVPositioner):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._last_status = None
+        
+    def set(self, new_position, **kwargs):
+        sts = self._last_status = super().set(new_position, **kwargs)
+        rbv = self.readback
+        
+        def rbv_callback(value, **kwargs):
+            # TUNE THIS DEADBAND!!!!
+            if np.abs(value - new_position) < 0.0005:
+                sts._finished()
+                rbv.clear_sub(rbv_callback)
+                
+        rbv.subscribe(rbv_callback, run=True)
+        
+        return self._last_status
+
+    def stop(self, *, success=False):
+        # super hacky fix to skip pvpostioner stop method
+        # which always hits the stop signal which flashes the brakes and takes
+        # the
+        if self._last_status is not None and self._last_status.done:
+            return PositionerBase.stop(self, success=success)
+        else:
+            self.setpoint.put(self.position)
+            return super().stop(success=success)
+        
+    def _setup_move(self, position):
+        # this is because this apprently blocks until the move finishes!
+        self.setpoint.put(position, wait=False)
+
+class UgapPositioner(DeadBandPositioner):
     readback = Cpt(EpicsSignalRO, '-Ax:Gap}Mtr.RBV')
     setpoint = Cpt(EpicsSignal, '-Ax:Gap}Mtr')
-    actuate = Cpt(EpicsSignal, '}Cmd:Start-Cmd', string=True)
-    actuate_value = 'On'
 
     stop_signal = Cpt(EpicsSignal, '}Cmd:Stop-Cmd')
-    stop_value = 1
+    stop_value = 0
 
-    done = Cpt(EpicsSignal, '}Cmd:Start-Cmd')
+    done = Cpt(EpicsSignal, '}Sts:Moving-Sts' )
     done_value = 0
 
     kill_switch_pressed = Cpt(EpicsSignalRO, '}Sts:Kill-Sts')
@@ -23,16 +60,14 @@ class UgapPositioner(PVPositioner):
     emergency_open_gap = Cpt(EpicsSignalRO, '}Sts:OpenGapCmd-Sts', string=True)
     # TODO subscribe kill switch prressed and stop motion
     
-class UphasePositioner(PVPositioner):
+class UphasePositioner(DeadBandPositioner):
     readback = Cpt(EpicsSignalRO, '-Ax:Phase}Mtr.RBV')
     setpoint = Cpt(EpicsSignal, '-Ax:Phase}Mtr')
-    actuate = Cpt(EpicsSignal, '}Cmd:Start-Cmd', string=True)
-    actuate_value = 'On'
 
     stop_signal = Cpt(EpicsSignal, '}Cmd:Stop-Cmd')
-    stop_value = 1
+    stop_value = 0
 
-    done = Cpt(EpicsSignal, '}Cmd:Start-Cmd')
+    done = Cpt(EpicsSignal, '}Sts:Moving-Sts')
     done_value = 0
 
     kill_switch_pressed = Cpt(EpicsSignalRO, '}Sts:Kill-Sts')
