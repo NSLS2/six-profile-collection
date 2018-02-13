@@ -58,3 +58,5 @@ m3slt = BaffleSlitSA('XF:02IDC-OP{Mir:3-Slt:12_U_1', name='m3slt')
 m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
 
 extslt = ExitSlit('XF:02IDC-OP{Slt:1-Ax:15', name='extslt')
+
+dcslt = BaffleSlit('XF:02IDD-ES{DC:1-Slt:1',name='dcslt')

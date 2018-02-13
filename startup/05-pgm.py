@@ -24,6 +24,15 @@ class PGMjoe(Device):
 
 # TODO changing gratign will require a plan + at least 1
 # soft signal
-    
+
+class PGM_ES(Device):
+    cff = Cpt(EpicsMotor, 'cff}Mtr')
+    en = Cpt(EpicsMotor, 'E}Mtr')
+    gr_x = Cpt(EpicsMotor, 'GXRaw}Mtr')
+    m7_pit = Cpt(EpicsMotor, 'MP}Mtr')
+    gr_pit = Cpt(EpicsMotor, 'GP}Mtr')
+
+
 pgm = PGM('XF:02IDB-OP{Mono:1-Ax:9', name='pgm')
 pgmjoe = PGMjoe('XF:02IDB-OP{Mono:1-Ax:9', name='pgmjoe')
+espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')

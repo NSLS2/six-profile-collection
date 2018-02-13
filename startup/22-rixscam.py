@@ -121,29 +121,29 @@ class RIXSCam(SingleTrigger, AreaDetector):
     def set_HR(self):
         #missing Node Readout mode "HR node"
         self.set_voltages()
-        self.stage_sigs[self.set_node] = 1        
-        self.stage_sigs[self.delay_adc] = 1
-        self.stage_sigs[self.delay_intminus] = 14
-        self.stage_sigs[self.delay_intplus] = 13
-        self.stage_sigs[self.delay_inttime] = 255
-        self.stage_sigs[self.delay_serialT] = 3
-        self.stage_sigs[self.delay_parT] = 255
-        self.stage_sigs[self.ccd1_hv] = 20
-        self.stage_sigs[self.ccd2_hv] = 20
+        self.set_node.put(1)        
+        self.delay_adc.put(1)
+        self.delay_intminus.put(14)
+        self.delay_intplus.put(13)
+        self.delay_inttime.put(255)
+        self.delay_serialT.put(3)
+        self.delay_parT.put(255)
+        self.ccd1_hv.put(20)
+        self.ccd2_hv.put(20)
 
     def set_LS(self):
         #missing Node Readout mode "LS node"
         self.set_voltages()
-        self.stage_sigs[self.set_node] = 0
-        self.stage_sigs[self.delay_adc] = 168
-        self.stage_sigs[self.delay_intminus] = 4
-        self.stage_sigs[self.delay_intplus] = 2
-        self.stage_sigs[self.delay_inttime] = 80
-        self.stage_sigs[self.delay_serialT] = 255
-        self.stage_sigs[self.delay_parT] = 151
+        self.set_node.put(0)
+        self.delay_adc.put(168)
+        self.delay_intminus.put(4)
+        self.delay_intplus.put(2)
+        self.delay_inttime.put(80)
+        self.delay_serialT.put(255)
+        self.delay_parT.put(151)
         #Calibration done on 6/13/2017 for the CCD HV values below
-        self.stage_sigs[self.ccd1_hv] = 44.5
-        self.stage_sigs[self.ccd2_hv] = 44.6
+        self.ccd1_hv.put(44.5)
+        self.ccd2_hv.put(44.6)
 
     def set_temp_control(self):
         en_ctr.put('On')
