@@ -42,19 +42,18 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
     if num is None:
         num=numO
         
-    print (len(args)%3!=1)
         
     for i in range(numO):
             
         O=startO+i*(stopO-startO)/(numO-1)
         yield from mv(motorO,O)
+        multi_position=str(i)+':'+str(numO)
         
-        _md={'plan_name':'multi_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,'multi_motor':motorO,
-             'multi_position':str(i)+':'+str(numO)}
         md=md or {}
-        _md.update(md)
+        md.update({'plan_name':'multi_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+                   'multi_motor':motorO.name,'multi_position': multi_position})
 
-        uid=yield from scan(detectors,*args,num, per_step=per_step, md=_md)
+        uid=yield from scan(detectors,*args,num, per_step=per_step, md=md)
 
         if initial_uid is 'current uid':
             initial_uid = uid
@@ -109,14 +108,13 @@ def multi_rel_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=N
             
         O=startO+i*(stopO-startO)/(numO-1)
         yield from mv(motorO,O)
+        multi_position=str(i)+':'+str(numO)        
         
-        _md={'plan_name':'multi_rel_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,'multi_motor':motorO,
-             'multi_position':str(i)+':'+str(numO)}
         md=md or {}
-        _md.update(md)
+        md.update({'plan_name':'multi_rel_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+                   'multi_motor':motorO.name,'multi_position': multi_position})    
         
-        
-        uid=yield from rel_scan(detectors,*args,num, per_step=per_step, md=_md)
+        uid=yield from rel_scan(detectors,*args,num, per_step=per_step, md=md)
 
         if initial_uid is 'current uid':
             initial_uid = uid
@@ -166,14 +164,14 @@ def multi_grid_scan(detectors,motorO,startO,stopO,numO,*args,per_step=None, md=N
             
         O=startO+i*(stopO-startO)/(numO-1)
         yield from mv(motorO,O)
-        
-        _md={'plan_name':'multi_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,'multi_motor':motorO,
-             'multi_position':str(i)+':'+str(numO)}
+        multi_position=str(i)+':'+str(numO)
+
         md=md or {}
-        _md.update(md)
+        md.update({'plan_name':'multi_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+                   'multi_motor':motorO.name,'multi_position': multi_position})
 
 
-        uid=yield from grid_scan(detectors,*args, per_step=per_step, md=_md)
+        uid=yield from grid_scan(detectors,*args, per_step=per_step, md=md)
 
         if initial_uid is 'current uid':
             initial_uid = uid
@@ -235,14 +233,14 @@ def multi_rel_grid_scan(detectors,motorO,startO,stopO,numO,*args,num=None, per_s
             
         O=startO+i*(stopO-startO)/(numO-1)
         yield from mv(motorO,O)
+        multi_position=str(i)+':'+str(numO)
         
-        _md={'plan_name':'multi_rel_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,'multi_motor':motorO,
-             'multi_position':str(i)+':'+str(numO)}
         md=md or {}
-        _md.update(md)
+        md.update({'plan_name':'multi_rel_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+                   'multi_motor':motorO.name,'multi_position': multi_position})
 
 
-        uid=yield from rel_grid_scan(detectors,*args, per_step=per_step, md=_md)
+        uid=yield from rel_grid_scan(detectors,*args, per_step=per_step, md=md)
 
         if initial_uid is 'current uid':
             initial_uid = uid
