@@ -18,14 +18,43 @@ class MHexapod(Device):
     pit = Cpt(EpicsMotor, '_Ry}Mtr')
     rol = Cpt(EpicsMotor, '_Rz}Mtr')
 
-class EHexapod(Device):
-    x = Cpt(EpicsMotor, 'X-SP')
-    y = Cpt(EpicsMotor, 'Y-SP')
-    z = Cpt(EpicsMotor, 'Z-SP')
-    yaw = Cpt(EpicsMotor, 'Yaw-SP')
-    pit = Cpt(EpicsMotor, 'Pitch-SP')
-    rol = Cpt(EpicsMotor, 'Roll-SP')
+class M5_axis(Device):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.readback.name = self.name
 
+        
+    readback = Cpt(EpicsSignalRO,"-I")
+    setpoint = Cpt(EpicsSignal,"-SP")
+    #I have hard coded the done moving PV here, I will look at options to resolve this.
+    done = Cpt(EpicsSignalRO,"XF:02IDD-ES{Mir:5}Sts:MoveDone-Sts",add_prefix='')
+    done_value=1
+
+    # Define the class properties here
+    
+    @property
+    def read_val(self):
+        return self.get()
+
+    @property
+    def hints(self):
+        return{'fields':'[self.readback.name]'}
+
+    def set(self,value):
+        self.setpoint.put(value)
+    
+class EHexapod(Device):
+    x = Cpt(M5_axis, 'X')
+    y = Cpt(M5_axis, 'Y')
+    z = Cpt(M5_axis, 'Z')
+    yaw = Cpt(M5_axis, 'Yaw')
+    pit = Cpt(M5_axis, 'Pitch')
+    rol = Cpt(M5_axis, 'Roll')
+
+
+    
+
+    
     
 m1 = M1('XF:02IDA-OP{Mir:1-Ax:4', name='m1')
 m3 = MHexapod('XF:02IDC-OP{Mir:3-Ax:13', name='m3')
