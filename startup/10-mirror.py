@@ -1,4 +1,4 @@
-from ophyd import Device, EpicsMotor
+from ophyd import Device, EpicsMotor, EpicsSignalRO,EpicsSignal
 from ophyd import Component as Cpt
 
 class M1(Device):
