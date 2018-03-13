@@ -32,7 +32,7 @@ class M5_axis(PVPositioner):
     # Define the class properties here
     @property
     def hints(self):
-        return{'fields':'[self.readback.name]'}
+        return{'fields':[self.readback.name]}
 
  
 class EHexapod(Device):
