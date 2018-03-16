@@ -39,23 +39,107 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
                            self.stats5.total.name]}
 
 
-class StandardProsilicaSaving(StandardProsilica):
+class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
               write_path_template='/XF02ID1/prosilica_data/%Y/%m/%d',
               root='/XF02ID1',
               reg=db.reg)
 
+class StandardProsilicaROI(StandardProsilica):
+    #A class that is used to add the attributes 'roi_enable', 'roi_set' and roi_read' to a camera with
+    #the roi plugin enabled.
+    
+    def roi_set(self,min_x,size_x,min_y,size_y,min_z=None,size_z=None,roi_num=1):
+        ''' 
+        An attribute function for the camera that allows the user to set an roi size and position. setting
+        any of the values to 'None' means they are ignored(left as is).
+            
+        Parameters
+        ----------
+        min_x : integer
+            The pixel number position of the left edge of the ROI.
+        size_x : integer
+            The pixel number width of the ROI.
 
+        min_y : integer
+            The pixel number position of the bottom edge of the ROI.
+        size_y : integer
+            The pixel number height of the ROI.
 
-diagon_h_cam = StandardProsilica('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
-diagon_v_cam = StandardProsilica('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
-m3_diag_cam = StandardProsilica('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
+        min_z : integer,optional
+            The pixel number minima of the intensity region of the ROI.
+        size_z : integer,optional
+            The pixel number maxima of the intensity region of the ROI.
+
+        roi_num : integer, optional
+            The roi number to act, default is 1 and it must be 1,2,3 or 4.        
+        '''
+
+        if min_x is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_x').put(min_x)
+        if size_x is not None: getattr(self, 'roi' + str(roi_num) + '.size.x').put(size_x)
+        if min_y is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_y').put(min_y)
+        if size_y is not None: getattr(self, 'roi' + str(roi_num) + '.size.y').put(size_y)
+        if min_z is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_z').put(min_z)
+        if size_z is not None: getattr(self, 'roi' + str(roi_num) + '.size.z').put(size_z)
+
+    def roi_read(self,roi_num=1):
+        ''' 
+        An attribute function for the camera that allows the user to read the current values of  
+        an roi size and position.
+
+        Usage hints: to extract a specific value use "cam_name.roi_read()['keyword']" where 'keyword'
+        is min_x, size_x, min_y, size_y, min_z, size_z or status.        
+            
+        Parameters
+        ----------
+        
+        roi_num : integer, optional
+            The roi number to act, default is 1 and it must be 1,2,3 or 4.  
+        
+        roi_dict : output
+            A dictionary which gives the current roi positions in the form: 
+            {'min_x':value,'size_x':value,'min_y':value,'size_y':value,'min_z':value,'size_z':value,'status':status}
+        '''
+        roi_dict={'min_x' : getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_x').get(),
+                  'size_x': getattr(self, 'roi' + str(roi_num) + '.size.x').get(),
+                  'min_y': getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_y').get(),
+                  'size_y': getattr(self, 'roi' + str(roi_num) + '.size.y').get(),
+                  'min_z' : getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_z').get(),
+                  'size_z' : getattr(self, 'roi' + str(roi_num) + '.size.z').get(),
+                  'status' : getattr(self, 'roi' + str(roi_num) + '.enable').get()}
+        
+        return roi_dict
+
+    def roi_enable(self,status,roi_num=1):
+        ''' 
+        An attribute function for the camera that allows the user to enable or disable an ROI.
+      
+            
+        Parameters
+        ----------
+        
+        status : string
+            The string indicating the status to set for the ROI, must be 'Enable' or 'Disable'.
+        
+        roi_num : integer, optional
+            The roi number to act, default is 1 and it must be 1,2,3 or 4.    
+        '''   
+
+        if status is 'Enable' or status is 'Disable':
+            getattr(self, 'roi' + str(roi_num) + '.enable').set(status)
+        else:
+            raise RuntimeError('in roi_enable status must be Enable or Disable')
+
+            
+diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
+diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
+m3_diag_cam = StandardProsilicaROI('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
 extslt_cam = StandardProsilicaSaving('XF:02IDC-BI{Slt:1-Cam:15_1}', name='extslt_cam')
-gc_diag_cam = StandardProsilica('XF:02IDC-BI{Mir:4-Cam:18_1}', name='gc_diag_cam')
+gc_diag_cam = StandardProsilicaROI('XF:02IDC-BI{Mir:4-Cam:18_1}', name='gc_diag_cam')
 sc_navitar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
-sc_3  = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_3}', name='sc_3')
-sc_4  = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_4}', name='sc_4')
+sc_3  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_3}', name='sc_3')
+sc_4  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_4}', name='sc_4')
 #sc_navitar_cam = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
 
 #####just commenting out this portion to see if it is breaking the ability to use the camera as a det
@@ -145,3 +229,4 @@ qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
 
 qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
+

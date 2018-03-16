@@ -16,6 +16,20 @@ def m3d_grid():
 def m3d_out():
     return (yield from mv(m3_diag, -1))
 
+# position and enable the m3_diag_cam roi1 for alignment scans
+def m3d_roi(m3_x=1.6):
+    #m3_x is the m3_x position to set roi1 to match, it must be one of the predefined values.
+    m3_diag_cam.roi_enable('Enable') #enables roi 1 so that the values are saved during scans.
+
+    if (m3_x == 1.6):
+        m3_diag_cam.roi_set(420,175,400,200)#set the values for this positon
+    elif (m3_x == 2.0):
+        m3_diag_cam.roi_set(500,185,380,180)#set the values for this positon
+    else:
+        raise RuntimeError('m3_x not in the list (1.6,2.0)')#throw an error if m3_x is not pre-defined.
+    
+    
+
 
             
 # Gas Cell diagnostic
