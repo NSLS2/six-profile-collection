@@ -39,13 +39,6 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
                            self.stats5.total.name]}
 
 
-class StandardProsilicaSaving(StandardProsilicaROI):
-    hdf5 = Cpt(HDF5PluginWithFileStore,
-              suffix='HDF1:',
-              write_path_template='/XF02ID1/prosilica_data/%Y/%m/%d',
-              root='/XF02ID1',
-              reg=db.reg)
-
 class StandardProsilicaROI(StandardProsilica):
     #A class that is used to add the attributes 'roi_enable', 'roi_set' and roi_read' to a camera with
     #the roi plugin enabled.
@@ -131,6 +124,14 @@ class StandardProsilicaROI(StandardProsilica):
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
 
+
+class StandardProsilicaSaving(StandardProsilicaROI):
+    hdf5 = Cpt(HDF5PluginWithFileStore,
+              suffix='HDF1:',
+              write_path_template='/XF02ID1/prosilica_data/%Y/%m/%d',
+              root='/XF02ID1',
+              reg=db.reg)
+        
             
 diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
@@ -229,4 +230,5 @@ qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
 
 qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
+
 

@@ -5,6 +5,7 @@ import datetime
 
 #CUSTOM UTILITIES FOR 2-ID BEAMLINE
 
+###scan info utilities###
 def scan_info(scan_id,source='all'):
     ''' 
     Combines an 'outer_product_scan' scan with a 'relative_scan' scan such that each  multi-motor trajectory 
@@ -67,4 +68,8 @@ def scan_info(scan_id,source='all'):
         print (f_string)
   
     else:
-        print ('source must be "all", "header" or "baseline"')            
+        print ('source must be "all", "header" or "baseline"')
+
+
+###ROI utilities###
+
