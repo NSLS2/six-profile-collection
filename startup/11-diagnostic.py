@@ -1,5 +1,52 @@
 from ophyd import EpicsMotor
 
+
+def mv_Diag_SAslit_unit(axis,value):
+    '''
+    A function that moves the diagnostic or single axis slit to hte location defined by 'value'
+    
+    Parameters
+    ----------
+    axis: device
+        The device axis to move.
+    value: float
+        The value to move the axis too.
+
+    '''
+    
+    yield from mv(axis,value)
+    
+
+class Diag_SAslit_unit(Device):
+    '''
+    A class that is used to create a diagnostic unit and/or a single axis slit unit. The
+    class has the axis as an attribute as well as a series of pre-defined 'locations'.
+    
+    Parameters
+    ----------
+    self : numerous paramters
+        All of the parameters associated with the parent class 'Device'
+    locations : dictionary
+        A keyword:Value dictionary that lists all of the predefined locations and axis values 
+        for the instance of the class in the form {location1:value1, location2:value2,.....}.
+
+    '''
+    def __init__(self, *args, locations=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.locations = locations
+        for location in locations:
+            setattr(self,location,mv_Diag_SAslit_unit(self.y,locations[location]))
+            
+                
+    y = Cpt(EpicsMotor, '')
+
+
+            
+m5msk = Diag_SAslit_unit('XF:02IDD-ES{Msk:Mir5-Ax:Y}Mtr',
+                         locations= {'Open':54, 'Thin':34, 'Wide':21, 'Thru':8},
+                         name='m5msk')
+
+    
 m3_diag = EpicsMotor('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',name='m3_diag')
 
 gc_diag = EpicsMotor('XF:02IDC-OP{Mir:4-Diag:16_U_1-Ax:1}Mtr',name='gc_diag')

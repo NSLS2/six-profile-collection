@@ -40,9 +40,11 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
 
 
 class StandardProsilicaROI(StandardProsilica):
-    #A class that is used to add the attributes 'roi_enable', 'roi_set' and roi_read' to a camera with
-    #the roi plugin enabled.
-    
+    '''
+    A class that is used to add the attributes 'roi_enable', 'roi_set' and roi_read' to a camera with
+    the roi plugin enabled.
+    '''    
+
     def roi_set(self,min_x,size_x,min_y,size_y,min_z=None,size_z=None,roi_num=1):
         ''' 
         An attribute function for the camera that allows the user to set an roi size and position. setting
