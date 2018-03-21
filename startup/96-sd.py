@@ -14,7 +14,7 @@ m4.x, m4.y, m4.z, m4.yaw, m4.pit, m4.rol,
 cryo.x, cryo.y, cryo.z, cryo.t, 
 ow,
 m5.x, m5.y, m5.z, m5.yaw, m5.pit, m5.rol,
-m5_msk, m6_msk,
+m5msk.y, m6_msk,
 m6.pit, m6.z,
 espgm.cff, espgm.en, espgm.m7_pit, espgm.gr_pit, espgm.gr_x, espgm.gr_x_rb, espgm_msk]
 
