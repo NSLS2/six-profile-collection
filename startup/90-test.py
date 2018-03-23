@@ -22,7 +22,7 @@ def m3d_roi(m3_x=1.6):
     m3_diag_cam.roi_enable('Enable') #enables roi 1 so that the values are saved during scans.
 
     if (m3_x == 1.6):
-        m3_diag_cam.roi_set(420,175,400,200)#set the values for this positon
+        m3_diag_cam.roi_set(582,44,256,520)#values updated on 03/22/2018
     elif (m3_x == 2.0):
         m3_diag_cam.roi_set(500,185,380,180)#set the values for this positon
     else:

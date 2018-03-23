@@ -125,14 +125,14 @@ def Sic2f(ph_en, i):
 # above functions and data is from ESM
 	
       
-def gr500_info(eV, r2=42636):
+def gr500_info(eV, mm=1,r2=42636):
     # calculate various information for the 500 mm-1 grating for SIX
     # eV is the energy in electron volts
     # r2 is the monochromator exit arm in mm, nominally 42636 mm
     r1 = 55000  # input arm length in mm
     k0 = 500    # grating central line density in mm-1
     a1 = 0.0328411  # grating focusing constant in mm-2
-    mm = 1      # diffraction order
+    #mm = 1      # diffraction order
     
     wl = 0.0012398/eV  # wavelength in mm
     rr = r2/r1 # unitless
@@ -204,7 +204,7 @@ def gr500mv1(eV, cff):
     OFFgr = -0.35772   # value in deg, these are in addition to EPICS offsets
     wl = 0.0012398/eV  # wavelength in mm
     k0 = 500 # grating central line density, hard coded
-    mm = 1 # diffraction order, hard coded
+    #mm = 1 # diffraction order, hard coded
     pi=3.14159265359
     A0 = mm*k0*wl   
     term4=(cff*A0)/(cff*cff-1)

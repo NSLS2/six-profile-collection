@@ -42,9 +42,24 @@ class Diag_SAslit_unit(Device):
 
 
             
-m5msk = Diag_SAslit_unit('XF:02IDD-ES{Msk:Mir5-Ax:Y}Mtr',
+m5mask = Diag_SAslit_unit('XF:02IDD-ES{Msk:Mir5-Ax:Y}Mtr',
                          locations= {'Open':54, 'Thin':34, 'Wide':21, 'Thru':8},
-                         name='m5msk')
+                         name='m5mask')
+
+m3diag = Diag_SAslit_unit('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',
+                         locations= {'Diode':-76.4, 'YAG':-49.4, 'Grid':-97.5, 'Out':-1},
+                         name='m3diag')
+
+gcdiag = Diag_SAslit_unit('XF:02IDC-OP{Mir:4-Diag:16_U_1-Ax:1}Mtr',
+                         locations= {'Diode':-71.4, 'YAG':-43.4, 'Grid':-95.4, 'Out':-1},
+                         name='gcdiag')
+
+espgmmask = Diag_SAslit_unit('XF:02IDD-ES{Msk:Mono2-Ax:Y}Mtr',
+                         locations= {'YAG':-43.4},
+                         name='espgmmask')
+
+
+
 
     
 m3_diag = EpicsMotor('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',name='m3_diag')
