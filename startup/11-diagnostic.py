@@ -26,26 +26,29 @@ class Diag_SAslit_unit(Device):
         self.locations = locations
         self.in_band = in_band
 
+        def mv_axis(axis,value,location):
+            '''
+            A function that moves the diagnostic or single axis slit to the location defined by 'value'
+    
+            Parameters
+            ----------
+            axis: device
+                The device axis to move.
+            value: float
+                The value to move the axis too.
+
+            '''
+    
+            yield from mv(axis,value)
+            setattr(self,location,mv_axis(self.y,self.locations[location],location)) 
+
         for location in self.locations:
-            setattr(self,location,self.mv_axis(self.y,self.locations[location])) 
+            setattr(self,location,mv_axis(self.y,self.locations[location],location)) 
              
             
     y = Cpt(EpicsMotor, '')
 
-    def mv_axis(self,axis,value):
-        '''
-        A function that moves the diagnostic or single axis slit to the location defined by 'value'
-    
-        Parameters
-        ----------
-        axis: device
-            The device axis to move.
-        value: float
-            The value to move the axis too.
 
-        '''
-    
-        yield from mv(axis,value)
 
         
     def read(self):
@@ -67,7 +70,7 @@ class Diag_SAslit_unit(Device):
                 loc_value = location
 
         out_dict = collections.OrderedDict()
-        out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
+ #       out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
 
         read_dict = super().read()
         read_dict.update(out_dict)
@@ -89,29 +92,33 @@ class Diag_SAslit_unit(Device):
         '''
 
         out_dict = collections.OrderedDict()
-        out_dict[self.name+'_location'] = {'dtype': 'string',
-               'lower_ctrl_limit': None,
-               'precision': None,
-               'shape': [],
-               'source': None,
-               'units': None,
-               'upper_ctrl_limit': None}
+ #       out_dict[self.name+'_location'] = {'dtype': 'string',
+ #              'lower_ctrl_limit': None,
+ #              'precision': None,
+ #              'shape': [],
+ #              'source': None,
+ #              'units': None,
+ #              'upper_ctrl_limit': None}
               
         describe_dict = super().describe()
         describe_dict.update(out_dict)
         
         return describe_dict
 
-    @property
-    def position(self):
+#    @property
+#    def position(self):
         '''The current location of the device
         
         Returns
         -------
         position : string
         '''
-
-        return self.read()[self.name+'_location']['value']
+#        loc_value='invalid location'
+#        for location in self.locations:
+#            if self.y.position >= self.locations[location] - self.in_band and \
+#                    self.y.position <= self.locations[location] + self.in_band:
+#                loc_value = location
+#        return loc_value
 
 
     
