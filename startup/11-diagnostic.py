@@ -2,20 +2,6 @@ from ophyd import EpicsMotor
 import collections
 import time
 
-def mv_Diag_SAslit_unit(axis,value):
-    '''
-    A function that moves the diagnostic or single axis slit to hte location defined by 'value'
-    
-    Parameters
-    ----------
-    axis: device
-        The device axis to move.
-    value: float
-        The value to move the axis too.
-
-    '''
-    
-    yield from mv(axis,value)
     
 
 class Diag_SAslit_unit(Device):
@@ -39,12 +25,29 @@ class Diag_SAslit_unit(Device):
         super().__init__(*args, **kwargs)
         self.locations = locations
         self.in_band = in_band
-        for location in locations:
-            setattr(self,location,mv_Diag_SAslit_unit(self.y,locations[location]))            
 
+        for location in self.locations:
+            setattr(self,location,self.mv_axis(self.y,self.locations[location])) 
+             
             
     y = Cpt(EpicsMotor, '')
 
+    def mv_axis(self,axis,value):
+        '''
+        A function that moves the diagnostic or single axis slit to the location defined by 'value'
+    
+        Parameters
+        ----------
+        axis: device
+            The device axis to move.
+        value: float
+            The value to move the axis too.
+
+        '''
+    
+        yield from mv(axis,value)
+
+        
     def read(self):
         '''
         An attribute that returns the current 'location' of the unit as an ordered dictionary. This
@@ -53,7 +56,7 @@ class Diag_SAslit_unit(Device):
         
         Parameters
         ----------
-        out_dict: ordered dictionary, ouput
+        read_dict: ordered dictionary, ouput
             The output dictionary that matches the standard output for a Device.
 
         '''
@@ -65,9 +68,53 @@ class Diag_SAslit_unit(Device):
 
         out_dict = collections.OrderedDict()
         out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
-                
-        return out_dict
-                
+
+        read_dict = super().read()
+        read_dict.update(out_dict)
+        
+        return read_dict
+
+    
+    def describe(self):
+        '''
+        An attribute that returns the current 'location'description of the output data as an ordered dictionary. 
+        This is used identically to the describe attribute function for a standard device and therefore can 
+        be used in the baseline.
+        
+        Parameters
+        ----------
+        describe_dict: ordered dictionary, ouput
+            The output dictionary that matches the standard output for a Device.
+
+        '''
+
+        out_dict = collections.OrderedDict()
+        out_dict[self.name+'_location'] = {'dtype': 'string',
+               'lower_ctrl_limit': None,
+               'precision': None,
+               'shape': [],
+               'source': None,
+               'units': None,
+               'upper_ctrl_limit': None}
+              
+        describe_dict = super().describe()
+        describe_dict.update(out_dict)
+        
+        return describe_dict
+
+    @property
+    def position(self):
+        '''The current location of the device
+        
+        Returns
+        -------
+        position : string
+        '''
+
+        return self.read()[self.name+'_location']['value']
+
+
+    
             
 m5mask = Diag_SAslit_unit('XF:02IDD-ES{Msk:Mir5-Ax:Y}Mtr',
                          locations= {'Open':54, 'Thin':34, 'Wide':21, 'Thru':8},
