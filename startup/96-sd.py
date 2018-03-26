@@ -16,7 +16,9 @@ ow,
 m5.x, m5.y, m5.z, m5.yaw, m5.pit, m5.rol,
 m5mask.y, m6_msk,
 m6.pit, m6.z,
-espgm.cff, espgm.en, espgm.m7_pit, espgm.gr_pit, espgm.gr_x, espgm.gr_x_rb, espgmmask.y]
+espgm.cff, espgm.en, espgm.m7_pit, espgm.gr_pit, espgm.gr_x, espgm.gr_x_rb, espgmmask.y,
+oc.y, oc.z, oc.roll, oc.two_th,
+dc.z, dc.two_th]
 
 # To avoid baseline are printed on screen:
 # bec.disable_baseline()%

@@ -43,10 +43,7 @@ class PreDefinedPositions(Device):
             location: string
                 The name of the location that it is required to move too.
             '''
-            axis_value_list=self.locations[location]
-            for n,item in enumerate(axis_value_list):
-                if isinstance(item,str):
-                    axis_value_list[n]=getattr(self,item)
+            axis_value_list=self.get_axis_value_list(location)
         
             yield from mv(*axis_value_list)
             setattr(self,location,mv_axis(location)) 
@@ -70,11 +67,11 @@ class PreDefinedPositions(Device):
         '''
         loc_value='invalid location'
         for location in self.locations:
-            if self.y.position >= self.locations[location] - self.in_band and \
-                    self.y.position <= self.locations[location] + self.in_band:
+            if self.y.position >= self.locations[location][1] - self.in_band and \
+                    self.y.position <= self.locations[location][1] + self.in_band:
                 loc_value = location
 
-        out_dict = collections.OrderedDict()
+ #       out_dict = collections.OrderedDict()
  #       out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
 
         read_dict = super().read()
@@ -111,6 +108,27 @@ class PreDefinedPositions(Device):
         
         return describe_dict
 
+
+
+    def get_axis_value_list(self,location):
+        '''returns the axis-value list for a defined location
+        
+        Returns
+        -------
+        axis_value_list : list, output
+            the axis-value list for the inputted location that is returned
+
+        '''
+        axis_value_list=[]
+        for item in self.locations[location]:
+                if isinstance(item,str):
+                    axis_value_list.append(getattr(self,item))
+                else:
+                    axis_value_list.append(item)
+                    
+        return axis_value_list
+        
+
     @property
     def current(self):
         '''The current location of the device
@@ -134,6 +152,8 @@ class PreDefinedPositions(Device):
         return loc_value
 
 
+
+
 class PreDefinedPositionsGroup():
     '''
     This is a class that can be used to 'combine' a set of PreDefinedPosition devices into a coherant whole. 
@@ -146,16 +166,39 @@ class PreDefinedPositionsGroup():
     locations : dictionary
         A keyword:Value dictionary that lists all of the predefined locations (keyword) and a 
         list of device-location list to be set in this location in the form: 
-        {location1:[[device1,device1_location],[device2,device2_locaiton],...], 
-            location2:[device1,device1_location],[device2,device2_locaiton],.....}.
+        {location1:[[device1_name,device1_location,device2_name,device2_location,...], 
+            location2:[device1_name,device1_location,device2_name,device2_location,.....]}.
             NOTE: not all devices need to have a specifed location for each group location, only those with
                   a specifed location are moved/checked for a given location. 
 
  
     '''
-    def __init__(self,devices,locations):
+    def __init__(self,devices,locations,name=None):
         self.devices=devices
         self.locations=locations
+        self.name=name
+        
+        for device in devices:
+            setattr(self,device.name,device)    
+        
+
+        def mv_axis(location):
+            '''
+            A function that moves the diagnostic or single axis slit to the location defined by 'value'
+    
+            Parameters
+            ----------
+            location: string
+                The name of the location that it is required to move too.
+            '''
+    
+            axis_value_list=self.get_axis_value_list(location)
+                        
+            yield from mv(*axis_value_list)
+            setattr(self,location,mv_axis(location))
+
+        for location in self.locations:
+            setattr(self,location,mv_axis(location))
 
     
     def read(self):
@@ -172,11 +215,49 @@ class PreDefinedPositionsGroup():
 
         out_dict = collections.OrderedDict()
         for dev in self.devices:
+            out_dict[self.name+'_'+dev.name+'_location'] = {'timestamp':time.time(),'value':dev.current }
 
-            out_dict[dev.name] = {'timestamp':time.time(),'location':getattr(dev,'current') }
+        return out_dict
 
+    
+    def get_axis_value_list(self,location):
+        '''returns the axis-value list for a defined location
         
-        return out_dict    
+        Returns
+        -------
+        axis_value_list : list, output
+           the axis-value list for the inputted location that is returned
+
+        '''
+        axis_value_list=[]
+        for i in range(0,len(self.locations[location]),2):
+            device = getattr(self,self.locations[location][i])
+            device_location = self.locations[location][i+1]
+            axis_value_list.extend(getattr(device,'get_axis_value_list')(device_location))
+                    
+        return axis_value_list
+
+    
+    @property
+    def current(self):
+        '''The current location of the device
+        
+        Returns
+        -------
+        position : string
+        '''
+        loc_value='invalid location'
+        for location in self.locations:
+            in_position=True
+            for i in range(0,len(self.locations[location]),2):
+                device = getattr(self,self.locations[location][i])
+                device_location = self.locations[location][i+1]
+                if device_location != getattr(device,'current'):
+                    in_position=False
+   
+            if in_position: loc_value = location
+            
+        return loc_value
 
 
     
@@ -217,7 +298,7 @@ espgmmask = DiagAndSingleAxisMask('XF:02IDD-ES{Msk:Mono2-Ax:Y}Mtr',
                          name='espgmmask')
 
 
-diagnostics = PreDefinedPositionsGroup([m3diag,gcdiag],{'test_location':[[m3diag,'out']]})
+diagnostics = PreDefinedPositionsGroup([m3diag,gcdiag],{'test_location':['m3diag','out','gcdiag','out']},name='diagnostics')
 
 
 
