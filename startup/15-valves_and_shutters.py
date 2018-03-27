@@ -20,8 +20,8 @@ class TwoButtonShutter(Device):
 
     
     # user facing commands
-    open_str = 'Open'
-    close_str = 'Close'
+    open_str = 'open'
+    close_str = 'close'
     def set(self, val):
         if self._set_st is not None:
             raise RuntimeError('trying to set while a set is in progress')
@@ -84,6 +84,10 @@ class TwoButtonShutter(Device):
         self.read_attrs = ['status']
 
 #Define the shutters from the above class.
-shutter_FE = TwoButtonShutter('XF:02ID-PPS{Sh:FE}', name='shutter_FE')
-shutter_A = TwoButtonShutter('XF:02IDA-PPS{PSh}', name='shutter_A')
-shutter_B = TwoButtonShutter('XF:02IDB-PPS{PSh}', name='shutter_B')
+shutterfe = TwoButtonShutter('XF:02ID-PPS{Sh:FE}', name='shutterfe')
+shuttera = TwoButtonShutter('XF:02IDA-PPS{PSh}', name='shuttera')
+shutterb = TwoButtonShutter('XF:02IDB-PPS{PSh}', name='shutterb')
+
+#Define the gatevalves from the above class.
+gvbt1 = TwoButtonShutter('XF:02IDD-VA{BT:1-GV:1}', name='gvbt1')
+gvsc1 = TwoButtonShutter('XF:02IDD-VA{SC:1-GV:1}', name='gvsc1')
