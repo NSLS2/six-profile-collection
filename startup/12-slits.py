@@ -51,8 +51,8 @@ feslt = VirtualMotorCenterAndGap('FE:C02A-OP{Slt:12', name='feslt')
 
 m1slt = BaffleSlit('XF:02IDA-OP{Mir:1-Slt:4_D_1', name='m1slt')
 
-pgmslt_u = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:8_U_1', name='pgmslt_u')
-pgmslt_d = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:9_D_1', name='pgmslt_d')
+pgmsltu = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:8_U_1', name='pgmsltu')
+pgmsltd = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:9_D_1', name='pgmsltd')
 
 m3slt = BaffleSlitSA('XF:02IDC-OP{Mir:3-Slt:12_U_1', name='m3slt')
 m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
