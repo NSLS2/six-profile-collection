@@ -107,6 +107,8 @@ class PreDefinedPositions(Device):
               
         describe_dict = super().describe()
         describe_dict.update(out_dict)
+
+        describe_dict = {k:v for k,v in describe_dict.items() if not k.endswith('user_setpoint')}
         
         return describe_dict
 
