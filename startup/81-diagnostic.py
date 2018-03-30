@@ -71,11 +71,13 @@ class PreDefinedPositions(Device):
                     self.y.position <= self.locations[location][1] + self.in_band:
                 loc_value = location
 
- #       out_dict = collections.OrderedDict()
- #       out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
+        out_dict = collections.OrderedDict()
+        out_dict[self.name+'_location'] = {'timestamp':time.time(),'value':loc_value }
 
         read_dict = super().read()
         read_dict.update(out_dict)
+
+        read_dict = {k:v for k,v in read_dict.items() if not k.endswith('user_setpoint')}
         
         return read_dict
 
@@ -95,13 +97,13 @@ class PreDefinedPositions(Device):
         '''
 
         out_dict = collections.OrderedDict()
- #       out_dict[self.name+'_location'] = {'dtype': 'string',
- #              'lower_ctrl_limit': None,
- #              'precision': None,
- #              'shape': [],
- #              'source': None,
- #              'units': None,
- #              'upper_ctrl_limit': None}
+        out_dict[self.name+'_location'] = {'dtype': 'string',
+               'lower_ctrl_limit': 'NA',
+               'precision': 'NA',
+               'shape': [],
+               'source': 'None',
+               'units': 'NA',
+               'upper_ctrl_limit': 'NA'}
               
         describe_dict = super().describe()
         describe_dict.update(out_dict)
