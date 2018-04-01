@@ -41,10 +41,19 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
 
 class StandardProsilicaROI(StandardProsilica):
     '''
-    A class that is used to add the attributes 'roi_enable', 'roi_set' and roi_read' to a camera with
-    the roi plugin enabled.
+    A class that is used to add the attributes 'roi_enable', 'roi_set', 'roi_read' and the group ('roiN_minM', roiN_sizeM) 
+    where N is 1-4 and M is x,y or z. to a camera with the roi plugin enabled.
     '''    
 
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        
+        for i in range(1,4):
+            for axis in ['x','y','z']:
+                setattr(self,'roi{}_min{}'.format(i,axis) ,getattr(self, 'roi' + str(i) + '.min_xyz.min_{}'.format(axis)))
+                setattr(self,'roi{}_size{}'.format(i,axis) ,getattr(self, 'roi' + str(i) + '.size.{}'.format(axis)))
+    
+    
     def roi_set(self,min_x,size_x,min_y,size_y,min_z=None,size_z=None,roi_num=1):
         ''' 
         An attribute function for the camera that allows the user to set an roi size and position. setting
@@ -125,6 +134,8 @@ class StandardProsilicaROI(StandardProsilica):
             getattr(self, 'roi' + str(roi_num) + '.enable').set(status)
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
+
+
 
 
 class StandardProsilicaSaving(StandardProsilicaROI):
@@ -219,8 +230,8 @@ qem08 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:8}EM180:', name='qem08'),
 qem09 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:9}EM180:', name='qem09'),
                  ['m4slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
-qem10 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:10}EM180:', name='qem10'),
-		 ['m4_mir'])
+#qem10 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:10}EM180:', name='qem10'),
+#		 ['m4_mir'])
 #                 ['m4'.format(s) for s in ('mir')])
 
 qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),

@@ -70,7 +70,7 @@ class TwoButtonShutter(Device):
                     cmd_sig.clear_sub(cmd_retry_cb)
 
                     
-        cmd_sig.put(1)
+        cmd_sig.set(1)
         cmd_sig.subscribe(cmd_retry_cb, run=False)
 
         self.status.subscribe(shutter_cb)
