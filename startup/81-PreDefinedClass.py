@@ -23,6 +23,11 @@ class PreDefinedPositions(Device):
             location2:['axis1_name',value1,axis2_name',value2,...],.....}.
             NOTE: Not all axes need to have a specifed value for each device location, only 
             those with a specifed value are moved/checked for a given location. 
+    neighbours : Dictionary
+        A keyword:value dictionary where each keyword is a location defined in 'locations' and 
+        each value is a list of 'neighbours' for that location. When defined motion occurs only 
+        between neighbours, for non-neighbours a path through various locations will be used, if 
+        it is found using self.find_path. 
     in_band : float or dictionary
         A float that gives the in-band range for all axes when deciding if the device is 'in' the 
         correct location or not. The default value is 0.1. The optional keyword:value dictionary 
@@ -67,8 +72,7 @@ class PreDefinedPositions(Device):
         self.locations = locations
         self.in_band = in_band
         self.neighbours = neighbours
-        if isinstance(cam_list,list):
-            print (cam_list)
+        if isinstance(cam_list,list): 
             if len(cam_list)==1:
                 self.cam=cam_list[0]
             else:
@@ -188,53 +192,96 @@ class PreDefinedPositions(Device):
                     axis_value_list.append(getattr(self,item))
                 else:
                     axis_value_list.append(item)
-                                        
+                    
         return axis_value_list
         
 
 
-    def find_path(self, to_location):
+    def find_path(self,to_location):
         '''
-        This function returns the shortest path between the current location and the to_location.
-        If it returns None then no path was found.
-        NOTE: if the current location is unknown then it returns 'unknown starting location'.
-        Parameters
-        ----------
+        Find the shortest path from 'from_location' to 'to_location' passing only thorugh the 
+        neighbours for each location defiend by the dictionary 'neighbours'. Returns an empty list 
+        if no path found otherwise returns a list of 'locations' that define the path.
+
+        Paramters
+        ---------
         to_location: string
-            The ending location for the required path.
-
-        Returns
-        -------
-        path_list, list
-            A list of strings containing the names of the locations that the path should take. If 
-            it is None when no path was found and returns "unknown starting location" if the current
-            position is not a predefined location.
+            The name of the ending location required for the path.
+        neighbours: dictionary
+            The dictionary that specifes the list of neighbours for each location in the device.
+        path_list: list, output
+            A list locations indicating the path to take to reach the required position.
 
         '''
-        path_list=None
-        for from_location in self.status_list:
-            new_path_list=find_path_default(from_location, to_location,self.neighbours)
-            if new_path_list is not None:
-                if path_list is None:
-                    path_list = new_path_list
-                elif new_path_list != 'unknown starting location' and \
-                            path_list == 'unknown starting location':
-                    path_list = new_path_list
-                else:
-                    min([path_list,new_path_list], key=len)
+    
+    
+        #Generator that calculates all possible, cycle free, paths that start at 'from_location'.
+        def paths(from_location,neighbours):
+            '''
+            Generate the maximal cycle-free paths in neighbours starting at from_location. The output
+            of the generator is a set of lists that start at the 'from_location'.
+        
+            Parameters
+            ----------        
+            from_location: string
+                The name of the starting location.
 
-        return path_list 
+            '''
+            path = [from_location]                  # path traversed so far
+            seen = {from_location}                  # set of vertices in path
+            def search():
+                dead_end = True
+                for neighbour in neighbours[path[-1]]:
+                    if neighbour not in seen:
+                        dead_end = False
+                        seen.add(neighbour)
+                        path.append(neighbour)
+                        yield from search()
+                        path.pop()
+                        seen.remove(neighbour)
+                if dead_end:
+                    yield list(path)
+    
+            yield from search()
+
+
+        if isinstance(self.status_list,str):
+            print (self.status_list)
+        else:
+        
+            path_list=[]
+            for from_location in self.status_list:
+                prev_path_list=path_list
+                path_list=[]
+                #Start the process of finding the path
+                if self.neighbours is None or to_location in self.neighbours[from_location]: 
+                    #1 move deep
+                    path_list = [to_location]
+                else:
+                    #more than 1 move deep
+                    for path in paths(from_location,self.neighbours):
+                        if to_location in path:
+                            if len(path_list)<1:
+                                path_list=path[:path.index(to_location)+1]
+                            elif len(path[:path.index(to_location)+1]) < len(path_list):
+                                path_list=path[:path.index(to_location)+1]
+
+                if len(prev_path_list)>1 and len(prev_path_list)<len(path_list):
+                    path_list=prev_path_list
+
+            return path_list
+
 
 
     @property
     def status_list(self):
-        '''The current locations of the device as a list
+        '''The current location of the device
         
         Returns
         -------
         position : list
         '''
-        loc_list=['unknown location']
+        loc_list='unknown location'
         for location in self.locations:
             in_position=True
             for i in range(0,len(self.locations[location]),2):
@@ -266,32 +313,34 @@ class PreDefinedPositions(Device):
                         in_position=False
 
             if in_position: 
-                if loc_list == ['unknown location']:
+                if loc_list == 'unknown location':
                     loc_list = [location]
                 else:
                     loc_list.append(location)
 
         return loc_list
-
-    @property
+   
+    @property  
     def status(self):
-        '''The current locations of the device as a string
-
+        '''The current location of the device
+        
         Returns
         -------
-        position: string
-
+        position : string
         '''
-        position =''
-        for location in self.status_list:
-            if len(position)>1:
-                position+=' , '
-                
-            position+= location
+
+        if isinstance(self.status_list,list):
+            position=''
+            for location in self.status_list:
+                if len(position)>1:
+                    position+=' , '
+
+                position+= location
+        else:
+            position = self.status_list
 
         return position
-       
-
+        
 
 class PreDefinedPositionsGroup():
     '''
@@ -310,6 +359,12 @@ class PreDefinedPositionsGroup():
             location2:[device1_name,device1_location,device2_name,device2_location,.....]}.
             NOTE: not all devices need to have a specifed location for each group location, only 
             those with a specifed location are moved/checked for a given location. 
+    neighbours : Dictionary
+        A keyword:value dictionary where each keyword is a location defined in 'locations' and 
+        each value is a list of 'neighbours' for that location. When defined motion occurs only 
+        between neighbours, for non-neighbours a path through various locations will be used, if 
+        it is found using self.find_path. 
+
  
     '''
     def __init__(self,devices,locations,neighbours=None,name=None):
@@ -391,54 +446,96 @@ class PreDefinedPositionsGroup():
                     
         return axis_value_list
 
-
-    def find_path(self, to_location):
+    def find_path(self,to_location):
         '''
-        This function returns the shortest path between the current location and the to_location.
-        If it returns None then no path was found.
-        NOTE: if the current location is unknown then it returns 'unknown starting location'.
-        Parameters
-        ----------
+        Find the shortest path from 'from_location' to 'to_location' passing only thorugh the 
+        neighbours for each location defiend by the dictionary 'neighbours'. Returns an empty list 
+        if no path found otherwise returns a list of 'locations' that define the path.
+
+        Paramters
+        ---------
         to_location: string
-            The ending location for the required path.
-
-        Returns
-        -------
-        path_list, list
-            A list of strings containing the names of the locations that the path should take. If 
-            it is None when no path was found and returns "unknown starting location" if the current
-            position is not a predefined location.
+            The name of the ending location required for the path.
+        neighbours: dictionary
+            The dictionary that specifes the list of neighbours for each location in the device.
+        path_list: list, output
+            A list locations indicating the path to take to reach the required position.
 
         '''
-        path_list=None
-        for from_location in self.status_list:
-            new_path_list=find_path_default(from_location, to_location,self.neighbours)
-            if new_path_list is not None:
-                if path_list is None:
-                    path_list = new_path_list
-                elif new_path_list != 'unknown starting location' and \
-                            path_list == 'unknown starting location':
-                    path_list = new_path_list
-                else:
-                    min([path_list,new_path_list], key=len)
-
-        return path_list 
     
+    
+        #Generator that calcualtes all possible, cycle free, paths that start at 'from_location'.
+        def paths(from_location,neighbours):
+            '''
+            Generate the maximal cycle-free paths in neighbours starting at from_location. The output
+            of the generator is a set of lists that start at the 'from_location'.
+        
+            Parameters
+            ----------        
+            from_location: string
+                The name of the starting location.
+
+            '''
+            path = [from_location]                  # path traversed so far
+            seen = {from_location}                  # set of vertices in path
+            def search():
+                dead_end = True
+                for neighbour in neighbours[path[-1]]:
+                    if neighbour not in seen:
+                        dead_end = False
+                        seen.add(neighbour)
+                        path.append(neighbour)
+                        yield from search()
+                        path.pop()
+                        seen.remove(neighbour)
+                if dead_end:
+                    yield list(path)
+    
+            yield from search()
+        
+        if isinstance(self.status_list,str):
+            print (self.status_list)
+        else:
+        
+            path_list=[]
+            for from_location in self.status_list:
+                prev_path_list=path_list
+                path_list=[]
+                #Start the process of finding the path
+                if self.neighbours is None or to_location in self.neighbours[from_location]: 
+                    #1 move deep
+                    path_list = [to_location]
+                else:
+                    #more than 1 move deep
+                    for path in paths(from_location,self.neighbours):
+                        if to_location in path:
+                            if len(path_list)<1:
+                                path_list=path[:path.index(to_location)+1]
+                            elif len(path[:path.index(to_location)+1]) < len(path_list):
+                                path_list=path[:path.index(to_location)+1]
+
+                if len(prev_path_list)>1 and len(prev_path_list)<len(path_list):
+                    path_list=prev_path_list
+
+            return path_list
+
+     
     @property
     def status_list(self):
         '''The current location of the device
         
         Returns
         -------
-        position : list
+        position : string
         '''
+        
         loc_list='unknown location'
         for location in self.locations:
             in_position=True
             for i in range(0,len(self.locations[location]),2):
                 device = getattr(self,self.locations[location][i])
                 device_location = self.locations[location][i+1]
-                if device_location not in getattr(device,'location'):
+                if device_location not in getattr(device,'status_list'):
                     in_position=False
 
             if in_position: 
@@ -450,23 +547,27 @@ class PreDefinedPositionsGroup():
         return loc_list
 
 
-    @property
-    def status(self):
-        '''The current locations of the device as a string
 
+    @property  
+    def status(self):
+        '''The current location of the device
+        
         Returns
         -------
-        position: string
-
+        position : string
         '''
-        position =''
-        for location in self.status_list:
-            if len(position)>1:
-                position+=' , '
+        if isinstance(self.status_list,list):
+            position=''
+            for location in self.status_list:
+                if len(position)>1:
+                    position+=' , '
 
-            position+= location
+                position+= location
+        else:
+            position = self.status_list
 
         return position
+
 
 
 

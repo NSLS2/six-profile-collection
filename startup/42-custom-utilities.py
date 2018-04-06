@@ -73,3 +73,25 @@ def scan_info(scan_id,source='all'):
 
 ###ROI utilities###
 
+
+
+
+
+
+### detector utilities ##
+
+def scan_dets(*scan_no):
+    '''Enter scan id numbers to print settings for primary stream detectors'''
+    xtr_str = ''
+    for scan in scan_no:
+        if 'reason' in db[scan].start:
+            xtr_str = '   ' + db[scan].start['reason']
+        elif 'purpose' in scan.start:
+            xtr_str = '   ' + db[scan].start['purpose']
+        print('Scan ID {}:  {}'.format(scan, xtr_str) )
+        for detector in db[scan]['start']['detectors']:
+            print('  {} (primary stream):  '.format(detector) )
+            settings = db[scan].config_data(detector)['primary'][0]
+            for p, n in settings.items():
+                print('    {:_<30} : {:_>20}'.format(p, n))
+            print('{:-<70}'.format('-'))
