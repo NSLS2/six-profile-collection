@@ -26,11 +26,11 @@ class align_class():
 
         '''
         initial_position = -0.747405
-        num = [31, 31, 31] # all lists here should have the same length, corresponding to the number of scan performed
-        start = [-0.005, -0.0025, -0.001]
-        stop = [0.005, 0.0025, 0.001]
+        num = [31, 31] # all lists here should have the same length, corresponding to the number of scan performed
+        start = [-0.005, -0.001]
+        stop = [0.005, 0.001]
         vertical = 30
-        horizontal = [150, 75, 20]
+        horizontal = [150, 75]
     
         initial_vertical = extslt.vg.position
         initial_horizontal = extslt.hg.position
@@ -68,11 +68,11 @@ class align_class():
         '''
 
         initial_position = 1910.05
-        num = [31, 31, 31] # all lists here should have the same length, corresponding to the number of scan performed
-        start = [-50, -20, -10]
-        stop = [50, 20, 10]
-        roi1_minx = [554, 579, 594]
-        roi1_sizex = [100, 50, 20]
+        num = [31, 31] # all lists here should have the same length, corresponding to the number of scan performed
+        start = [-200, -50]
+        stop = [200, 50]
+        roi1_minx = [554, 579]
+        roi1_sizex = [100, 50]
     
 
         initial_m3diag = m3diag.y.position
