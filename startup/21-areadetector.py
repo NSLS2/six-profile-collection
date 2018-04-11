@@ -19,7 +19,10 @@ class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 #ALL OF THIS COMMENT DOWN TO testing m3_diag_cam is for testing only. DON'T DELETE 
 
 class StandardProsilica(SingleTrigger, ProsilicaDetector):
-#class StandardCam(SingleTrigger, AreaDetector):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.hints = {'fields':[self.stats1.total.name, self.stats5.total.name]}
+
     #image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
@@ -33,10 +36,6 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     #proc1 = Cpt(ProcessPlugin, 'Proc1:')
 
-    @property
-    def hints(self):
-        return {'fields': [self.stats1.total.name,
-                           self.stats5.total.name]}
 
 
 class StandardProsilicaROI(StandardProsilica):
