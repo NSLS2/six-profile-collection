@@ -116,7 +116,7 @@ class PreDefinedPositions(Device):
                 print ('attribute, e.g. device.locations')
             else:
                 for location in path_list:
-                    print ('Move to "{}"'.format(location))
+                    print ('Move {} to "{}"'.format(self.name,location))
                     axis_value_list=self.get_axis_value_list(location)
                     yield from mv(*axis_value_list)
                     
@@ -401,7 +401,7 @@ class PreDefinedPositionsGroup():
                 print ('attribute, e.g. device.locations')
             else:
                 for location in path_list:
-                    print ('Move to "{}"'.format(location))
+                    print ('Move {} to "{}"'.format(self.name,location))
                     axis_value_list=self.get_axis_value_list(location)
                     yield from mv(*axis_value_list)
                                      

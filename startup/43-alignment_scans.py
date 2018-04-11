@@ -90,6 +90,7 @@ class align_class():
                 print ("m1.pit -> peaks.cen['m3_diag_cam_stats1_total']")
                 print("For scan {} of {} the center is peaks.cen['m3_diag_cam_stats1_total']".format(i+1, len(start)))
 
+        yield from count([m3diag.cam])
 
         yield from mv(m3diag.y, initial_m3diag)
         
