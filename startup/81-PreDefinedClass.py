@@ -1,6 +1,8 @@
 from ophyd import EpicsMotor,Device
 import collections
 import time
+import networkx as nx
+from matplotlib.patches import ArrowStyle
 
 
 
@@ -16,19 +18,19 @@ class PreDefinedPositions(Device):
     ----------
     self : numerous paramters
         All of the parameters associated with the parent class 'Device'
-    locations : dictionary
+    locations : dictionary, optional
         A keyword:Value dictionary that lists all of the predefined locations (keyword) and a 
         list of axis-value pairs to be set in this location in the form: 
         {location1:['axis1_name',value1,axis2_name',value2,...], 
             location2:['axis1_name',value1,axis2_name',value2,...],.....}.
             NOTE: Not all axes need to have a specifed value for each device location, only 
             those with a specifed value are moved/checked for a given location. 
-    neighbours : Dictionary
+    neighbours : Dictionary, optional
         A keyword:value dictionary where each keyword is a location defined in 'locations' and 
         each value is a list of 'neighbours' for that location. When defined motion occurs only 
         between neighbours, for non-neighbours a path through various locations will be used, if 
         it is found using self.find_path. 
-    in_band : float or dictionary
+    in_band : float or dictionary, optional
         A float that gives the in-band range for all axes when deciding if the device is 'in' the 
         correct location or not. The default value is 0.1. The optional keyword:value dictionary 
         that lists all of the predefined locations (keyword) and a sub-dictionary that has axis_name
@@ -44,15 +46,19 @@ class PreDefinedPositions(Device):
             range in this dictionary for the given location, unless the 'value' in location is a 
             string.
 
-    cam_list : list
+    cam_list : list, optional
         A list of cameras associated with this device, they will be accesible via the attribute
         cam or cam1,cam2 etc.
-    qem_list : list
+    qem_list : list, optional
         A list of qem's associated with this device, they will be accesible via the attribute
         qem or qem1,qem2 etc.
-    gv_list : list
+    gv_list : list, optional
         A list of gv's associated with this device, they will be accesible via the attribute
         gv or gv1,gv2 etc.
+    vis_path_options : dict, optional
+        A dictionary that allows for different path visulatiztion options, the parameters and values
+        are those defined for drawing in the python networkX Module. A set of defaults is used if this 
+        parameter is None.
 
     NOTES ON PREDEFINED MOTION WITH NEIGHBOURS:
     1. The locations dictionary can include gate valves and/or parameter sets as axes with the 
@@ -66,12 +72,28 @@ class PreDefinedPositions(Device):
         path.
     '''
     def __init__(self, *args, locations=None, neighbours=None,in_band=0.1, cam_list=None, 
-            qem_list=None, gv_list=None, **kwargs):
+            qem_list=None, gv_list=None, vis_path_options=None,**kwargs):
         super().__init__(*args, **kwargs)
 
         self.locations = locations
         self.in_band = in_band
         self.neighbours = neighbours
+        self.vis_path_options=vis_path_options
+
+        self.nxGraph=nx.DiGraph(directed=True)
+        
+        self.nxGraph.add_nodes_from(list(locations.keys()))
+        if neighbours is not None:
+            for key in neighbours.keys():
+                for neighbour in neighbours[key]:
+                    self.nxGraph.add_edge(str(key),neighbour)
+        elif locations is not None:
+            for location in locations.keys():
+                for location2 in locations.keys():
+                    if location is not location2:
+                        self.nxGraph.add_edge(str(location),str(location2))
+
+
         if isinstance(cam_list,list): 
             if len(cam_list)==1:
                 self.cam=cam_list[0]
@@ -109,7 +131,7 @@ class PreDefinedPositions(Device):
             setattr(self,to_location,mv_axis(to_location))#this resolves an issue with the definition
                                                           #being set to None after a call 
             
-            path_list = self.find_path(to_location)
+            path_list = self.find_path(from_location='current_location',to_location=to_location)
             if path_list == 'unknown starting location':#if the current location is unknown
                 print ('current location is not pre-defined, move to predefined position first')
                 print ('a list of locations and axis values can be found using the "locations"')
@@ -196,81 +218,59 @@ class PreDefinedPositions(Device):
         return axis_value_list
         
 
-
-    def find_path(self,to_location):
+    def find_path(self,from_location=None,to_location=None):
         '''
-        Find the shortest path from 'from_location' to 'to_location' passing only thorugh the 
+        Find the shortest path from the 'from_location' to 'to_location' passing only thorugh the 
         neighbours for each location defiend by the dictionary 'neighbours'. Returns an empty list 
-        if no path found otherwise returns a list of 'locations' that define the path.
+        if no path found otherwise returns a list of 'locations' that define the path. If to_location 
+        is None then it returns a dictionary showing the shortest path to all possible locations. If
+        from_location is None it returns a dictionary showing the shortest path from all locations to
+        the current location. If both are None it returns a dictioanry of dictionaries. If 
+        from_location is 'current_location' the starting point is changed to the current location.
 
         Paramters
         ---------
+        from_location: string
+            The name of the starting location required for the path.
+
         to_location: string
             The name of the ending location required for the path.
-        neighbours: dictionary
-            The dictionary that specifes the list of neighbours for each location in the device.
+
         path_list: list, output
             A list locations indicating the path to take to reach the required position.
 
         '''
-    
-    
-        #Generator that calculates all possible, cycle free, paths that start at 'from_location'.
-        def paths(from_location,neighbours):
-            '''
-            Generate the maximal cycle-free paths in neighbours starting at from_location. The output
-            of the generator is a set of lists that start at the 'from_location'.
-        
-            Parameters
-            ----------        
-            from_location: string
-                The name of the starting location.
 
-            '''
-            path = [from_location]                  # path traversed so far
-            seen = {from_location}                  # set of vertices in path
-            def search():
-                dead_end = True
-                for neighbour in neighbours[path[-1]]:
-                    if neighbour not in seen:
-                        dead_end = False
-                        seen.add(neighbour)
-                        path.append(neighbour)
-                        yield from search()
-                        path.pop()
-                        seen.remove(neighbour)
-                if dead_end:
-                    yield list(path)
-    
-            yield from search()
 
-        if self.neighbours is None:        
-            return [to_location]
+        if from_location is not 'current_location':
+            return nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
         elif isinstance(self.status_list,str):
             print (self.status_list)
         else:
-        
             path_list=[]
-            for from_location in self.status_list:
+            for location in self.status_list:
                 prev_path_list=path_list
-                path_list=[]
-                #Start the process of finding the path
-                if self.neighbours is None or to_location in self.neighbours[from_location]: 
-                    #1 move deep
-                    path_list = [to_location]
-                else:
-                    #more than 1 move deep
-                    for path in paths(from_location,self.neighbours):
-                        if to_location in path:
-                            if len(path_list)<1:
-                                path_list=path[:path.index(to_location)+1]
-                            elif len(path[:path.index(to_location)+1]) < len(path_list):
-                                path_list=path[:path.index(to_location)+1]
-
-                if len(prev_path_list)>1 and len(prev_path_list)<len(path_list):
+                path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
+                if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
                     path_list=prev_path_list
+        return path_list
 
-            return path_list
+    @property
+    def visualize_paths(self):
+        ''' Creates a plot of the possible paths between the predefined locations.
+
+        '''
+        if self.locations is None:
+            print ('No locations to visualize')
+        else:
+            
+            options={'pos':nx.circular_layout(self.nxGraph),'node_color':'darkturquoise','edge_color':'grey','node_size':6000,
+                     'width':3,'arrowstyle':'-|>','arrow_size':12}
+            if self.vis_path_options is not None:
+                options.update(self.vis_path_options)
+
+            plt.figure('visualize {} paths'.format(self.name),figsize=(10,10))
+            nx.draw_networkx(self.nxGraph,arrows=True,**options)
 
 
 
@@ -360,19 +360,38 @@ class PreDefinedPositionsGroup():
             location2:[device1_name,device1_location,device2_name,device2_location,.....]}.
             NOTE: not all devices need to have a specifed location for each group location, only 
             those with a specifed location are moved/checked for a given location. 
-    neighbours : Dictionary
+    neighbours : Dictionary, optional
         A keyword:value dictionary where each keyword is a location defined in 'locations' and 
         each value is a list of 'neighbours' for that location. When defined motion occurs only 
         between neighbours, for non-neighbours a path through various locations will be used, if 
         it is found using self.find_path. 
+    vis_path_options : dict, optional
+        A dictionary that allows for different path visualiztion options, the parameters and values
+        are those defined for drawing in the python networkX Module. A set of defaults is used if this 
+        parameter is None.
+
 
  
     '''
-    def __init__(self,devices,locations,neighbours=None,name=None):
+    def __init__(self,devices,locations,neighbours=None,vis_path_options=None,name=None):
         self.devices=devices
         self.locations=locations
         self.neighbours=neighbours
         self.name=name
+        self.vis_path_options=vis_path_options
+
+        self.nxGraph=nx.DiGraph()
+        
+        self.nxGraph.add_nodes_from(list(locations.keys()))
+        if neighbours is not None:
+            for key in neighbours.keys():
+                for neighbour in neighbours[key]:
+                    self.nxGraph.add_edge(str(key),neighbour)
+        elif locations is not None:
+            for location in locations.keys():
+                for location2 in locations.keys():
+                    if location is not location2:
+                        self.nxGraph.add_edge(str(location),str(location2))
         
         for device in devices:
             setattr(self,device.name,device)    
@@ -392,7 +411,7 @@ class PreDefinedPositionsGroup():
             setattr(self,to_location,mv_axis(to_location))#this resolves an issue with the definition
                                                     #being set to None after a call 
             
-            path_list = self.find_path(to_location)
+            path_list = self.find_path(from_location='current_location',to_location=to_location)
             if path_list is None:#if no path was found to the too location.
                 print ('no path between current location and requested location found')
             if path_list == 'unknown starting location':#if the current location is unknown.
@@ -447,82 +466,62 @@ class PreDefinedPositionsGroup():
                     
         return axis_value_list
 
-    def find_path(self,to_location):
+
+    def find_path(self,from_location='current_location',to_location=None):
         '''
-        Find the shortest path from 'from_location' to 'to_location' passing only thorugh the 
+        Find the shortest path from the 'from_location' to 'to_location' passing only thorugh the 
         neighbours for each location defiend by the dictionary 'neighbours'. Returns an empty list 
-        if no path found otherwise returns a list of 'locations' that define the path.
+        if no path found otherwise returns a list of 'locations' that define the path. If to_location 
+        is None then it returns a dictionary showing the shortest path to all possible locations. If
+        from_location is None it returns a dictionary showing the shortest path from all locations to
+        the current location. If both are None it returns a dictioanry of dictionaries. If 
+        from_location is 'current_location' the starting point is changed to the current location.
 
         Paramters
         ---------
+        from_location: string
+            The name of the starting location required for the path.
+
         to_location: string
             The name of the ending location required for the path.
-        neighbours: dictionary
-            The dictionary that specifes the list of neighbours for each location in the device.
+
         path_list: list, output
             A list locations indicating the path to take to reach the required position.
 
         '''
-    
-    
-        #Generator that calcualtes all possible, cycle free, paths that start at 'from_location'.
-        def paths(from_location,neighbours):
-            '''
-            Generate the maximal cycle-free paths in neighbours starting at from_location. The output
-            of the generator is a set of lists that start at the 'from_location'.
-        
-            Parameters
-            ----------        
-            from_location: string
-                The name of the starting location.
 
-            '''
-            path = [from_location]                  # path traversed so far
-            seen = {from_location}                  # set of vertices in path
-            def search():
-                dead_end = True
-                for neighbour in neighbours[path[-1]]:
-                    if neighbour not in seen:
-                        dead_end = False
-                        seen.add(neighbour)
-                        path.append(neighbour)
-                        yield from search()
-                        path.pop()
-                        seen.remove(neighbour)
-                if dead_end:
-                    yield list(path)
-    
-            yield from search()
 
-        if self.neighbours is None:        
-            return [to_location]
+        if from_location is not 'current_location':
+            return nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
         elif isinstance(self.status_list,str):
             print (self.status_list)
         else:
-        
             path_list=[]
-            for from_location in self.status_list:
+            for location in self.status_list:
                 prev_path_list=path_list
-                path_list=[]
-                #Start the process of finding the path
-                if self.neighbours is None or to_location in self.neighbours[from_location]: 
-                    #1 move deep
-                    path_list = [to_location]
-                else:
-                    #more than 1 move deep
-                    for path in paths(from_location,self.neighbours):
-                        if to_location in path:
-                            if len(path_list)<1:
-                                path_list=path[:path.index(to_location)+1]
-                            elif len(path[:path.index(to_location)+1]) < len(path_list):
-                                path_list=path[:path.index(to_location)+1]
-
-                if len(prev_path_list)>1 and len(prev_path_list)<len(path_list):
+                path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
+                if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
                     path_list=prev_path_list
+        return path_list
 
-            return path_list
+    @property
+    def visualize_paths(self):
+        ''' Creates a plot of the possible paths between the predefined locations.
 
-     
+        '''
+        if self.locations is None:
+            print ('No locations to visualize')
+        else:
+            
+            options={'pos':nx.circular_layout(self.nxGraph),'node_color':'darkturquoise','edge_color':'grey','node_size':6000,
+                     'width':3,'arrowstyle':'-|>','arrow_size':12}
+            if self.vis_path_options is not None:
+                options.update(self.vis_path_options)
+
+            plt.figure('visualize {} paths'.format(self.name),figsize=(10,10))
+            nx.draw_networkx(self.nxGraph,arrows=True,**options)
+
+
     @property
     def status_list(self):
         '''The current location of the device
