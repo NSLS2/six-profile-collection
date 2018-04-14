@@ -58,7 +58,8 @@ class PreDefinedPositions(Device):
     vis_path_options : dict, optional
         A dictionary that allows for different path visulatiztion options, the parameters and values
         are those defined for drawing in the python networkX Module. A set of defaults is used if this 
-        parameter is None.
+        parameter is None. May also contain the optional 'axis_labels':['x_label','y_label'] and 
+        'fig_size':[x_size,y_size] values.
 
     NOTES ON PREDEFINED MOTION WITH NEIGHBOURS:
     1. The locations dictionary can include gate valves and/or parameter sets as axes with the 
@@ -269,7 +270,22 @@ class PreDefinedPositions(Device):
             if self.vis_path_options is not None:
                 options.update(self.vis_path_options)
 
-            plt.figure('visualize {} paths'.format(self.name),figsize=(10,10))
+            if 'fig_size' in options.keys():
+                fig_size=[options['fig_size'][0],options['fig_size'][1]]
+                del options['fig_size']
+            else:
+                fig_size=[10,10]
+
+            if 'axis_labels' in options.keys():
+                axis_labels=[options['axis_labels'][0],options['axis_labels'][1]]
+                del options['axis_labels']
+            else:
+                axis_labels=['arbitrary axis','arbitrary axis']
+
+
+            plt.figure('visualize {} paths'.format(self.name),figsize=(fig_size[0],fig_size[1]))
+            plt.xlabel(axis_labels[0])
+            plt.ylabel(axis_labels[1])
             nx.draw_networkx(self.nxGraph,arrows=True,**options)
 
 
