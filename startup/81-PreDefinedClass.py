@@ -133,7 +133,7 @@ class PreDefinedPositions(Device):
                                                           #being set to None after a call 
             
             path_list = self.find_path(from_location='current_location',to_location=to_location)
-            if path_list == 'unknown starting location':#if the current location is unknown
+            if path_list == 'unknown location':#if the current location is unknown
                 print ('current location is not pre-defined, move to predefined position first')
                 print ('a list of locations and axis values can be found using the "locations"')
                 print ('attribute, e.g. device.locations')
@@ -229,7 +229,7 @@ class PreDefinedPositions(Device):
         the current location. If both are None it returns a dictioanry of dictionaries. If 
         from_location is 'current_location' the starting point is changed to the current location.
 
-        Paramters
+        Parameters
         ---------
         from_location: string
             The name of the starting location required for the path.
@@ -244,16 +244,21 @@ class PreDefinedPositions(Device):
 
 
         if from_location is not 'current_location':
-            return nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
-        elif isinstance(self.status_list,str):
-            print (self.status_list)
+            path_list = nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
+        elif isinstance(self.status_list,str) and self.neighbours is not None:
+            path_list=(self.status_list)
         else:
-            path_list=[]
-            for location in self.status_list:
-                prev_path_list=path_list
-                path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
-                if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
-                    path_list=prev_path_list
+            if self.neighbours is None:
+                path_list=[to_location]
+            else:
+                path_list=[]
+                for location in self.status_list:
+                    prev_path_list=path_list
+                    path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
+
+                    if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
+                        path_list=prev_path_list
+
         return path_list
 
     @property
@@ -430,7 +435,8 @@ class PreDefinedPositionsGroup():
             path_list = self.find_path(from_location='current_location',to_location=to_location)
             if path_list is None:#if no path was found to the too location.
                 print ('no path between current location and requested location found')
-            if path_list == 'unknown starting location':#if the current location is unknown.
+
+            if path_list == 'unknown location':#if the current location is unknown.
                 print ('current location is not pre-defined, move to predefined position first')
                 print ('a list of locations and axis values can be found using the "locations"')
                 print ('attribute, e.g. device.locations')
@@ -493,7 +499,7 @@ class PreDefinedPositionsGroup():
         the current location. If both are None it returns a dictioanry of dictionaries. If 
         from_location is 'current_location' the starting point is changed to the current location.
 
-        Paramters
+        Parameters
         ---------
         from_location: string
             The name of the starting location required for the path.
@@ -508,16 +514,21 @@ class PreDefinedPositionsGroup():
 
 
         if from_location is not 'current_location':
-            return nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
+            path_list = nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
         elif isinstance(self.status_list,str):
-            print (self.status_list)
+            path_list = (self.status_list)
         else:
-            path_list=[]
-            for location in self.status_list:
-                prev_path_list=path_list
-                path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
-                if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
-                    path_list=prev_path_list
+            if self.neighbours is None:
+                path_list=[to_location]
+            else:
+                path_list=[]
+                for location in self.status_list:
+                    prev_path_list=path_list
+                    path_list=nx.shortest_path(self.nxGraph,source=location,target=to_location)
+
+                    if len(prev_path_list)>1 and len(prev_path_len)<len(path_list):
+                        path_list=prev_path_list
+
         return path_list
 
     @property

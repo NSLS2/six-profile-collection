@@ -50,8 +50,8 @@ class align_class():
                 print ("m3.pit -> peaks.cen['gc_diag_grid']")
                 print("For scan {} of {} the center is peaks.cen['gc_diag_grid']".format(i+1, len(start)))
 
-        yield from mv(extslt.vg, initial_vertical, extslt.hg, initial_horizontal,gcdiag.y,initial_gcdiagy)
-
+        #yield from mv(extslt.vg, initial_vertical, extslt.hg, initial_horizontal,gcdiag.y,initial_gcdiagy)
+        yield from mv(extslt.vg, initial_vertical, extslt.hg, initial_horizontal,gcdiag.y,-1)
 
     @property
     def m1pit(self):
