@@ -88,8 +88,8 @@ def current_plan_time(start_scan_id,total_num_scans):
         scan_id=yield from 'first scan in plan (can be inside a loop)'
     
     #THE FIRST SCAN SHOULD AVE THE FOLLOWING AFTER THE FIRST SCAN YIELD FROM.
-        if scan_id is not None and start_scan_id is None: 
-           start_scan_id = scan_id
+        if uid is not None and start_scan_id is None:
+            start_scan_id = db[uid].start['scan_id']
 
     #THE FOLLOWING SHOULD BE PLACED AFTER EACH SCAN IN THE PLAN TO PRINT OUT THE TIME TAKEN AND TIME REMAINING.
         if start_scan_id is not None: current_plan_time(start_scan_id,total_num_scans)
@@ -104,17 +104,21 @@ def current_plan_time(start_scan_id,total_num_scans):
 
         
     '''
-    time_taken = (db[-2].stop['time'] - db[start_scan_id].start['time'])
-    scans_complete = (db[-2].start['scan_id'] - start_scan_id)
-    scans_remaining = total_num_scans - scans_complete
-    time_per_scan = time_taken/scans_complete
-    time_remaining = scans_remaining*time_per_scan-(time.time()-db[-2].stop['time'])
-    estimated_completion_time = time.time() + time_remaining
+    if int(start_scan_id) < db[-2].start['scan_id']:
+        time_taken = (db[-2].stop['time'] - db[int(start_scan_id)].start['time'])
+        scans_complete = (db[-2].start['scan_id'] - int(start_scan_id))
+        scans_remaining = total_num_scans - scans_complete
+        time_per_scan = time_taken/scans_complete
+        time_remaining = scans_remaining*time_per_scan-(time.time()-db[-2].stop['time'])
+        estimated_completion_time = time.time() + time_remaining
     
-    print ('Completed scan {} of {}, time taken = {}, average time per scan = {}'.format(scans_complete,total_num_scans, 
+        print ('Completed scan {} of {}, time taken = {}, average time per scan = {}'.format(scans_complete,total_num_scans, 
                              time.strftime('%H:%M:%S',time.gmtime(time_taken)), time.strftime('%H:%M:%S',time.gmtime(time_per_scan))))
-    print ('Remaining time = {}, estimated completion at {}'.format(time.strftime('%H:%M:%S',time.gmtime(time_remaining)), 
+        print ('Remaining time = {}, estimated completion at {}'.format(time.strftime('%H:%M:%S',time.gmtime(time_remaining)), 
                                                                     time.strftime('%d %b %Y %X',time.localtime(estimated_completion_time))))
+
+    else:
+        print ('not enough completed scans to estimate time')
     
 
 
