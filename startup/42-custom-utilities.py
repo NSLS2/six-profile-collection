@@ -1,6 +1,6 @@
 from ophyd import Device, EpicsMotor
 from ophyd import Component as Cpt
-import datetime
+import time
 
 
 #CUSTOM UTILITIES FOR 2-ID BEAMLINE
@@ -8,9 +8,7 @@ import datetime
 ###scan info utilities###
 def scan_info(scan_id,source='all'):
     ''' 
-    Combines an 'outer_product_scan' scan with a 'relative_scan' scan such that each  multi-motor trajectory 
-    defined by '*args' is saved as a seperate experiment in databroker for point defined by numO,motorO,
-    startO,stopO.
+    Prints to the command line, in a human readable way, the header and/or baseline info for the scan defined by scan_id.
             
     Parameters
     ----------
@@ -71,11 +69,53 @@ def scan_info(scan_id,source='all'):
         print ('source must be "all", "header" or "baseline"')
 
 
-###ROI utilities###
+###plan time utilities###
+def current_plan_time(start_scan_id,total_num_scans):
+    ''' 
+    For plans that involve multiple seperate scans this determines the expected finishing time, based on the time taken so far and the total number of scans.
+
+    It assumes that all scans will take the same amount of time. So it will be less accurate when a plan involves scans of different length and will be more 
+    accurate the more scans have already taken place.
+
+    It can be added to scan plans to print out the time taken and the time left after each 'scan', this requires the lines below just before the first scan to 
+    define the start scan id:
+
+    #ADD THIS LINE AT START OF PLAN OUTSIDE ANY LOOPS
+        start_scan_id=None
+        total_num_scans=XXXX
+
+    #THE FIRST SCAN SHOULD HAVE THE FOLLOWING IN FRONT OF THE YIELD FROM.
+        scan_id=yield from 'first scan in plan (can be inside a loop)'
+    
+    #THE FIRST SCAN SHOULD AVE THE FOLLOWING AFTER THE FIRST SCAN YIELD FROM.
+        if scan_id is not None and start_scan_id is None: 
+           start_scan_id = scan_id
+
+    #THE FOLLOWING SHOULD BE PLACED AFTER EACH SCAN IN THE PLAN TO PRINT OUT THE TIME TAKEN AND TIME REMAINING.
+        if start_scan_id is not None: current_plan_time(start_scan_id,total_num_scans)
 
 
+    Parameters
+    ----------
+    start_scan_id : integer
+        The scan_id for the first scan.
+    total_num_scans : integer
+        The total number of scans in the plan.
 
-
+        
+    '''
+    time_taken = (db[-2].stop['time'] - db[start_scan_id].start['time'])
+    scans_complete = (db[-2].start['scan_id'] - start_scan_id)
+    scans_remaining = total_num_scans - scans_complete
+    time_per_scan = time_taken/scans_complete
+    time_remaining = scans_remaining*time_per_scan-(time.time()-db[-2].stop['time'])
+    estimated_completion_time = time.time() + time_remaining
+    
+    print ('Completed scan {} of {}, time taken = {}, average time per scan = {}'.format(scans_complete,total_num_scans, 
+                             time.strftime('%H:%M:%S',time.gmtime(time_taken)), time.strftime('%H:%M:%S',time.gmtime(time_per_scan))))
+    print ('Remaining time = {}, estimated completion at {}'.format(time.strftime('%H:%M:%S',time.gmtime(time_remaining)), 
+                                                                    time.strftime('%d %b %Y %X',time.localtime(estimated_completion_time))))
+    
 
 
 ### detector utilities ##
