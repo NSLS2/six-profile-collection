@@ -38,8 +38,12 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
     md : dict, optional
         metadata
     '''
-    initial_uid='current_uid'
+    initial_scan_id='current scan_id'
     initial_posO=motorO.position
+
+    #initialization of time to finish variables.
+    start_scan_id=None
+    total_num_scans=num0
     
     if num is None:
         num=numO
@@ -52,13 +56,15 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
         multi_position=str(i)+':'+str(numO)
         
         md=md or {}
-        md.update({'plan_name':'multi_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+        md.update({'plan_name':'multi_scan','multi_initial_scan_id':initial_scan_id,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
                    'multi_motor':motorO.name,'multi_position': multi_position,'multi_axis_value':O})
 
         uid=yield from scan(detectors,*args,num, per_step=per_step, md=md)
 
-        if initial_uid is 'current uid':
-            initial_uid = uid
+        if initial_scan_id is 'current scan_id' and uid is not None:
+            initial_scan_id = db[uid].start['scan_id']
+        
+        if initial_scan_id is not 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
 
     yield from mv(motorO,initial_posO)
     
@@ -96,8 +102,12 @@ def multi_rel_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=N
     md : dict, optional
         metadata
     '''
-    initial_uid='current_uid'
+    initial_scan_id='current scan_id'
     initial_posO=motorO.position
+
+    #initialization of time to finish variables.
+    start_scan_id=None
+    total_num_scans=num0
     
     if num is None:
         num=numO
@@ -113,13 +123,15 @@ def multi_rel_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=N
         multi_position=str(i)+':'+str(numO)        
         
         md=md or {}
-        md.update({'plan_name':'multi_rel_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+        md.update({'plan_name':'multi_rel_scan','multi_initial_scan_id':initial_scan_id,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
                    'multi_motor':motorO.name,'multi_position': multi_position,'multi_axis_value':O})    
         
         uid=yield from rel_scan(detectors,*args,num, per_step=per_step, md=md)
 
-        if initial_uid is 'current uid':
-            initial_uid = uid
+        if initial_scan_id is 'current scan_id' and uid is not None:
+            initial_scan_id = db[uid].start['scan_id']
+
+        if initial_scan_id is not 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
                 
     yield from mv(motorO,initial_posO)
 
@@ -158,9 +170,12 @@ def multi_grid_scan(detectors,motorO,startO,stopO,numO,*args,per_step=None, md=N
     md : dict, optional
         metadata
     '''
-    initial_uid='current_uid'
+    initial_scan_id='current scan_id'
     initial_posO=motorO.position
 
+    #initialization of time to finish variables.
+    start_scan_id=None
+    total_num_scans=num0
         
     for i in range(numO):
             
@@ -169,14 +184,16 @@ def multi_grid_scan(detectors,motorO,startO,stopO,numO,*args,per_step=None, md=N
         multi_position=str(i)+':'+str(numO)
 
         md=md or {}
-        md.update({'plan_name':'multi_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+        md.update({'plan_name':'multi_grid_scan','multi_initial_scan_id':initial_scan_id,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
                    'multi_motor':motorO.name,'multi_position': multi_position,'multi_axis_value':O})
 
 
         uid=yield from grid_scan(detectors,*args, per_step=per_step, md=md)
 
-        if initial_uid is 'current uid':
-            initial_uid = uid
+        if initial_scan_id is 'current scan_id' and uid is not None:
+            initial_scan_id = db[uid].start['scan_id']
+
+        if initial_scan_id is not 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
 
     yield from mv(motorO,initial_posO)
     
@@ -222,8 +239,12 @@ def multi_rel_grid_scan(detectors,motorO,startO,stopO,numO,*args,num=None, per_s
     md : dict, optional
         metadata
     '''
-    initial_uid='current_uid'
+    initial_scan_id='current scan_id'
     initial_posO=motorO.position
+
+    #initialization of time to finish variables.
+    start_scan_id=None
+    total_num_scans=num0
 
     num=numO
 
@@ -238,14 +259,16 @@ def multi_rel_grid_scan(detectors,motorO,startO,stopO,numO,*args,num=None, per_s
         multi_position=str(i)+':'+str(numO)
         
         md=md or {}
-        md.update({'plan_name':'multi_rel_grid_scan','multi_initial_uid':initial_uid,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
+        md.update({'plan_name':'multi_rel_grid_scan','multi_initial_scan_id':initial_scan_id,'multi_num':numO,'multi_start':startO,'multi_stop':stopO,
                    'multi_motor':motorO.name,'multi_position': multi_position,'multi_axis_value':O})
 
 
         uid=yield from rel_grid_scan(detectors,*args, per_step=per_step, md=md)
 
-        if initial_uid is 'current uid':
-            initial_uid = uid
+        if initial_scan_id is 'current scan_id' and uid is not None:
+            initial_scan_id = db[uid].start['scan_id']
+
+        if initial_scan_id is not 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
                 
     yield from mv(motorO,initial_posO)
 

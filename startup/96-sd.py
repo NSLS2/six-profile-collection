@@ -18,6 +18,7 @@ m5mask, m6_msk,
 m6.pit, m6.z,
 espgm.cff, espgm.en, espgm.m7pit, espgm.grpit, espgm.grx, espgm.grxrb, espgmmask,
 oc.y, oc.z, oc.roll, oc.twoth,
+dcslt.inb,dcslt.out,dcslt.bot,dcslt.top,
 dc.z, dc.twoth]
 
 

@@ -85,7 +85,7 @@ def current_plan_time(start_scan_id,total_num_scans):
         total_num_scans=XXXX
 
     #THE FIRST SCAN SHOULD HAVE THE FOLLOWING IN FRONT OF THE YIELD FROM.
-        scan_id=yield from 'first scan in plan (can be inside a loop)'
+        uid_id=yield from 'first scan in plan (can be inside a loop)'
     
     #THE FIRST SCAN SHOULD AVE THE FOLLOWING AFTER THE FIRST SCAN YIELD FROM.
         if uid is not None and start_scan_id is None:
