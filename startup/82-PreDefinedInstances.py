@@ -6,35 +6,90 @@ import math
 
 #Definition of SIX specific classes
     
-
+#Class for single ('y') motion axis devices.
 class DiagAndSingleAxisMaskClass(PreDefinedPositions):
     '''
-    A class that is used to defien diagnostic untis and single axis mask units. It is a child of the 
-    PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
+    A class that is used to define a PreDefinedPositions child class for use with a single 'y' motion axis. 
+    It is a child of the PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
     these have a single, "y", axis that is used to move to the different locations.
     '''
 
     y = Cpt(EpicsMotor, '')
 
+
+
+#class for single ('th') motion axis devices
 class OpticsWheelClass(PreDefinedPositions):
     '''
-    A class that is used to defien diagnostic untis and single axis mask units. It is a child of the 
+    A class that is used to define a PreDefinedPositions child class for use with a single 'th' motion axis . It is a child of the 
     PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
-    these have a single, "y", axis that is used to move to the different locations.
+    these have a single, "th", axis that is used to move to the different locations.
     '''
     
     th = Cpt(EpicsMotor, '')
 
 
+#class for 8 ('in','out','bottom','top','hc','hg','vc','vg') motion axis devices
+class BaffleSlitClass(PreDefinedPositions):
+    '''
+    A class that is used to define a PreDefinedPositions child class for use with 8 motion axis ('in','out','bottom','top','hc','hg',
+    'vc','vg'). It is a child of the PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
+    these have 8 axes associated with a type of baffle slits ('in','out','bottom','top','hc','hg','vc','vg') axis that is used to move 
+    to the different locations.
+    '''
+    #top level baffle slit axes
+    hg = Cpt(EpicsMotor, '-Ax:HG}Mtr')
+    hc = Cpt(EpicsMotor, '-Ax:HC}Mtr')
+    vg = Cpt(EpicsMotor, '-Ax:VG}Mtr')
+    vc = Cpt(EpicsMotor, '-Ax:VC}Mtr')
+    #low level real motor axes
+    inb = Cpt(EpicsMotor, '-Ax:I}Mtr')
+    out = Cpt(EpicsMotor, '-Ax:O}Mtr')
+    bot = Cpt(EpicsMotor, '-Ax:B}Mtr')
+    top = Cpt(EpicsMotor, '-Ax:T}Mtr')
+ 
+#class for 8 ('hs','ha','vs','va','hc','hg','vc','vg') motion axis devices
+class BaffleSlitSAClass(PreDefinedPositions):
+    '''
+    A class that is used to define a PreDefinedPositions child class for use with 8 motion axis ('hs','ha','vs','va','hc','hg',
+    'vc','vg'). It is a child of the PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
+    these have 8 axes associated with a type of baffle slits ('hs','ha','vs','va','hc','hg','vc','vg') axis that is used to move 
+    to the different locations.
+    '''
+    #top level baffle slit axes
+    hg = Cpt(EpicsMotor, '-Ax:HG}Mtr')
+    hc = Cpt(EpicsMotor, '-Ax:HC}Mtr')
+    vg = Cpt(EpicsMotor, '-Ax:VG}Mtr')
+    vc = Cpt(EpicsMotor, '-Ax:VC}Mtr')
+    #low level real motor axes
+    hs = Cpt(EpicsMotor, '-Ax:HS}Mtr')
+    ha = Cpt(EpicsMotor, '-Ax:HA}Mtr')
+    vs = Cpt(EpicsMotor, '-Ax:VS}Mtr')
+    va = Cpt(EpicsMotor, '-Ax:VA}Mtr')
+
+
+
 
 #Definition of Devices
     
+#Masks
+
             
 m5mask = DiagAndSingleAxisMaskClass('XF:02IDD-ES{Msk:Mir5-Ax:Y}Mtr',
                          locations = {'open':['y',54], 'thin':['y',34], 'wide':['y',21], 'thru':['y',8],},
                          vis_path_options={'fig_size':[10,10],'axis_labels':['arbitrary axis','m5mask_y'],
                                            'pos':{'open':[0,54],'thin':[0,34],'wide':[0,21],'thru':[0,8]}},
                          name = 'm5mask')
+
+espgmmask = DiagAndSingleAxisMaskClass('XF:02IDD-ES{Msk:Mono2-Ax:Y}Mtr',
+                         locations= {'yag':['y',-43.4],'out':['y',0]},
+                         vis_path_options={'fig_size':[10,10],'axis_labels':['arbitrary axis','espgm_y'],
+                                           'pos':{'out':[0,0],'yag':[0,-43.4]}},
+                         cam_list = [sc_4],
+                         name='espgmmask')
+
+#Diagnostic units
+
 
 m3diag = DiagAndSingleAxisMaskClass('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',
                          locations = {'diode':['y',-76.4],'grid':['y',-97.5], 'out':['y',-1],
@@ -52,12 +107,7 @@ gcdiag = DiagAndSingleAxisMaskClass('XF:02IDC-OP{Mir:4-Diag:16_U_1-Ax:1}Mtr',
                          cam_list = [gc_diag_cam], qem_list = [qem07],  
                          name = 'gcdiag')
 
-espgmmask = DiagAndSingleAxisMaskClass('XF:02IDD-ES{Msk:Mono2-Ax:Y}Mtr',
-                         locations= {'yag':['y',-43.4],'out':['y',0]},
-                         vis_path_options={'fig_size':[10,10],'axis_labels':['arbitrary axis','espgm_y'],
-                                           'pos':{'out':[0,0],'yag':[0,-43.4]}},
-                         cam_list = [sc_4],
-                         name='espgmmask')
+#Optics wheel
 
 ow = OpticsWheelClass('XF:02IDD-ES{Mir:5-Ax:S1_2T}Mtr',
                          locations={'m5in':['th',-30],'m5out':['th',-90],'yag_reflected':['th',100.3],
@@ -79,6 +129,20 @@ ow = OpticsWheelClass('XF:02IDD-ES{Mir:5-Ax:S1_2T}Mtr',
 #new_dict={}
 #for key in ow.locations.keys():
 #    new_dict[key]=[-1* math.cos(math.radians(ow.locations[key][1]+209.7)),math.sin(math.radians(ow.locations[key][1]+209.7))]
+
+
+
+#Baffle Slits
+
+dcslt = BaffleSlitClass('XF:02IDD-ES{DC:1-Slt:1',
+                           locations={'baffle':['inb',18,'out',45,'bot',11,'top',10],
+                                      'retract':['inb',46,'out',46,'bot',38,'top',33]},
+                           name='dcslt')
+
+m4slt = BaffleSlitClass('XF:02IDC-OP{Mir:4-Slt:18_U_1',
+                           locations={'baffle':['inb',5,'out',5,'bot',5,'top',-8],
+                                      'retract':['inb',0,'out',10,'bot',0,'top',0]}, 
+                           name='m4slt')
 
 
 

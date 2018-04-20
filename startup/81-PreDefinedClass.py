@@ -83,7 +83,8 @@ class PreDefinedPositions(Device):
 
         self.nxGraph=nx.DiGraph(directed=True)
         
-        self.nxGraph.add_nodes_from(list(locations.keys()))
+        if locations is not None: self.nxGraph.add_nodes_from(list(locations.keys()))
+
         if neighbours is not None:
             for key in neighbours.keys():
                 for neighbour in neighbours[key]:
@@ -144,9 +145,9 @@ class PreDefinedPositions(Device):
                     yield from mv(*axis_value_list)
                     
 
-
-        for location in self.locations:#define the position attributes
-            setattr(self,location,mv_axis(location))
+        if locations is not None:
+            for location in self.locations:#define the position attributes
+                setattr(self,location,mv_axis(location))
 
         
         
@@ -303,42 +304,46 @@ class PreDefinedPositions(Device):
         -------
         position : list
         '''
-        loc_list='unknown location'
-        for location in self.locations:
-            in_position=True
-            for i in range(0,len(self.locations[location]),2):
-                axis = self.locations[location][i]
-                value = self.locations[location][i+1]
+   
+        if self.locations is not None:
+            loc_list='unknown location'
+            for location in self.locations:
+                in_position=True
+                for i in range(0,len(self.locations[location]),2):
+                    axis = self.locations[location][i]
+                    value = self.locations[location][i+1]
 
-                if hasattr(getattr(self,axis),'position'):
-                    if isinstance(self.in_band, float):
-                        if getattr(self,axis).position < value - self.in_band or \
-                            getattr(self,axis).position > value + self.in_band:
+                    if hasattr(getattr(self,axis),'position'):
+                        if isinstance(self.in_band, float):
+                            if getattr(self,axis).position < value - self.in_band or \
+                                getattr(self,axis).position > value + self.in_band:
+                                in_position=False
+                        else:
+                            if getattr(self,axis).position < self.in_band[location][axis][0] or \
+                                getattr(self,axis).position > self.in_band[location][axis][1] :
+                                in_position=False
+
+                    elif hasattr(getattr(self,axis),'get'):
+                        if isinstance(self.in_band, float):
+                            if getattr(self,axis).get() < value - self.in_band or \
+                                getattr(self,axis).get() > value + self.in_band:
+                                in_position=False
+                        else:
+                            if getattr(self,axis).get() < self.in_band[location][axis][0] or \
+                                getattr(self,axis).get() > self.in_band[location][axis][1] :
+                                in_position=False
+
+                    elif hasattr(getattr(self,axis),'status'):
+                        if getattr(self,axis).status is not value:
                             in_position=False
+
+                if in_position: 
+                    if loc_list == 'unknown location':
+                        loc_list = [location]
                     else:
-                        if getattr(self,axis).position < self.in_band[location][axis][0] or \
-                            getattr(self,axis).position > self.in_band[location][axis][1] :
-                            in_position=False
-
-                elif hasattr(getattr(self,axis),'get'):
-                    if isinstance(self.in_band, float):
-                        if getattr(self,axis).get() < value - self.in_band or \
-                            getattr(self,axis).get() > value + self.in_band:
-                            in_position=False
-                    else:
-                        if getattr(self,axis).get() < self.in_band[location][axis][0] or \
-                            getattr(self,axis).get() > self.in_band[location][axis][1] :
-                            in_position=False
-
-                elif hasattr(getattr(self,axis),'status'):
-                    if getattr(self,axis).status is not value:
-                        in_position=False
-
-            if in_position: 
-                if loc_list == 'unknown location':
-                    loc_list = [location]
-                else:
-                    loc_list.append(location)
+                        loc_list.append(location)
+        else:
+            loc_list=['no locations']
 
         return loc_list
    
@@ -403,7 +408,8 @@ class PreDefinedPositionsGroup():
 
         self.nxGraph=nx.DiGraph()
         
-        self.nxGraph.add_nodes_from(list(locations.keys()))
+        if locations is not None: self.nxGraph.add_nodes_from(list(locations.keys()))
+
         if neighbours is not None:
             for key in neighbours.keys():
                 for neighbour in neighbours[key]:
@@ -447,9 +453,9 @@ class PreDefinedPositionsGroup():
                     yield from mv(*axis_value_list)
                                      
 
-
-        for location in self.locations:
-            setattr(self,location,mv_axis(location))
+        if locations is not None:
+            for location in self.locations:#define the position attributes
+                setattr(self,location,mv_axis(location))
 
     
     def read(self):
@@ -557,21 +563,23 @@ class PreDefinedPositionsGroup():
         -------
         position : string
         '''
-        
-        loc_list='unknown location'
-        for location in self.locations:
-            in_position=True
-            for i in range(0,len(self.locations[location]),2):
-                device = getattr(self,self.locations[location][i])
-                device_location = self.locations[location][i+1]
-                if device_location not in getattr(device,'status_list'):
-                    in_position=False
+        if self.locations is not None:
+            loc_list='unknown location'
+            for location in self.locations:
+                in_position=True
+                for i in range(0,len(self.locations[location]),2):
+                    device = getattr(self,self.locations[location][i])
+                    device_location = self.locations[location][i+1]
+                    if device_location not in getattr(device,'status_list'):
+                        in_position=False
 
-            if in_position: 
-                if loc_list == 'unknown location':
-                    loc_list = [location]
-                else:
-                    loc_list.append(location)
+                if in_position: 
+                    if loc_list == 'unknown location':
+                        loc_list = [location]
+                    else:
+                        loc_list.append(location)
+        else:
+            loc_list=['no locations']
 
         return loc_list
 

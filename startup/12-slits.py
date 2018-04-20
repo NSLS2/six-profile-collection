@@ -55,8 +55,11 @@ pgmsltu = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:8_U_1', name='pgmsltu')
 pgmsltd = BaffleSlit('XF:02IDB-OP{Mono:1-Slt:9_D_1', name='pgmsltd')
 
 m3slt = BaffleSlitSA('XF:02IDC-OP{Mir:3-Slt:12_U_1', name='m3slt')
-m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
 
 extslt = ExitSlit('XF:02IDC-OP{Slt:1-Ax:15', name='extslt')
 
-dcslt = BaffleSlit('XF:02IDD-ES{DC:1-Slt:1',name='dcslt')
+
+
+#The following devices have been moved to '82-PreDefinedInstances.py'
+#dcslt = BaffleSlit('XF:02IDD-ES{DC:1-Slt:1',name='dcslt')
+#m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
