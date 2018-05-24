@@ -1,13 +1,13 @@
-from ophyd.quadem import QuadEM
+from ophyd.quadem import QuadEM, QuadEMPort
 
 
 from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
-                   TransformPlugin, ProcessPlugin, Signal)
+                   TransformPlugin, ProcessPlugin, Signal, Kind)
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.cam import AreaDetectorCam
-from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV
+from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV, ADBase
 
 
 class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
@@ -21,8 +21,12 @@ class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 class StandardProsilica(SingleTrigger, ProsilicaDetector):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
-        self.hints = {'fields':[self.stats1.total.name, self.stats5.total.name]}
 
+        for n in [1, 5]:
+            stats = getattr(self, f'stats{n}')
+            stats.kind |= Kind.normal
+            stats.total.kind = Kind.hinted
+        
     #image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
@@ -47,16 +51,20 @@ class StandardProsilicaROI(StandardProsilica):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         
-        for i in range(1,4):
+        for i in range(1, 4):
             for axis in ['x','y','z']:
-                setattr(self,'roi{}_min{}'.format(i,axis) ,getattr(self, 'roi' + str(i) + '.min_xyz.min_{}'.format(axis)))
-                setattr(self,'roi{}_size{}'.format(i,axis) ,getattr(self, 'roi' + str(i) + '.size.{}'.format(axis)))
+                setattr(self,'roi{}_min{}'.format(i, axis),
+                        getattr(self, 'roi' + str(i) + '.min_xyz.min_{}'.format(axis)))
+                setattr(self,'roi{}_size{}'.format(i, axis),
+                        getattr(self, 'roi' + str(i) + '.size.{}'.format(axis)))
     
     
-    def roi_set(self,min_x,size_x,min_y,size_y,min_z=None,size_z=None,roi_num=1):
+    def roi_set(self,min_x, size_x, min_y, size_y, min_z=None, size_z=None, roi_num=1):
         ''' 
         An attribute function for the camera that allows the user to set an roi size and position. setting
         any of the values to 'None' means they are ignored(left as is).
+
+        TODO add a 'set' method tothe ROIPlugin class to supprt 'cam.roi1.set(...)'
             
         Parameters
         ----------
@@ -79,14 +87,20 @@ class StandardProsilicaROI(StandardProsilica):
             The roi number to act, default is 1 and it must be 1,2,3 or 4.        
         '''
 
-        if min_x is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_x').put(min_x)
-        if size_x is not None: getattr(self, 'roi' + str(roi_num) + '.size.x').put(size_x)
-        if min_y is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_y').put(min_y)
-        if size_y is not None: getattr(self, 'roi' + str(roi_num) + '.size.y').put(size_y)
-        if min_z is not None: getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_z').put(min_z)
-        if size_z is not None: getattr(self, 'roi' + str(roi_num) + '.size.z').put(size_z)
+        if min_x is not None:
+            getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_x').put(min_x)
+        if size_x is not None:
+            getattr(self, 'roi' + str(roi_num) + '.size.x').put(size_x)
+        if min_y is not None:
+            getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_y').put(min_y)
+        if size_y is not None:
+            getattr(self, 'roi' + str(roi_num) + '.size.y').put(size_y)
+        if min_z is not None:
+            getattr(self, 'roi' + str(roi_num) + '.min_xyz.min_z').put(min_z)
+        if size_z is not None:
+            getattr(self, 'roi' + str(roi_num) + '.size.z').put(size_z)
 
-    def roi_read(self,roi_num=1):
+    def roi_read(self, roi_num=1):
         ''' 
         An attribute function for the camera that allows the user to read the current values of  
         an roi size and position.
@@ -114,7 +128,7 @@ class StandardProsilicaROI(StandardProsilica):
         
         return roi_dict
 
-    def roi_enable(self,status,roi_num=1):
+    def roi_enable(self, status, roi_num=1):
         ''' 
         An attribute function for the camera that allows the user to enable or disable an ROI.
       
@@ -141,13 +155,12 @@ class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
               write_path_template='/XF02ID1/prosilica_data/%Y/%m/%d',
-              root='/XF02ID1',
-              reg=db.reg)
+              root='/XF02ID1')
         
             
 diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
-m3_diag_cam = StandardProsilicaROI('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
+m3_diag_cam = StandardProsilicaSaving('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
 extslt_cam = StandardProsilicaSaving('XF:02IDC-BI{Slt:1-Cam:15_1}', name='extslt_cam')
 gc_diag_cam = StandardProsilicaROI('XF:02IDC-BI{Mir:4-Cam:18_1}', name='gc_diag_cam')
 sc_navitar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
@@ -175,8 +188,9 @@ for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_
 #####try instead
 #m3_diag_cam = StandardCam('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
 
+
 class SIXQuadEM(QuadEM):
-    port_name = Cpt(Signal, value='EM180')
+    conf = Cpt(QuadEMPort, port_name='EM180')
     em_range = Cpt(EpicsSignalWithRBV, 'Range', string=True)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -193,14 +207,13 @@ class SIXQuadEM(QuadEM):
 
 def name_qem(qem, chan_name):
     read_attrs = []
-    fields = []
     for j, n in enumerate(chan_name):
-        nm = 'current{}.mean_value'.format(j+1)
-        getattr(qem, nm).name = n
-        read_attrs.append(nm)
-        fields.append(n)
+        current = getattr(qem, f'current{j+1}')
+        current.mean_value.name = n
+        current.kind |= Kind.normal
+        current.mean_value.kind |= Kind.normal
+        read_attrs.append(f'current{j+1}.mean_value')
     qem.read_attrs = read_attrs
-    qem.hints = {'fields': fields}
     return qem
 
 qem01 = name_qem(SIXQuadEM('XF:02IDA-BI{EM:1}EM180:', name='qem01'),
@@ -240,9 +253,13 @@ qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
 qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
                  ['sample_tey_{}'.format(s) for s in ('top','empty','bot')])
 
-qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
+# qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
+qem07.current1.mean_value.kind = Kind.hinted
+qem07.current3.mean_value.kind = Kind.hinted
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
-qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
+#qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
 qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
+qem12.current1.mean_value.kind = Kind.hinted
+qem12.current3.mean_value.kind = Kind.hinted
 
 
