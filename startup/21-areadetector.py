@@ -238,9 +238,11 @@ qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
                  ['sc_diode_{}'.format(s) for s in ('1','2','3','4')])
 
 qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
-                 ['sample_tey_{}'.format(s) for s in ('top','bot')])
+                 ['sample_tey_{}'.format(s) for s in ('top','empty','bot')])
 
 qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
+qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
+qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
 
 

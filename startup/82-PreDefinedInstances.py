@@ -135,13 +135,13 @@ ow = OpticsWheelClass('XF:02IDD-ES{Mir:5-Ax:S1_2T}Mtr',
 #Baffle Slits
 
 dcslt = BaffleSlitClass('XF:02IDD-ES{DC:1-Slt:1',
-                           locations={'baffle':['inb',18,'out',45,'bot',11,'top',10],
-                                      'retract':['inb',46,'out',46,'bot',38,'top',33]},
+                           locations={'close':['inb',18,'out',45,'bot',11,'top',10],
+                                      'open':['inb',46,'out',46,'bot',38,'top',33]},
                            name='dcslt')
 
 m4slt = BaffleSlitClass('XF:02IDC-OP{Mir:4-Slt:18_U_1',
-                           locations={'baffle':['inb',5,'out',5,'bot',5,'top',-8],
-                                      'retract':['inb',0,'out',10,'bot',0,'top',0]}, 
+                           locations={'close':['inb',5,'out',5,'bot',5,'top',-8],
+                                      'open':['inb',0,'out',10,'bot',0,'top',0]}, 
                            name='m4slt')
 
 
