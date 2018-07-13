@@ -1,5 +1,5 @@
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
-                   Device)
+                   Device, FormattedComponent as FmCpt)
 from ophyd.status import MoveStatus
 from ophyd.positioner import PositionerBase
 from ophyd.utils import ReadOnlyError
@@ -78,13 +78,30 @@ class UphasePositioner(DeadBandPositioner):
 
 
 class EPU(Device):
-    gap = Cpt(UgapPositioner, '', settle_time=0)
-    phase = Cpt(UphasePositioner, '', settle_time=0)
+    gap = Cpt(UgapPositioner, 'SR:C02-ID:G1A{EPU:1', settle_time=0)   #works without added table and offset & def below
+    phase = Cpt(UphasePositioner, 'SR:C02-ID:G1A{EPU:1', settle_time=0) #works without added table and offset
+    #gap = Cpt(UgapPositioner,'{self._epu_prefix}', settle_time=0)
+    #phase = Cpt(UphasePositioner,'self._epu_prefix', settle_time=0)
+    table = FmCpt(EpicsSignal,'{self._ai_prefix}Val:Table-Sel') # TODO add reference to PV string for meaning
+    offset = FmCpt(EpicsSignal,'{self._ai2_prefix}Val:InpOff1-SP', name = 'epu1_offset') #calibration offset 
+    def __init__(self, *args, ai_prefix=None,  ai2_prefix='None', **kwargs): #,epu_prefix=None
+        #self._epu_prefix = epu_prefix
+        self._ai_prefix = ai_prefix
+        self._ai2_prefix = ai2_prefix
+        
+        super().__init__(*args, **kwargs)
 
-epu1 = EPU('SR:C02-ID:G1A{EPU:1', name='epu1')
 
-epu1.gap.read_attrs = ['setpoint', 'readback']
-epu1.gap.readback.name = 'epu1_gap'
+epu1 = EPU(ai_prefix='XF:02ID-ID{EPU:1}', ai2_prefix ='XF:02ID-ID{EPU:1-FLT}', name='epu1') #epu_prefix='SR:C02-ID:G1A{EPU:1', 
+#epu1 = EPU('SR:C02-ID:G1A{EPU:1', ai_prefix='XF:02ID-ID{EPU:1}', ai2_prefix ='XF:02ID-ID{EPU:1-FLT}', name='epu1')
 
-epu1.phase.read_attrs = ['setpoint', 'readback']
-epu1.phase.readback.name = 'epu1_phase'
+#epu1 = EPU('SR:C02-ID:G1A{EPU:1', name='epu1')
+
+#epu1.gap.read_attrs = ['setpoint', 'readback']
+#epu1.gap.readback.name = 'epu1_gap'
+
+#epu1.phase.read_attrs = ['setpoint', 'readback']
+#epu1.phase.readback.name = 'epu1_phase'
+
+
+
