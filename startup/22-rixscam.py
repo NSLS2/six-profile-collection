@@ -3,7 +3,7 @@ from ophyd.areadetector.plugins import PluginBase
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
-                   Device)
+                   Device, Kind)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
 
 
@@ -13,6 +13,23 @@ from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
 class XIPPlugin(PluginBase):
     'A class for the centroiding plugin'
     _suffix_re = 'XIP\d:'
+    _default_read_attrs = (PluginBase._default_read_attrs + (
+                           'count_possible_event', 'count_above_threshold', 
+                           'count_below_threshold', 'count_neighbours',
+                           'count_event_2x2', 'count_event_3x3'))
+    _default_configuration_attrs = (PluginBase._default_configuration_attrs + (
+                                    'algorithm', 'output_mode', 'bkgd_update_mode',
+                                    'bkgd_value', 'sum_3x3_threshold_min',
+                                    'sum_3x3_threshold_max', 'hist_start',
+                                    'hist_bin_width', 'hist_bin_count', 'source_region',
+                                    'dim0_region_start', 'dim0_region_size',
+                                    'dim1_region_start', 'dim1_region_size',
+                                    'x_expansion_factor', 'y_expansion_factor',
+                                    'centroid_correction', 'beamline_energy',
+                                    'isolinear_correction', 'isolinear_coefficient_x2_1',
+                                    'isolinear_coefficient_x1_1', 'isolinear_coefficient_x0_1',
+                                    'isolinear_coefficient_x2_2', 'isolinear_coefficient_x1_2',
+                                    'isolinear_coefficient_x0_2', 'isolinear_threshold'))
 
     algorithm = Cpt(EpicsSignal, 'ALGORITHM', string=True)
     output_mode = Cpt(EpicsSignal, 'OUTPUT_MODE', string=True)
@@ -154,6 +171,8 @@ class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
 class RIXSCam(SingleTrigger, AreaDetector):
 
+
+
     exposure = Cpt(TriggeredCamExposure, '')
 
     xip = Cpt(XIPPlugin, suffix = 'XIP1:')
@@ -164,6 +183,19 @@ class RIXSCam(SingleTrigger, AreaDetector):
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
               root='/XF02ID1',
               reg=db.reg)
+
+# Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
+#    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
+#              suffix='HDF2:',
+#              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
+#              write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
+#              root='/XF02ID1',
+#              reg=db.reg)
+
+   # _default_read_attrs = (AreaDetector._default_read_attrs + 
+   #                        xip._default_read_attrs)
+   # _default_configuration_attrs = (AreaDetector._default_configuration_attrs + (
+   #                                 'hdf5', 'xip'))
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     #Delays
@@ -297,7 +329,8 @@ class RIXSCam(SingleTrigger, AreaDetector):
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
-rixscam.read_attrs = ['hdf5']
+# Once the hdf2 IOC issues have been sorted add 'hdf2' to the rixscam.read_attrs list below
+rixscam.read_attrs = ['hdf5','xip']
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
@@ -307,25 +340,3 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'sensor_region_xsize', 'sensor_region_ysize', 
                                'sensor_region_xstart', 'sensor_region_ystart', 
                                'sensor_binning_x', 'sensor_binning_y']
-
-#setup the read and config attrs for the xip plugin
-
-read_attrs_list = ['count_possible_event', 'count_above_threshold', 'count_below_threshold',
-                   'count_neighbours', 'count_event_2x2', 'count_event_3x3']
-
-for component in read_attrs_list:
-    getattr(rixscam.xip, component).kind == Kind.normal
-
-configuration_attrs_list = ['algorithm', 'output_mode', 'bkgd_update_mode', 'bkgd_value',
-                           'sum_3x3_threshold_min', 'sum_3x3_threshold_max', 'hist_start',
-                           'hist_bin_width', 'hist_bin_count', 'source_region',
-                           'dim0_region_start', 'dim0_region_size', 'dim1_region_start',
-                           'dim1_region_size', 'x_expansion_factor', 'y_expansion_factor',
-                           'centroid_correction', 'beamline_energy', 'isolinear_correction',
-                           'isolinear_coefficient_x2_1', 'isolinear_coefficient_x1_1',
-                           'isolinear_coefficient_x0_1', 'isolinear_coefficient_x2_2',
-                           'isolinear_coefficient_x1_2', 'isolinear_coefficient_x0_2',
-                           'isolinear_threshold'] 
-
-for component in configuration_attrs_list:
-    getattr(rixscam.xip, component).kind == Kind.config
