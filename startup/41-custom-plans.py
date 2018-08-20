@@ -15,7 +15,7 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
     ----------
     detectors : list
         list of 'readable' objects
-    numX : integer
+    numO : integer
         The number of points to step through for the axis not contained within each seperate experiment. 
     motorO, startO, stopO : object, float, float
         The motor axis, start and stop values for the axis not contained within each seperate experiment. 

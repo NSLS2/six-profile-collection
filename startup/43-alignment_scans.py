@@ -25,7 +25,7 @@ class align_class():
             position of the peak found after each M3 pitch scan, and is printed to the command line.
 
         '''
-        initial_position = -0.747405
+        initial_position = m3.pit.user_readback.value
         num = [31] # all lists here should have the same length, corresponding to the number of scan performed
         start = [ -0.001]
         stop = [ 0.001]
@@ -67,12 +67,12 @@ class align_class():
 
         '''
 
-        initial_position = 1910.05
-        num = [ 31] # all lists here should have the same length, corresponding to the number of scan performed
-        start = [ -50]
-        stop = [ 50]
-        roi1_minx = [ 579]
-        roi1_sizex = [ 50]
+        initial_position = m1.pit.user_readback.value
+        num = [ 36] # all lists here should have the same length, corresponding to the number of scan performed
+        start = [ -70]
+        stop = [ 70]
+        roi1_minx = [ 592]
+        roi1_sizex = [ 44]
     
 
         initial_m3diag = m3diag.y.position
@@ -86,6 +86,7 @@ class align_class():
             if uid is not None:
                 yield from mv(m1.pit, peaks.cen['m3_diag_cam_stats1_total'])   
                 print('For scan {} of {} the center is {}'.format(i+1, len(start), peaks.cen['m3_diag_cam_stats1_total']))
+                print('\t moved from {} to {}'.format(initial_position,peaks.cen['m3_diag_cam_stats1_total']))
             else:
                 print ("m1.pit -> peaks.cen['m3_diag_cam_stats1_total']")
                 print("For scan {} of {} the center is peaks.cen['m3_diag_cam_stats1_total']".format(i+1, len(start)))

@@ -19,14 +19,14 @@ class DiagAndSingleAxisMaskClass(PreDefinedPositions):
 
 
 #class for single ('th') motion axis devices
-class OpticsWheelClass(PreDefinedPositions):
-    '''
-    A class that is used to define a PreDefinedPositions child class for use with a single 'th' motion axis . It is a child of the 
-    PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
-    these have a single, "th", axis that is used to move to the different locations.
-    '''
+#class OpticsWheelClass(PreDefinedPositions):
+    #'''
+    #A class that is used to define a PreDefinedPositions child class for use with a single 'th' motion axis . It is a child of the 
+    #PreDefinedPositions class which allows for defining a set of pre-defined positions, in addition 
+    #these have a single, "th", axis that is used to move to the different locations.
+    #'''
     
-    th = Cpt(EpicsMotor, '')
+    #th = Cpt(EpicsMotor, '')
 
 
 #class for 8 ('in','out','bottom','top','hc','hg','vc','vg') motion axis devices
@@ -109,19 +109,19 @@ gcdiag = DiagAndSingleAxisMaskClass('XF:02IDC-OP{Mir:4-Diag:16_U_1-Ax:1}Mtr',
 
 #Optics wheel
 
-ow = OpticsWheelClass('XF:02IDD-ES{Mir:5-Ax:S1_2T}Mtr',
-                         locations={'m5in':['th',-30],'m5out':['th',-90],'yag_reflected':['th',100.3],
-                                    'yag_postcryo':['th',-26.5],'yag_precryo':['th',-209.7],'door':['th',113],
-                                    'diode':['th',68.9]},
-                         vis_path_options={'fig_size':[20,20],'axis_labels':['cryo_x','cryo_z'],
-                                           'pos': {'diode': [-0.14953534344370978, 0.9887563810470058],
-                                           'door': [-0.7954734808548956, 0.6059884002657115],
-                                           'm5in': [0.9999862922474267, -0.005235963831419821],
-                                           'm5out': [0.4954586684324072, -0.8686315144381914],
-                                           'yag_postcryo': [0.998440764181981, 0.05582150499316376],
-                                           'yag_precryo': [-1.0, 0.0],
-                                           'yag_reflected': [-0.6427876096865393, 0.7660444431189781]} },
-                         name='ow')
+#ow = OpticsWheelClass('XF:02IDD-ES{Mir:5-Ax:S1_2T}Mtr',
+                         #locations={'m5in':['th',-30],'m5out':['th',-90],'yag_reflected':['th',100.3],
+                                    #'yag_postcryo':['th',-26.5],'yag_precryo':['th',-209.7],'door':['th',113],
+                                    #'diode':['th',68.9]},
+                         #vis_path_options={'fig_size':[20,20],'axis_labels':['cryo_x','cryo_z'],
+                                           #'pos': {'diode': [-0.14953534344370978, 0.9887563810470058],
+                                           #'door': [-0.7954734808548956, 0.6059884002657115],
+                                           #'m5in': [0.9999862922474267, -0.005235963831419821],
+                                           #'m5out': [0.4954586684324072, -0.8686315144381914],
+                                           #'yag_postcryo': [0.998440764181981, 0.05582150499316376],
+                                           #'yag_precryo': [-1.0, 0.0],
+                                           #'yag_reflected': [-0.6427876096865393, 0.7660444431189781]} },
+                         #name='ow')
     
 #defining some parameters for the visulization of the paths
 

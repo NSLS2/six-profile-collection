@@ -9,6 +9,7 @@ from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.cam import AreaDetectorCam
 from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV, ADBase
 
+start_time=time.monotonic()
 
 class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
@@ -256,10 +257,14 @@ qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
 # qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.current1.mean_value.kind = Kind.hinted
 qem07.current3.mean_value.kind = Kind.hinted
+qem07.current2.mean_value.kind = Kind.normal
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
 #qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
+
 qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
 qem12.current1.mean_value.kind = Kind.hinted
 qem12.current3.mean_value.kind = Kind.hinted
 
+print (f'21-areadetector.py {start_time-time.monotonic()}')
 
+start_time=time.monotonic()
