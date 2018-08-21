@@ -1,9 +1,157 @@
-
 from ophyd.areadetector import AreaDetector, HDF5Plugin
+from ophyd.areadetector.plugins import PluginBase
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
-                   Device)
+                   Device, Kind)
+from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
+
+
+
+
+
+class XIPPlugin(PluginBase):
+    'A class for the centroiding plugin'
+    _suffix_re = 'XIP\d:'
+    _default_read_attrs = (PluginBase._default_read_attrs + (
+                           'count_possible_event', 'count_above_threshold', 
+                           'count_below_threshold', 'count_neighbours',
+                           'count_event_2x2', 'count_event_3x3'))
+    _default_configuration_attrs = (PluginBase._default_configuration_attrs + (
+                                    'algorithm', 'output_mode', 'bkgd_update_mode',
+                                    'bkgd_value', 'sum_3x3_threshold_min',
+                                    'sum_3x3_threshold_max', 'hist_start',
+                                    'hist_bin_width', 'hist_bin_count', 'source_region',
+                                    'dim0_region_start', 'dim0_region_size',
+                                    'dim1_region_start', 'dim1_region_size',
+                                    'x_expansion_factor', 'y_expansion_factor',
+                                    'centroid_correction', 'beamline_energy',
+                                    'isolinear_correction', 'isolinear_coefficient_x2_1',
+                                    'isolinear_coefficient_x1_1', 'isolinear_coefficient_x0_1',
+                                    'isolinear_coefficient_x2_2', 'isolinear_coefficient_x1_2',
+                                    'isolinear_coefficient_x0_2', 'isolinear_threshold'))
+
+    algorithm = Cpt(EpicsSignal, 'ALGORITHM', string=True)
+    output_mode = Cpt(EpicsSignal, 'OUTPUT_MODE', string=True)
+    
+    bkgd_update_mode = Cpt(EpicsSignal, 'BACKGROUND_UPDATE_MODE', string=True)
+    bkgd_value = Cpt(SignalWithRBV, 'BACKGROUND_VALUE')
+    
+    sum_3x3_threshold_min = Cpt(SignalWithRBV, 'SUM3X3_THRESHOLD_MINIMUM')
+    sum_3x3_threshold_max = Cpt(SignalWithRBV, 'SUM3X3_THRESHOLD_MAXIMUM')
+
+    hist_start = Cpt(SignalWithRBV, 'HISTOGRAM_RANGEMINIMUM')
+    hist_bin_width = Cpt(SignalWithRBV, 'HISTOGRAM_BINWIDTH')
+    hist_bin_count = Cpt(SignalWithRBV, 'HISTOGRAM_BINCOUNT')
+
+    source_region = Cpt(EpicsSignal, 'ENABLE_SOURCE_REGION', string=True)
+    dim0_region_start = Cpt(SignalWithRBV, 'DIM0_MIN')
+    dim0_region_size =  Cpt(SignalWithRBV, 'DIM0_SIZE')
+    dim1_region_start = Cpt(SignalWithRBV, 'DIM1_MIN')
+    dim1_region_size =  Cpt(SignalWithRBV, 'DIM1_SIZE')
+
+    x_expansion_factor = Cpt(SignalWithRBV, 'EXPAND_FACTOR_X')
+    y_expansion_factor = Cpt(SignalWithRBV, 'EXPAND_FACTOR_Y')
+
+    frames_accumulated = Cpt(EpicsSignalRO, 'FRAMES_ACCUMULATED_RBV')
+
+    centroid_correction = Cpt(EpicsSignal, 'CENTROID_FILENAME', string=True)
+    beamline_energy = Cpt(EpicsSignal, 'BEAMLINE_ENERGY')
+    
+    isolinear_correction = Cpt(EpicsSignal, 'ENABLE_ISOLINEAR_CORRECTION', string=True)
+    isolinear_coefficient_x2_1 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X2_1')
+    isolinear_coefficient_x1_1 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X1_1')
+    isolinear_coefficient_x0_1 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X0_1')
+    isolinear_coefficient_x2_2 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X2_2')
+    isolinear_coefficient_x1_2 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X1_2')
+    isolinear_coefficient_x0_2 = Cpt(SignalWithRBV, 'ISOLINEAR_COEFFICIENT_X0_2')
+    isolinear_threshold = Cpt(EpicsSignal, 'HR_ISOLINEAR_CALIBRATION_THRESHOLD')  
+
+    count_possible_event = Cpt(EpicsSignalRO, 'COUNT_POSSIBLE_EVENT_RBV')
+    count_above_threshold = Cpt(EpicsSignalRO, 'COUNT_ABOVE_THRESHOLD_RBV')
+    count_below_threshold = Cpt(EpicsSignalRO, 'COUNT_BELOW_THRESHOLD_RBV')
+    count_neighbours = Cpt(EpicsSignalRO, 'COUNT_NEIGHBOURING_RBV')
+    count_event_2x2 = Cpt(EpicsSignalRO, 'COUNT_ACTUAL_2X2_RBV')
+    count_event_3x3 = Cpt(EpicsSignalRO, 'COUNT_ACTUAL_3X3_RBV')
+
+    max_threads = Cpt(SignalWithRBV, 'MAX_THREADS')
+
+
+    
+class TriggeredCamExposure(Device):
+    '''A class designed for the setting of the detector exposure paramters (acquire_time, acquire_period and num_images) at once.
+
+    This class is used to provide an attribute for setting the exposure parameters in a single command. It sets the aqcuire_time 
+    (and at the same time the delay generator parameters) the acquire_period and the num_images. These are set via the child 'set' 
+    attribute. 
+    '''
+
+    def __init__(self, *args, **kwargs):
+        self._Tc = 0.004
+        self._To = 0.0035
+        self._readout = 0.080
+        super().__init__(*args, **kwargs)
+
+    def set(self, exp):
+        '''Used for the setting of the detector exposure parameters (acquire_time, acquire_period and num_images) and the delay 
+        generator parameters.
+
+        This function is used to provide an attribute for setting the exposure parameters in a single command. It sets the
+        aqcuire_time (and at the same time the delay generator parameters) the acquire_period and the num_images. 
+    
+        PARAMETERS
+        ----------
+        exp: tuple.
+		A tuple with the structure (aqcuire_time, acquire_period, num_images).
+        '''
+
+        # Exposure time = 0
+        # Cycle time = 1
+
+        if exp[0] is not None:
+            Efccd = exp[0] + self._Tc + self._To
+            # To = start of FastCCD Exposure
+            aa = 0                          # Shutter open
+            bb = Efccd - self._Tc + aa      # Shutter close
+            cc = self._To * 3               # diag6 gate start
+            dd = exp[0] - (self._Tc * 2)    # diag6 gate stop
+            ee = 0                          # Channel Adv Start
+            ff = 0.001                      # Channel Adv Stop
+            gg = self._To                   # MCS Count Gate Start
+            hh = exp[0] + self._To          # MCS Count Gate Stop
+
+            # Set delay generator
+            self.parent.dg1.A.set(aa)
+            self.parent.dg1.B.set(bb)
+            self.parent.dg1.C.set(cc)
+            self.parent.dg1.D.set(dd)
+            self.parent.dg1.E.set(ee)
+            self.parent.dg1.F.set(ff)
+            self.parent.dg1.G.set(gg)
+            self.parent.dg1.H.set(hh)
+
+
+            # Set AreaDetector
+            self.parent.cam.acquire_time.set(Efccd)
+
+        # Now do period
+        if exp[1] is not None:
+            if exp[1] < (Efccd + self._readout):
+                p = Efccd + self._readout
+            else:
+                p = exp[1]
+
+        self.parent.cam.acquire_period.set(p)
+
+        if exp[2] is not None:
+            self.parent.cam.num_images.set(exp[2])
+
+        return NullStatus()
+
+    def get(self):
+        return None
+
+
 
 class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
@@ -23,12 +171,31 @@ class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
 class RIXSCam(SingleTrigger, AreaDetector):
 
+
+
+    exposure = Cpt(TriggeredCamExposure, '')
+
+    xip = Cpt(XIPPlugin, suffix = 'XIP1:')
+
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
               suffix='HDF1:',
               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
               root='/XF02ID1',
               reg=db.reg)
+
+# Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
+#    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
+#              suffix='HDF2:',
+#              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
+#              write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
+#              root='/XF02ID1',
+#              reg=db.reg)
+
+   # _default_read_attrs = (AreaDetector._default_read_attrs + 
+   #                        xip._default_read_attrs)
+   # _default_configuration_attrs = (AreaDetector._default_configuration_attrs + (
+   #                                 'hdf5', 'xip'))
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     #Delays
@@ -162,7 +329,8 @@ class RIXSCam(SingleTrigger, AreaDetector):
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
-rixscam.read_attrs = ['hdf5']
+# Once the hdf2 IOC issues have been sorted add 'hdf2' to the rixscam.read_attrs list below
+rixscam.read_attrs = ['hdf5','xip']
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
@@ -171,5 +339,4 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                #'sensor_xsize', 'sensor_ysize',
                                'sensor_region_xsize', 'sensor_region_ysize', 
                                'sensor_region_xstart', 'sensor_region_ystart', 
-                               'sensor_binning_x', 'sensor_binning_y'] 
-
+                               'sensor_binning_x', 'sensor_binning_y']
