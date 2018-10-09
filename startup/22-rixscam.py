@@ -183,8 +183,8 @@ class RIXSCam(SingleTrigger, AreaDetector):
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
               root='/XF02ID1',
               reg=db.reg)
-
-# Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
+##
+## Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
 #    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
 #              suffix='HDF2:',
 #              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
