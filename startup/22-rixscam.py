@@ -5,6 +5,7 @@ from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
                    Device, Kind, Signal)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
+from ophyd.device import DynamicDeviceComponent as DDC, Staged
 
 
 
@@ -173,14 +174,14 @@ class RIXSCamHDF5PluginForXIP:
     '''This modifies the `array_size` attribute so that the second value is
     'unknown'.
     '''
-    width = C(EpicsSignalRO, 'ArraySize0_RBV')
-    height = C(Signal, 'height', value=-1)
-    depth = C(EpicsSignalRO, 'ArraySize2_RBV')
+    width = Cpt(EpicsSignalRO, 'ArraySize0_RBV')
+    height = Cpt(Signal, value=-1)
+    depth = Cpt(EpicsSignalRO, 'ArraySize2_RBV')
     _defn = {'height':(Signal,'',{'value':-1}),
-             'width':(EpicsSignalRO,'ArraySize1_RBV'),
-             'depth':(EpicsSignalRO,'ArraySize2_RBV')}
-    array_size = DDC(_defn, doc='The array size',
-                     default_read_attrs=('height', 'width', 'depth'))
+             'width':(EpicsSignalRO,'ArraySize1_RBV',{}),
+             'depth':(EpicsSignalRO,'ArraySize2_RBV',{})}
+    #array_size = DDC(_defn, doc='The array size',
+    #                 default_read_attrs=('height', 'width', 'depth'))
 
 
 class RIXSSingleTrigger(SingleTrigger):
@@ -206,11 +207,11 @@ class RIXSSingleTrigger(SingleTrigger):
         return self._status
 
 
-class RIXSCam(RIXSingleTrigger, AreaDetector):
+class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
 
-    centroid = Cpt(Signal, 'centroid', value=True)
+    centroid = Cpt(Signal, value=True)
 
     xip = Cpt(XIPPlugin, suffix = 'XIP1:')
 
@@ -223,7 +224,8 @@ class RIXSCam(RIXSingleTrigger, AreaDetector):
 
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
-    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
+    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
+#    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
               suffix='HDF2:',
               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
@@ -381,14 +383,14 @@ class RIXSCam(RIXSingleTrigger, AreaDetector):
 
         if mode == 'image':
             self.read_attrs = ['hdf5']
-            self.centroid = False
+            self.centroid.put(False)
 
-        elif mode = 'centroid':
+        elif mode == 'centroid':
             self.read_attrs = ['hdf5', 'hdf2', 'xip']
-            self.centroid = True
+            self.centroid.put(True)
 
         else:
-            raise ValueError("The input parameter, mode, needs to be 'image' or
+            raise ValueError("The input parameter, mode, needs to be 'image' or\
                              'centroid' but got {}".format(mode))
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
@@ -399,7 +401,7 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
-                               'set_node', 'centroid',
+                               'set_node',  'centroid',
                                #'sensor_xsize', 'sensor_ysize',
                                'sensor_region_xsize', 'sensor_region_ysize',
                                'sensor_region_xstart', 'sensor_region_ystart',
