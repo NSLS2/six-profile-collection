@@ -221,6 +221,7 @@ class RIXSCam(RIXSingleTrigger, AreaDetector):
               root='/XF02ID1',
               reg=db.reg)
 
+
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
               suffix='HDF2:',
@@ -228,6 +229,7 @@ class RIXSCam(RIXSingleTrigger, AreaDetector):
               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
               root='/XF02ID1',
               reg=db.reg)
+
 
    # _default_read_attrs = (AreaDetector._default_read_attrs + 
    #                        xip._default_read_attrs)
