@@ -3,7 +3,7 @@ from ophyd.areadetector.plugins import PluginBase
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
-                   Device, Kind)
+                   Device, Kind, Signal)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
 
 
@@ -169,7 +169,7 @@ class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
         self._naive_write_path_template = val
 
 
-class RIXSCamHDF5PluginForXIP()
+class RIXSCamHDF5PluginForXIP:
     '''This modifies the `array_size` attribute so that the second value is
     'unknown'.
     '''
@@ -188,22 +188,29 @@ class RIXSSingleTrigger(SingleTrigger):
     independently.
 
     This avoids the `dispatch` attribute entirely, but requires that both hdf5
-    and hdf2 attributes are included for the detector.
+    and hdf2 attributes are included for the detector. It only generates the
+    hdf2 field if self.centroid is true.
     '''
+    def trigger(self):
         if self._staged != Staged.yes:
             raise RuntimeError("This detector is not ready to trigger."
                                "Call the stage() method before triggering.")
 
         self._status = self._status_type(self)
         self._acquisition_signal.put(1, wait=False)
+        # Here we do away with the `dispatch` method used in `SingleTrigger` as
+        # that gives the same field to multiple datafiles which DB can't handle
         self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
-        self.hdf2.generate_datum('rixscam_centroids', ttime.time*(, {})
+        if self.centroid:
+            self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
         return self._status
 
 
 class RIXSCam(RIXSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
+
+    centroid = Cpt(Signal, 'centroid', value=True)
 
     xip = Cpt(XIPPlugin, suffix = 'XIP1:')
 
@@ -357,16 +364,41 @@ class RIXSCam(RIXSingleTrigger, AreaDetector):
         rate_int = 128
         rate_der = 7
 
+    def set_mode(self, mode):
+        '''This function sets the device to either perform centroiding or not.
+
+        Parameters
+        ----------
+
+        mode : str
+            This is a string which indicates weather the detector should be run
+            in centroiding mode ( `mode = 'centroid'`) or image mode ( `mode =
+            'image'`).
+
+        '''
+
+        if mode == 'image':
+            self.read_attrs = ['hdf5']
+            self.centroid = False
+
+        elif mode = 'centroid':
+            self.read_attrs = ['hdf5', 'hdf2', 'xip']
+            self.centroid = True
+
+        else:
+            raise ValueError("The input parameter, mode, needs to be 'image' or
+                             'centroid' but got {}".format(mode))
+
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
 # Once the hdf2 IOC issues have been sorted add 'hdf2' to the rixscam.read_attrs list below
-rixscam.read_attrs = ['hdf5','xip']
+rixscam.read_attrs = ['hdf5','hdf2','xip']
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
-                               'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv', 
-                               'set_node',
+                               'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
+                               'set_node', 'centroid',
                                #'sensor_xsize', 'sensor_ysize',
-                               'sensor_region_xsize', 'sensor_region_ysize', 
-                               'sensor_region_xstart', 'sensor_region_ystart', 
+                               'sensor_region_xsize', 'sensor_region_ysize',
+                               'sensor_region_xstart', 'sensor_region_ystart',
                                'sensor_binning_x', 'sensor_binning_y']
