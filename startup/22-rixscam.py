@@ -169,9 +169,39 @@ class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
         self._naive_write_path_template = val
 
 
-class RIXSCam(SingleTrigger, AreaDetector):
+class RIXSCamHDF5PluginForXIP()
+    '''This modifies the `array_size` attribute so that the second value is
+    'unknown'.
+    '''
+    width = C(EpicsSignalRO, 'ArraySize0_RBV')
+    height = C(Signal, 'height', value=-1)
+    depth = C(EpicsSignalRO, 'ArraySize2_RBV')
+    _defn = {'height':(Signal,'',{'value':-1}),
+             'width':(EpicsSignalRO,'ArraySize1_RBV'),
+             'depth':(EpicsSignalRO,'ArraySize2_RBV')}
+    array_size = DDC(_defn, doc='The array size',
+                     default_read_attrs=('height', 'width', 'depth'))
 
 
+class RIXSSingleTrigger(SingleTrigger):
+    '''Modifies the `trigger` attribute so that it triggers the 2 hdf5 files
+    independently.
+
+    This avoids the `dispatch` attribute entirely, but requires that both hdf5
+    and hdf2 attributes are included for the detector.
+    '''
+        if self._staged != Staged.yes:
+            raise RuntimeError("This detector is not ready to trigger."
+                               "Call the stage() method before triggering.")
+
+        self._status = self._status_type(self)
+        self._acquisition_signal.put(1, wait=False)
+        self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
+        self.hdf2.generate_datum('rixscam_centroids', ttime.time*(, {})
+        return self._status
+
+
+class RIXSCam(RIXSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
 
@@ -185,12 +215,12 @@ class RIXSCam(SingleTrigger, AreaDetector):
               reg=db.reg)
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
-#    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
-#              suffix='HDF2:',
-#              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
-#              write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
-#              root='/XF02ID1',
-#              reg=db.reg)
+    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
+              suffix='HDF2:',
+              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
+              write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
+              root='/XF02ID1',
+              reg=db.reg)
 
    # _default_read_attrs = (AreaDetector._default_read_attrs + 
    #                        xip._default_read_attrs)
