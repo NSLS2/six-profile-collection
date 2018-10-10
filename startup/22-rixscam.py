@@ -1,5 +1,6 @@
 from ophyd.areadetector import AreaDetector, HDF5Plugin
 from ophyd.areadetector.plugins import PluginBase
+
 from ophyd.areadetector.filestore_mixins import (FileStoreHDF5IterativeWrite,
                                                  FileStorePluginBase,
                                                  FileStoreIterativeWrite)
@@ -13,8 +14,10 @@ import time as ttime
 import os.path
 
 
+
 class AreaDetectorHDF5SingleHandler(HandlerBase):
     '''Handler for hdf5 data stored 1 image per file by areadetector
+
 
     Parameters
     ----------
@@ -70,6 +73,7 @@ def FileStoreHDF5Single(FileStorePluginBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filestore_spec = 'AD_HDF5_SINGLE'  # spec name stored in res. doc
+
         self.stage_sigs.update([('file_template', '%s%s_%6.6d.h5'),
                                 ('file_write_mode', 'Single'),
                                 ])
@@ -88,6 +92,7 @@ def FileStoreHDF5Single(FileStorePluginBase):
                            'filename': self.file_name.get(),
                            'frame_per_point': self.get_frames_per_point()}
         self._generate_resource(resource_kwargs)
+
 
 
 class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single,
@@ -275,6 +280,7 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     'unknown'.
     '''
 
+
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
     @property
@@ -284,7 +290,14 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     @write_path_template.setter
     def write_path_template(self, val):
         self._naive_write_path_template = val
-
+        self._status = self._status_type(self)
+        self._acquisition_signal.put(1, wait=False)
+        # Here we do away with the `dispatch` method used in `SingleTrigger` as
+        # that gives the same field to multiple datafiles which DB can't handle
+        self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
+        if self.centroid:
+            self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
+        return self._status
 
 class RIXSSingleTrigger(SingleTrigger):
     '''Modifies the `trigger` attribute so that it triggers the 2 hdf5 files
@@ -311,9 +324,14 @@ class RIXSSingleTrigger(SingleTrigger):
 
 class RIXSCam(SingleTrigger, AreaDetector):
 
+class RIXSCam(RIXSSingleTrigger, AreaDetector):
+
     exposure = Cpt(TriggeredCamExposure, '')
 
-    xip = Cpt(XIPPlugin, suffix='XIP1:')
+    centroid = Cpt(Signal, value=True)
+
+    xip = Cpt(XIPPlugin, suffix = 'XIP1:')
+
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
@@ -322,6 +340,7 @@ class RIXSCam(SingleTrigger, AreaDetector):
                root='/XF02ID1',
                reg=db.reg)
 
+
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
                suffix='HDF2:',
@@ -329,11 +348,6 @@ class RIXSCam(SingleTrigger, AreaDetector):
                write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
                root='/XF02ID1',
                reg=db.reg)
-
-    # _default_read_attrs = (AreaDetector._default_read_attrs +
-    #                        xip._default_read_attrs)
-    # _default_configuration_attrs = (AreaDetector._default_configuration_attrs
-    #                                 + ('hdf5', 'xip'))
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     # Delays
@@ -451,6 +465,7 @@ class RIXSCam(SingleTrigger, AreaDetector):
         self.ccd2_hv.put(44.6)
 
     def set_temp_control(self):
+
         self.en_ctr.put('On')
         self.ctr_mode = 'Manual'
         self.heater_sel = 'Output 1'
@@ -465,9 +480,37 @@ class RIXSCam(SingleTrigger, AreaDetector):
         self.rate_der = 7
 
 
+
+    def set_mode(self, mode):
+        '''This function sets the device to either perform centroiding or not.
+
+        Parameters
+        ----------
+
+        mode : str
+            This is a string which indicates weather the detector should be run
+            in centroiding mode ( `mode = 'centroid'`) or image mode ( `mode =
+            'image'`).
+
+        '''
+
+        if mode == 'image':
+            self.read_attrs = ['hdf5']
+            self.centroid.put(False)
+
+        elif mode == 'centroid':
+            self.read_attrs = ['hdf5', 'hdf2', 'xip']
+            self.centroid.put(True)
+
+        else:
+            raise ValueError("The input parameter, mode, needs to be 'image' or\
+                             'centroid' but got {}".format(mode))
+
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
+
 rixscam.read_attrs = ['hdf5', 'hdf2', 'xip']
+
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
