@@ -1,6 +1,6 @@
 from ophyd.areadetector import AreaDetector, HDF5Plugin
 from ophyd.areadetector.plugins import PluginBase
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
+from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite, FileStorePluginBase, FileStoreIterativeWrite
 from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
                    Device, Kind, Signal)
@@ -9,6 +9,32 @@ from ophyd.device import DynamicDeviceComponent as DDC, Staged
 
 
 
+class FileStoreHDF5Single(FileStorePluginBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filestore_spec = 'AD_HDF5_SINGLE'  # spec name stored in resource doc
+        self.stage_sigs.update([('file_template', '%s%s_%6.6d.h5'),
+                                ('file_write_mode', 'Single'),
+                                ])
+        # 'Single' file_write_mode means one image : one file.
+        # It does NOT mean that 'num_images' is ignored.
+
+    def get_frames_per_point(self):
+        return self.parent.cam.num_images.get()
+
+    def stage(self):
+        super().stage()
+        # this over-rides the behavior is the base stage
+        self._fn = self._fp
+
+        resource_kwargs = {'template': self.file_template.get(),
+                           'filename': self.file_name.get(),
+                           'frame_per_point': self.get_frames_per_point()}
+        self._generate_resource(resource_kwargs)
+
+
+class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single, FileStoreIterativeWrite):
+	pass
 
 
 class XIPPlugin(PluginBase):
@@ -170,18 +196,28 @@ class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
         self._naive_write_path_template = val
 
 
-class RIXSCamHDF5PluginForXIP:
+class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     '''This modifies the `array_size` attribute so that the second value is
     'unknown'.
     '''
-    width = Cpt(EpicsSignalRO, 'ArraySize0_RBV')
-    height = Cpt(Signal, value=-1)
-    depth = Cpt(EpicsSignalRO, 'ArraySize2_RBV')
-    _defn = {'height':(Signal,'',{'value':-1}),
-             'width':(EpicsSignalRO,'ArraySize1_RBV',{}),
-             'depth':(EpicsSignalRO,'ArraySize2_RBV',{})}
+    #width = Cpt(EpicsSignalRO, 'ArraySize0_RBV')
+    #height = Cpt(Signal, value=-1)
+    #depth = Cpt(EpicsSignalRO, 'ArraySize2_RBV')
+    #_defn = {'height':(Signal,'',{'value':-1}),
+    #         'width':(EpicsSignalRO,'ArraySize1_RBV',{}),
+    #         'depth':(EpicsSignalRO,'ArraySize2_RBV',{})}
     #array_size = DDC(_defn, doc='The array size',
     #                 default_read_attrs=('height', 'width', 'depth'))
+
+    # Override the write_path_template code in FileStoreBase because is
+    # assumes UNIX, not Windows, and adds a trailing forward slash.
+    @property
+    def write_path_template(self):
+        return self._naive_write_path_template
+
+    @write_path_template.setter
+    def write_path_template(self, val):
+        self._naive_write_path_template = val
 
 
 class RIXSSingleTrigger(SingleTrigger):
@@ -224,13 +260,13 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
-    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
-#    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
-              suffix='HDF2:',
-              read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
-              write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
-              root='/XF02ID1',
-              reg=db.reg)
+#    hdf2 = Cpt(RIXSCamHDF5PluginWithFileStore,
+    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
+               suffix='HDF2:',
+               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
+               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
+               root='/XF02ID1',
+               reg=db.reg)
 
 
    # _default_read_attrs = (AreaDetector._default_read_attrs + 
@@ -356,7 +392,7 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     def set_temp_control(self):
         en_ctr.put('On')
-        ctr_mode = 'Manual'
+        ctr_mode = 'Auto'
         heater_sel = 'Output 1'
         sensor_sel = 'Input 1'
         err_lim = 8192
