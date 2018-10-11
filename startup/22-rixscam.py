@@ -27,7 +27,7 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
     filename
     '''
 
-    specs = {AD_HDF5_SINGLE} | HandlerBase.specs
+    specs = {'AD_HDF5_SINGLE'} | HandlerBase.specs
 
     def __init__(self, fpath, template, filename, frame_per_point=1):
         self._path = os.path.join(fpath, '')
