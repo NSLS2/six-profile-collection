@@ -57,6 +57,9 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
         return ret
 
 
+db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
+
+
 def FileStoreHDF5Single(FileStorePluginBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
