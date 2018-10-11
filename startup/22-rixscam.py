@@ -16,18 +16,25 @@ import os.path
 import h5py
 
 
-class AreaDetectorHDF5SingleHandler(HandlerBase):
-    '''Handler for hdf5 data stored 1 image per file by areadetector
+class HDF5SingleHandler(HandlerBase):
+    '''Handler for hdf5 data stored 1 image per file.
 
 
     Parameters
     ----------
+    fpath : string
+        filepath
     template : string
         filename template string.
-    filename
+    filename : string
+        filename
+    key : string
+        the 'path' inside the file to the data set.
+    frame_per_point : float
+        the number of frames per point.
     '''
 
-    specs = {'AD_HDF5_SINGLE'} | HandlerBase.specs
+    specs = {'HDF5_SINGLE'} | HandlerBase.specs
 
     def __init__(self, fpath, template, filename, frame_per_point=1):
         self._path = os.path.join(fpath, '')
@@ -57,7 +64,32 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
         return ret
 
 
+class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
+    '''Handler for hdf5 data stored 1 image per file by areadetector
+
+    Parameters
+    ----------
+    fpath : string
+        filepath
+    template : string
+        filename template string.
+    filename : string
+        filename
+    frame_per_point : float
+        the number of frames per point.
+    '''
+
+    specs = {'AD_HDF5_SINGLE'} | HandlerBase.specs
+
+    def __init__(self, fpath, template, filename, frame_per_point=1):
+        hardcoded_key = '/entry/data/data'
+        super(AreDetectorHDF5SingleHandler, self).__init__(
+            fpath=fpath, template=template, filename=filename,
+            key=hardcoded_key, frame_per_point=frame_per_point)
+
+
 db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
+db.reg.register_handler('HDF5_SINGLE', HDF5SingleHandler)
 
 
 def FileStoreHDF5Single(FileStorePluginBase):
