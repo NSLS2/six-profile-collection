@@ -34,8 +34,6 @@ class HDF5SingleHandler(HandlerBase):
         the number of frames per point.
     '''
 
-    specs = {'HDF5_SINGLE'} | HandlerBase.specs
-
     def __init__(self, fpath, template, filename, frame_per_point=1):
         self._path = os.path.join(fpath, '')
         self._fpp = frame_per_point
@@ -89,7 +87,6 @@ class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
 
 
 db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
-db.reg.register_handler('HDF5_SINGLE', HDF5SingleHandler)
 
 
 def FileStoreHDF5Single(FileStorePluginBase):
