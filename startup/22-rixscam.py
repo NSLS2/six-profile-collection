@@ -7,12 +7,13 @@ from ophyd.areadetector.filestore_mixins import (FileStoreHDF5IterativeWrite,
 from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (Component as Cpt, EpicsSignal, EpicsSignalRO, Device)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
+from ophyd.signal import Signal
 from ophyd.device import Staged
 from ophyd.sim import NullStatus
 from databroker.assets.handlers_base import HandlerBase
 import time as ttime
 import os.path
-
+import h5py
 
 
 class AreaDetectorHDF5SingleHandler(HandlerBase):
@@ -33,9 +34,6 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
         self._fpp = frame_per_point
         self._template = template
         self._filename = filename
-        self._dataset = None
-        self._data_objects = {}
-        self.open()
         self._key = '/entry/data/data'
 
     def _fnames_for_point(self, point_number):
@@ -47,8 +45,9 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
     def __call__(self, point_number):
         ret = []
         for fn in self._fnames_for_point(point_number):
-            self._dataset = self._file[self._key]
-            ret.append(self._dataset)
+            f = h5py.File(fn, 'r')
+            data = f[self._key]
+            ret.append(data)
         return ret
 
     def get_file_list(self, datum_kwargs):
@@ -56,17 +55,6 @@ class AreaDetectorHDF5SingleHandler(HandlerBase):
         for d_kw in datum_kwargs:
             ret.extend(self._fnames_for_point(**d_kw))
         return ret
-
-    def open(self):
-        import h5py
-        if self._file:
-            return
-
-        self._file = h5py.File(self._filename, 'r')
-
-    def close(self):
-        self._file.close()
-        self._file = None
 
 
 def FileStoreHDF5Single(FileStorePluginBase):
@@ -92,7 +80,6 @@ def FileStoreHDF5Single(FileStorePluginBase):
                            'filename': self.file_name.get(),
                            'frame_per_point': self.get_frames_per_point()}
         self._generate_resource(resource_kwargs)
-
 
 
 class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single,
@@ -280,7 +267,6 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     'unknown'.
     '''
 
-
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
     @property
@@ -298,6 +284,7 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
         if self.centroid:
             self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
         return self._status
+
 
 class RIXSSingleTrigger(SingleTrigger):
     '''Modifies the `trigger` attribute so that it triggers the 2 hdf5 files
@@ -322,16 +309,13 @@ class RIXSSingleTrigger(SingleTrigger):
         return self._status
 
 
-class RIXSCam(SingleTrigger, AreaDetector):
-
 class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
 
     centroid = Cpt(Signal, value=True)
 
-    xip = Cpt(XIPPlugin, suffix = 'XIP1:')
-
+    xip = Cpt(XIPPlugin, suffix='XIP1:')
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
@@ -339,7 +323,6 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
                write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
                root='/XF02ID1',
                reg=db.reg)
-
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
@@ -479,8 +462,6 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         self.rate_int = 128
         self.rate_der = 7
 
-
-
     def set_mode(self, mode):
         '''This function sets the device to either perform centroiding or not.
 
@@ -505,6 +486,7 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         else:
             raise ValueError("The input parameter, mode, needs to be 'image' or\
                              'centroid' but got {}".format(mode))
+
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
