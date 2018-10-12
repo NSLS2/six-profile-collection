@@ -33,13 +33,14 @@ class HDF5SingleHandler(HandlerBase):
     frame_per_point : float
         the number of frames per point.
     '''
+    specs = {'AD_HDF5_SINGLE'} | HandlerBase.specs
 
-    def __init__(self, fpath, template, filename, frame_per_point=1):
+    def __init__(self, fpath, template, filename, key, frame_per_point=1):
         self._path = os.path.join(fpath, '')
         self._fpp = frame_per_point
         self._template = template
         self._filename = filename
-        self._key = '/entry/data/data'
+        self._key = key
 
     def _fnames_for_point(self, point_number):
         start = int(point_number * self._fpp)
@@ -76,12 +77,9 @@ class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
     frame_per_point : float
         the number of frames per point.
     '''
-
-    specs = {'AD_HDF5_SINGLE'} | HandlerBase.specs
-
     def __init__(self, fpath, template, filename, frame_per_point=1):
         hardcoded_key = '/entry/data/data'
-        super(AreDetectorHDF5SingleHandler, self).__init__(
+        super(AreaDetectorHDF5SingleHandler, self).__init__(
             fpath=fpath, template=template, filename=filename,
             key=hardcoded_key, frame_per_point=frame_per_point)
 
@@ -89,7 +87,7 @@ class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
 db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
 
 
-def FileStoreHDF5Single(FileStorePluginBase):
+class FileStoreHDF5Single(FileStorePluginBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filestore_spec = 'AD_HDF5_SINGLE'  # spec name stored in res. doc
@@ -114,8 +112,7 @@ def FileStoreHDF5Single(FileStorePluginBase):
         self._generate_resource(resource_kwargs)
 
 
-class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single,
-                                        FileStoreIterativeWrite):
+class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single, FileStoreIterativeWrite):
     pass
 
 
@@ -308,14 +305,6 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     @write_path_template.setter
     def write_path_template(self, val):
         self._naive_write_path_template = val
-        self._status = self._status_type(self)
-        self._acquisition_signal.put(1, wait=False)
-        # Here we do away with the `dispatch` method used in `SingleTrigger` as
-        # that gives the same field to multiple datafiles which DB can't handle
-        self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
-        if self.centroid:
-            self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
-        return self._status
 
 
 class RIXSSingleTrigger(SingleTrigger):
@@ -530,7 +519,7 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
-                               'set_node', 'centroid'
+                               'set_node', 'centroid',
                                # 'sensor_xsize', 'sensor_ysize',
                                'sensor_region_xsize', 'sensor_region_ysize',
                                'sensor_region_xstart', 'sensor_region_ystart',
