@@ -268,7 +268,6 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
                root='/XF02ID1',
                reg=db.reg)
 
-
    # _default_read_attrs = (AreaDetector._default_read_attrs + 
    #                        xip._default_read_attrs)
    # _default_configuration_attrs = (AreaDetector._default_configuration_attrs + (
@@ -386,9 +385,9 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         self.delay_inttime.put(80)
         self.delay_serialT.put(255)
         self.delay_parT.put(151)
-        #Calibration done on 6/13/2017 for the CCD HV values below
+        #Calibration done on 10/10/2018 for the CCD HV values below using LED light
         self.ccd1_hv.put(44.5)
-        self.ccd2_hv.put(44.6)
+        self.ccd2_hv.put(45.1)
 
     def set_temp_control(self):
         en_ctr.put('On')
