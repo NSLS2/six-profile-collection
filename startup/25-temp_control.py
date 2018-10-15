@@ -1,7 +1,7 @@
 from collections import deque
 
 from ophyd import (EpicsMotor, PVPositioner, PVPositionerPC,
-                   EpicsSignal, EpicsSignalRO, Device)
+                   EpicsSignal, EpicsSignalRO, Device, Kind)
 from ophyd import Component as Cpt
 from ophyd import FormattedComponent as FmtCpt
 from ophyd import DynamicDeviceComponent as DDC
@@ -46,7 +46,8 @@ class Lakeshore336Ext(Lakeshore336):
     temp = DDC(_temp_fields(['A','B','C','D','E','F','G', 'H']))
 
 
-#This part is not used, but can be used to treat the cryostat setpoint/readback as a motor
+#This part is not used, but can be used to treat the cryostat
+#setpoint/readback as a motor
 class Lakeshore336Picky(Device):
     setpoint = Cpt(EpicsSignal, read_pv='-Out:1}T-RB', write_pv='-Out:1}T-SP',
                    add_prefix=('read_pv', 'write_pv'))
@@ -149,6 +150,6 @@ class Lakeshore336Picky(Device):
 
 
 stemp = Lakeshore336('XF:02IDD-ES{TCtrl:1', name='stemp')
-#stemp.hints = {'fields': ['stemp_temp_A', 'stemp_temp_B']}  #TODO this doesn't work at 2ID and it DID at 23ID (is it kind vs hints)
-
-
+hinted_attrs_list = ['A', 'B']
+for attr in hinted_attrs_list:
+    getattr(stemp, 'temp.'+attr).kind = Kind.hinted
