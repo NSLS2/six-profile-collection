@@ -302,8 +302,8 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
 
     # Add some parameters required to retrieve the data as a pandas dataframe
     key = '/entry/data/data'
-    column_names = ['x', 'y', 'x_eta', 'y_eta', 'y_eta_iso', 'sum_regions',
-                    'XIP mode']
+    column_names = ('x', 'y', 'x_eta', 'y_eta', 'y_eta_iso', 'sum_regions',
+                    'XIP mode')
 
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
