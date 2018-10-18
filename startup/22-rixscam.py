@@ -295,6 +295,15 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     '''This modifies the `array_size` attribute so that the second value is
     'unknown'.
     '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Update the filestore_spec name
+        self.filestore_spec = 'AD_HDF5_SINGLE_XIP'
+
+    # Add some parameters required to retrieve the data as a pandas dataframe
+    key = '/entry/data/data'
+    column_names = ('x', 'y', 'x_eta', 'y_eta', 'y_eta_iso', 'sum_regions',
+                    'XIP mode')
 
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
@@ -305,6 +314,20 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
     @write_path_template.setter
     def write_path_template(self, val):
         self._naive_write_path_template = val
+
+    # write a new stage method that adds `column_names` and `key` to
+    # resource_kwargs.
+    def stage(self):
+        super().stage()
+        # this over-rides the behavior is the base stage
+        self._fn = self._fp
+
+        resource_kwargs = {'template': self.file_template.get(),
+                           'filename': self.file_name.get(),
+                           'key': self.key,
+                           'column_names': self.column_names,
+                           'frame_per_point': self.get_frames_per_point()}
+        self._generate_resource(resource_kwargs)
 
 
 class RIXSSingleTrigger(SingleTrigger):
