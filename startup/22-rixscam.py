@@ -84,7 +84,7 @@ class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
             key=hardcoded_key, frame_per_point=frame_per_point)
 
 
-db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
+#db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
 
 
 class FileStoreHDF5Single(FileStorePluginBase):
@@ -357,7 +357,7 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
 
-    centroid = Cpt(Signal, value=True)
+    centroid_enable = Cpt(Signal, value=True)
 
     xip = Cpt(XIPPlugin, suffix='XIP1:')
 
@@ -439,73 +439,86 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
     rate_int = Cpt(EpicsSignal, 'cam1:TEMP_INT_RATE')
     rate_der = Cpt(EpicsSignal, 'cam1:TEMP_DERIV_RATE')
 
+    def set_HR_RT(self):
+        yield from self.set_HR()
+        yield from mv(self.vss1,9.0)
+        yield from mv(self.vss2,9.0)
+        
+    def set_LS_RT(self):
+        yield from self.set_LS()
+        yield from mv(self.vss1,9.0)
+        yield from mv(self.vss2,9.0)       
+        yield from mv(self.ccd1_hv,20)
+        yield from mv(self.ccd2_hv,20)        
+        
+        
     def set_voltages(self):
-        self.vod1.put(32.85)
-        self.vdd1.put(20.02)
-        self.vrd1.put(19.08)
-        self.vog1.put(5.64)
-        self.vss1.put(6.20)
-        self.hv_dc1.put(5.73)
-        self.pedestal.put(1.16)
-        self.vclk_im1.put(6.60)
-        self.vclk_st1.put(11.90)
-        self.vclk_se1.put(12.38)
-        self.vclk_rst1.put(9.02)
+        yield from mv(self.vod1,32.85)
+        yield from mv(self.vdd1,20.02)
+        yield from mv(self.vrd1,19.08)
+        yield from mv(self.vog1,5.64)
+        yield from mv(self.vss1,6.20)
+        yield from mv(self.hv_dc1,5.73)
+        yield from mv(self.pedestal,1.16)
+        yield from mv(self.vclk_im1,6.60)
+        yield from mv(self.vclk_st1,11.90)
+        yield from mv(self.vclk_se1,12.38)
+        yield from mv(self.vclk_rst1,9.02)
 
-        self.vod2.put(32.85)
-        self.vdd2.put(20.02)
-        self.vrd2.put(19.08)
-        self.vog2.put(5.64)
-        self.vss2.put(6.20)
-        self.hv_dc2.put(5.73)
-        self.pedestal.put(1.16)
-        self.vclk_im2.put(6.60)
-        self.vclk_st2.put(11.90)
-        self.vclk_se2.put(12.38)
-        self.vclk_rst2.put(9.02)
+        yield from mv(self.vod2,32.85)
+        yield from mv(self.vdd2,20.02)
+        yield from mv(self.vrd2,19.08)
+        yield from mv(self.vog2,5.64)
+        yield from mv(self.vss2,6.20)
+        yield from mv(self.hv_dc2,5.73)
+        yield from mv(self.pedestal,1.16)
+        yield from mv(self.vclk_im2,6.60)
+        yield from mv(self.vclk_st2,11.90)
+        yield from mv(self.vclk_se2, 12.38)
+        yield from mv(self.vclk_rst2, 9.02)
 
     def set_HR(self):
         # missing Node Readout mode "HR node"
-        self.set_voltages()
-        self.set_node.put(1)
-        self.delay_adc.put(1)
-        self.delay_intminus.put(14)
-        self.delay_intplus.put(13)
-        self.delay_inttime.put(255)
-        self.delay_serialT.put(3)
-        self.delay_parT.put(255)
-        self.ccd1_hv.put(20)
-        self.ccd2_hv.put(20)
+        yield from self.set_voltages()
+        yield from mv(self.set_node,1)
+        yield from mv(self.delay_adc,1)
+        yield from mv(self.delay_intminus,14)
+        yield from mv(self.delay_intplus,13)
+        yield from mv(self.delay_inttime,255)
+        yield from mv(self.delay_serialT,3)
+        yield from mv(self.delay_parT,255)
+        yield from mv(self.ccd1_hv,20)
+        yield from mv(self.ccd2_hv,20)
 
     def set_LS(self):
         # missing Node Readout mode "LS node"
-        self.set_voltages()
-        self.set_node.put(0)
-        self.delay_adc.put(168)
-        self.delay_intminus.put(4)
-        self.delay_intplus.put(2)
-        self.delay_inttime.put(80)
-        self.delay_serialT.put(255)
-        self.delay_parT.put(151)
+        yield from self.set_voltages()
+        yield from mv(self.set_node,0)
+        yield from mv(self.delay_adc,168)
+        yield from mv(self.delay_intminus,4)
+        yield from mv(self.delay_intplus,2)
+        yield from mv(self.delay_inttime,80)
+        yield from mv(self.delay_serialT,255)
+        yield from mv(self.delay_parT,151)
 
         #Calibration done on 10/10/2018 for the CCD HV values below using LED light
-        self.ccd1_hv.put(44.5)
-        self.ccd2_hv.put(45.1)
+        yield from mv(self.ccd1_hv,44.5)
+        yield from mv(self.ccd2_hv,45.1)
 
     def set_temp_control(self):
 
-        self.en_ctr.put('On')
-        self.ctr_mode = 'Manual'
-        self.heater_sel = 'Output 1'
-        self.sensor_sel = 'Input 1'
-        self.err_lim = 8192
-        self.out_bias = 13087
-        self.gain_prop = 255
-        self.gain_int = 255
-        self.gain_der = 0
-        self.rate_prop = 128
-        self.rate_int = 128
-        self.rate_der = 7
+        yield from mv(self.en_ctr,'On')
+        yield from mv(self.ctr_mode, 'Auto')
+        yield from mv(self.heater_sel, 'Output 1')
+        yield from mv(self.sensor_sel, 'Input 1')
+        yield from mv(self.err_lim, 8192)
+        yield from mv(self.out_bias, 13087)
+        yield from mv(self.gain_prop, 255)
+        yield from mv(self.gain_int, 255)
+        yield from mv(self.gain_der, 0)
+        yield from mv(self.rate_prop, 128)
+        yield from mv(self.rate_int, 128)
+        yield from mv(self.rate_der, 7)
 
     def set_mode(self, mode):
         '''This function sets the device to either perform centroiding or not.
@@ -522,11 +535,13 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
         if mode == 'image':
             self.read_attrs = ['hdf5']
-            self.centroid.put(False)
+            yield from mv(self.centroid_enable,False)
+            yield from mv(self.hdf2.enable, 'Disable', self.xip.enable, 'Disable')
 
         elif mode == 'centroid':
             self.read_attrs = ['hdf5', 'hdf2', 'xip']
-            self.centroid.put(True)
+            yield from mv(self.centroid_enable,True)
+            yield from mv(self.hdf2.enable, 'Enable', self.xip.enable, 'Enable')
 
         else:
             raise ValueError("The input parameter, mode, needs to be 'image' or\
@@ -542,7 +557,7 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_exposures',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
-                               'set_node', 'centroid',
+                               'set_node', 'centroid_enable',
                                # 'sensor_xsize', 'sensor_ysize',
                                'sensor_region_xsize', 'sensor_region_ysize',
                                'sensor_region_xstart', 'sensor_region_ystart',
