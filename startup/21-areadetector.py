@@ -12,9 +12,13 @@ from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV, ADBase
 start_time=time.monotonic()
 
 class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
-
+    # add a few lines to ensure that we don't use the parent.cam.num_images
+    # when fly scanning.
     def get_frames_per_point(self):
-        return 1  # HACK
+        if not self.parent.is_flying:
+            return self.parent.cam.num_images.get()
+        else:
+            return 1
 
 
 #ALL OF THIS COMMENT DOWN TO testing m3_diag_cam is for testing only. DON'T DELETE 

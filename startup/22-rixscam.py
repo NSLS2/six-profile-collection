@@ -276,9 +276,13 @@ class TriggeredCamExposure(Device):
 
 
 class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
-
+    # add a few lines to ensure that we don't use the parent.cam.num_images when
+    # fly scanning
     def get_frames_per_point(self):
-        return 1  # HACK
+        if not self.parent.is_flying:
+            return self.parent.cam.num_images.get()
+        else:
+            return 1
 
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
