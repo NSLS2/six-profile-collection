@@ -1,8 +1,9 @@
 from ophyd import Device, EpicsMotor
 from ophyd import Component as Cpt
 from ophyd import DeviceStatus
+#from nslsii.devices import TwoButtonShutter  #TODO why are we not suing the facility TwoButtonShutter?
 
-class TwoButtonShutter(Device):
+class TwoButtonShutter(Device):  #Why custom and not facility?
 
     open_cmd = Cpt(EpicsSignal, 'Cmd:Opn-Cmd', string=True)
     open_val = 'Open'

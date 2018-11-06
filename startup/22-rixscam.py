@@ -278,7 +278,7 @@ class TriggeredCamExposure(Device):
 class RIXSCamHDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
     def get_frames_per_point(self):
-        return 1  # HACK
+        return self.parent.cam.num_images.get()
 
     # Override the write_path_template code in FileStoreBase because is
     # assumes UNIX, not Windows, and adds a trailing forward slash.
@@ -348,7 +348,7 @@ class RIXSSingleTrigger(SingleTrigger):
         # Here we do away with the `dispatch` method used in `SingleTrigger` as
         # that gives the same field to multiple datafiles which DB can't handle
         self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
-        if self.centroid:
+        if self.centroid_enable:
             self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
         return self._status
 
@@ -357,9 +357,10 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     exposure = Cpt(TriggeredCamExposure, '')
 
-    centroid_enable = Cpt(Signal, value=True)
+    centroid_enable = Cpt(Signal, value=False)
 
     xip = Cpt(XIPPlugin, suffix='XIP1:')
+    
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
@@ -550,11 +551,13 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
+rixscam.xip.enable.set('Disable')
+rixscam.hdf2.enable.set('Disable')
 
-rixscam.read_attrs = ['hdf5', 'hdf2', 'xip']
+rixscam.read_attrs = ['hdf5']
 
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
-                               'cam.num_exposures',
+                               'cam.num_images',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
                                'set_node', 'centroid_enable',

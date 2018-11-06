@@ -14,7 +14,7 @@ start_time=time.monotonic()
 class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
     def get_frames_per_point(self):
-        return 1  # HACK
+        return self.parent.cam.num_images.get()  # HACK fixed from =1 to this self.
 
 
 #ALL OF THIS COMMENT DOWN TO testing m3_diag_cam is for testing only. DON'T DELETE 
@@ -165,14 +165,15 @@ m3_diag_cam = StandardProsilicaSaving('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_
 extslt_cam = StandardProsilicaSaving('XF:02IDC-BI{Slt:1-Cam:15_1}', name='extslt_cam')
 gc_diag_cam = StandardProsilicaROI('XF:02IDC-BI{Mir:4-Cam:18_1}', name='gc_diag_cam')
 sc_navitar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
+#sc_navitar_cam = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
 sc_3  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_3}', name='sc_3')
 sc_4  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_4}', name='sc_4')
 sc_5  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_5}', name='sc_5')
 #sc_navitar_cam = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
 
 #####just commenting out this portion to see if it is breaking the ability to use the camera as a det
-for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_3,sc_4,sc_5]:
-    sts_readattrs = ['mean_value', 'sigma', 'min_value', 'max_value', 'total']
+for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_navitar_cam, sc_3,sc_4,sc_5]:
+    sts_readattrs = ['mean_value', 'sigma', 'min_value', 'max_value', 'total']  #TODO do we need all of these for general case?sudo -u csstudio sh -c "cd /opt/css/opi/production/cs-studio-xf; git pull"
     cam.read_attrs = ['stats{}'.format(j) for j in range(1, 6)]
     # If this camera has 'saving' (HDF5 plugin) set up, do some extra things:
     if hasattr(cam, 'hdf5'):
@@ -265,6 +266,6 @@ qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
 qem12.current1.mean_value.kind = Kind.hinted
 qem12.current3.mean_value.kind = Kind.hinted
 
-print (f'21-areadetector.py {start_time-time.monotonic()}')
+print ('21-areadetector.py {start_time-time.monotonic()}')
 
 start_time=time.monotonic()
