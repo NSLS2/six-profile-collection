@@ -201,6 +201,46 @@ def gr1200_info(eV, mm=1,r2=42636):
     print("GR pitch (deg) =", thetaGR*180/np.pi)
 
     return cff
+
+
+def gr1800_info(eV, mm=1,r2=42636):
+    # calculate various information for the 500 mm-1 grating for SIX
+    # eV is the energy in electron volts
+    # r2 is the monochromator exit arm in mm, nominally 42636 mm
+    r1 = 55000  # input arm length in mm
+    k0 = 1800    # grating central line density in mm-1
+    a1 = 0.08997  # grating focusing constant in mm-2
+    #mm = 1      # diffraction order
+    
+    wl = 0.0012398/eV  # wavelength in mm
+    rr = r2/r1 # unitless
+    b2 = -0.5*a1*(1/k0)  # convert grating focusing term to Ruben's standard
+    A0 = mm*k0*wl
+    B2 = r2*b2
+
+    term1 = 2*A0*B2+4*B2*B2+(4+2*A0*B2-A0*A0)*rr
+    term2 = -4*B2*np.sqrt((1+rr)*(1+rr)+2*A0*B2*(1+rr)-A0*A0*rr)
+    term3 = -4+A0*A0-4*A0*B2+4*B2*B2
+    cff = np.sqrt((term1+term2)/term3)
+    
+    term4=(cff*A0)/(cff*cff-1)
+    alpha=np.arcsin(-A0/(cff*cff-1)+np.sqrt(1+np.power(term4,2)))
+    beta=np.arcsin(A0-np.sin(alpha))
+    phi=0.5*(alpha-beta)
+    # this changes depending on angular conventions
+    thetaPM = phi
+    thetaGR = -beta
+    
+    print("cff =", cff)
+    print("alpha (deg) =", alpha*180/np.pi, " inc angle on grating")
+    print("beta (deg) =", beta*180/np.pi, " diffraction angle")
+    print("phi (deg) =", phi*180/np.pi, " inc angle on premirror")
+    print("pitch angles relative to vertical")
+    print("PM pitch (deg) =", thetaPM*180/np.pi)
+    print("GR pitch (deg) =", thetaGR*180/np.pi)
+
+    return cff
+    
     
 def monoInfo2(eV, k0, mm, cff):
     # calculate various information for a grating

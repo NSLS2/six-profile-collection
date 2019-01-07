@@ -69,8 +69,8 @@ class align_class():
 
         initial_position = m1.pit.user_readback.value
         num = [ 36] # all lists here should have the same length, corresponding to the number of scan performed
-        start = [ -70]
-        stop = [ 70]
+        start = [ -110]
+        stop = [ 110]
         roi1_minx = [ 592]
         roi1_sizex = [ 44]
     

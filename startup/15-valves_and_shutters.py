@@ -109,7 +109,23 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
         self._set_st = None
         self.read_attrs = ['status']
 
+#Piezoshutter mode signal:
+pzshutter = EpicsSignal('XF:02ID1-ES{RIXSCam}:cam1:ShutterMode', name = 'pzshutter')
+def pzshutter_enable():
+    rixscam_exp_temp = rixscam.cam.acquire_time.value
+    rixscam_exp = 1
+    yield from mv(rixscam.cam.acquire_time, rixscam_exp)
+    yield from mv(pzshutter,'Detector output')
+    yield from count([rixscam], num=1, md = {'reason': 'enable pzshutter'})
+    yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
+def pzshutter_disable():
+    rixscam_exp_temp = rixscam.cam.acquire_time.value
+    rixscam_exp = 1
+    yield from mv(rixscam.cam.acquire_time, rixscam_exp)
+    yield from mv(pzshutter,'None')
+    yield from count([rixscam], num=1, md = {'reason': 'disable pzshutter'})
+    yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
 #Define the shutters from the above class.
 shutterfe = TwoButtonShutter('XF:02ID-PPS{Sh:FE}', name='shutterfe')

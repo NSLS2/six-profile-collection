@@ -89,14 +89,21 @@ espgmmask = DiagAndSingleAxisMaskClass('XF:02IDD-ES{Msk:Mono2-Ax:Y}Mtr',
                          name='espgmmask')
 
 #Diagnostic units
-
+# Commented on Sep 27, 2018
+#m3diag = DiagAndSingleAxisMaskClass('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',
+#                         locations = {'diode':['y',-76.4],'grid':['y',-97.5], 'out':['y',-1],
+#                                      'yag':['y',-49.4,'cam.roi1_minx',582,'cam.roi1_sizex',44,'cam.roi1_miny',
+#                                             540,'cam.roi1_sizey',225]},
+#                         vis_path_options={'fig_size':[10,10],'axis_labels':['arbitrary axis','m3diag_y'],
+#                                           'pos':{'diode':[0,-76.4],'grid':[0,-97.5],'out':[0,-1],'yag':[0,-49.4]}},
+#                         cam_list = [m3_diag_cam], qem_list = [qem05],
+#                         name = 'm3diag')
 
 m3diag = DiagAndSingleAxisMaskClass('XF:02IDC-OP{Mir:3-Diag:12_U_1-Ax:1}Mtr',
-                         locations = {'diode':['y',-76.4],'grid':['y',-97.5], 'out':['y',-1],
-                                      'yag':['y',-49.4,'cam.roi1_minx',582,'cam.roi1_sizex',44,'cam.roi1_miny',
-                                             540,'cam.roi1_sizey',225]},
+                         locations = {'diode':['y',-69.4],'grid':['y',-87.5], 'out':['y',-1],
+                                      'yag':['y',-42.4]},
                          vis_path_options={'fig_size':[10,10],'axis_labels':['arbitrary axis','m3diag_y'],
-                                           'pos':{'diode':[0,-76.4],'grid':[0,-97.5],'out':[0,-1],'yag':[0,-49.4]}},
+                                           'pos':{'diode':[0,-69.4],'grid':[0,-87.5],'out':[0,-1],'yag':[0,-42.4]}},
                          cam_list = [m3_diag_cam], qem_list = [qem05],
                          name = 'm3diag')
 

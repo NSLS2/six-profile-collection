@@ -170,6 +170,7 @@ sc_3  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_3}', name='sc_3')
 sc_4  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_4}', name='sc_4')
 sc_5  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_5}', name='sc_5')
 #sc_navitar_cam = StandardProsilica('XF:02IDD-BI{SC:1-Cam:S1_2}', name='sc_navitar_cam')
+sc_questar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_1}', name='sc_questar_cam')
 
 #####just commenting out this portion to see if it is breaking the ability to use the camera as a det
 for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_navitar_cam, sc_3,sc_4,sc_5]:

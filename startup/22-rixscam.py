@@ -556,12 +556,17 @@ rixscam.hdf2.enable.set('Disable')
 
 rixscam.read_attrs = ['hdf5']
 
+#TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'cam.num_images',
                                'cam.temperature', 'cam.temperature_actual',
                                'cam.trigger_mode', 'ccd1_hv', 'ccd2_hv',
                                'set_node', 'centroid_enable',
-                               # 'sensor_xsize', 'sensor_ysize',
+                               # 'sensor_xsize', 'sensor_ysize',d
                                'sensor_region_xsize', 'sensor_region_ysize',
                                'sensor_region_xstart', 'sensor_region_ystart',
                                'sensor_binning_x', 'sensor_binning_y']
+
+
+
+

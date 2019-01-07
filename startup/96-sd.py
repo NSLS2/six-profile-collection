@@ -50,4 +50,13 @@ dc]
 # To avoid baseline are printed on screen:
 # bec.disable_baseline()%
 
-# 
+def get_threshold(Ei = pgm.en.user_readback.value):
+    '''Calculate the minimum and maximum threshold for RIXSCAM single photon counting (LS mode) 
+    Ei\t:\t float -  incident energy (defualt is beamline current energy)
+    '''
+    t_min = 0.7987 * Ei - 97.964
+    t_max = 1.4907 * Ei + 38.249
+    print('\n\n\tMinimum value for RIXSCAM threshold (LS mode):\t{}'.format(t_min))
+    print('\tMaximum value for RIXSCAM threshold (LS mode):\t{}'.format(t_max))
+    
+    return t_min, t_max
