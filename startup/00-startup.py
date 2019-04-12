@@ -1,6 +1,9 @@
 import nslsii
 nslsii.configure_base(get_ipython().user_ns, 'six')
 
+from bluesky.log import current_handler
+current_handler.setLevel('CRITICAL')
+
 # After the above call, you will now have the following in your namespace:
 # 
 #	RE : RunEngine 
