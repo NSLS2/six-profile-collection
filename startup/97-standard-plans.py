@@ -20,7 +20,7 @@ def pol_H(offset=None):
 
 
 def m3_check():
-
+    sclr_enable()
     if pzshutter.value == 0:
        print('Piezo Shutter is disabled')
        flag = 0
@@ -60,7 +60,7 @@ def m1_align_fine2():
     for i in range(0,5):
         yield from mv(m1.pit,m1pit_start+i*m1pit_step)
         yield from scan([qem05],m1.x,-3,3.8,35)
-    yield from mv(m1.pit,m1pit_start)
+    yield from mv(m1.pit,m1pit_init)
 
 def alignM3x():
     # get the exit slit positions to return to at the end
@@ -75,7 +75,7 @@ def alignM3x():
     yield from gcdiag.grid
 
     # set detector e.g. gas cell diagnostics qem
-    detList=[sclr]
+    detList=[qem07] #[sclr] 
     # set V exit slit value to get enough signal
     yield from mv(extslt.vg, 30)
     # open H slit full open
@@ -95,7 +95,52 @@ def alignM3x():
     yield from mv(extslt.hc,hc_init)
     yield from mv(extslt.vg, vg_init, extslt.hg, hg_init)
 
+def beamline_align():
+    yield from mv(m1_fbk,0)
+    
+    yield from align.m1pit
+    yield from sleep(5)
+    yield from m3_check()
+    
+    #yield from mv(m1_fbk_cam_time,0.002)
+    #yield from mv(m1_fbk_th,1500)
+    yield from sleep(5)
+    yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.value)
+    yield from mv(m1_fbk,1)
 
+
+def xas(dets,motor,start_en,stop_en,num_points):
+
+    sclr_enable()
+
+    if pzshutter.value == 0:
+       print('Piezo Shutter is disabled')
+       flag = 0
+    if pzshutter.value == 2:
+       print('Piezo Shutter is enabled: going to be disabled')
+       yield from pzshutter_disable()
+       flag = 1
+
+    yield from scan(dets,pgm.en,start_en,stop_en,num_points)
+    E_max = peaks['max']['sclr_channels_chan2'][0] 
+
+    if flag == 0:
+       print('Piezo Shutter remains disabled')   
+    if flag == 1:
+       print('Piezo Shutter is going to renabled')
+       yield from pzshutter_enable()  
+    return E_max
+
+def get_threshold(Ei = pgm.en.user_readback.value):
+    '''Calculate the minimum and maximum threshold for RIXSCAM single photon counting (LS mode) 
+    Ei\t:\t float -  incident energy (defualt is beamline current energy)
+    '''
+    t_min = 0.7987 * Ei - 97.964
+    t_max = 1.4907 * Ei + 38.249
+    print('\n\n\tMinimum value for RIXSCAM threshold (LS mode):\t{}'.format(t_min))
+    print('\tMaximum value for RIXSCAM threshold (LS mode):\t{}'.format(t_max))
+    
+    return t_min, t_max
 #TODO make official
 m1_fbk = EpicsSignal('XF:02IDA-OP{FBck}Sts:FB-Sel', name = 'm1_fbk')
 m1_fbk_sp = EpicsSignal('XF:02IDA-OP{FBck}PID-SP', name = 'm1_fbk_sp')

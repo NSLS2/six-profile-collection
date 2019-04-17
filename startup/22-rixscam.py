@@ -364,17 +364,22 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
-               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
-               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
-               root='/XF02ID1',
+               read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',
+	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
+               write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',
+               #write_path_template='X:\nsls2\xf02id1\RIXSCAM\DATA\\%Y\\%m\\%d\\',
+               #read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
+               #root='/XF02ID1',
+               root='/nsls2/xf02id1',
                reg=db.reg)
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
                suffix='HDF2:',
-               read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
-               write_path_template='X:\RIXSCAM\DATA\\%Y\\%m\\%d\\',
-               root='/XF02ID1',
+               read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',
+	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
+               write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',
+               root='/nsls2/xf02id1',
                reg=db.reg)
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
@@ -551,10 +556,11 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
-rixscam.xip.enable.set('Disable')
-rixscam.hdf2.enable.set('Disable')
+rixscam.xip.enable.set('Enable')
+rixscam.hdf2.enable.set('Enable')
 
-rixscam.read_attrs = ['hdf5']
+#rixscam.read_attrs = ['hdf5']
+rixscam.read_attrs = ['hdf5','hdf2', 'xip']
 
 #TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
@@ -568,5 +574,7 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
                                'sensor_binning_x', 'sensor_binning_y']
 
 
+#rixscam.xip.count_neighbours.kind = Kind.hinted
+#rixscam.xip.count_event_3x3.kind = Kind.hinted
 
 

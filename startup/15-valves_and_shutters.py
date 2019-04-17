@@ -84,7 +84,7 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
             while not prev_st.done:
                 time.sleep(.1)   
         self._was_open = (self.open_val == self.status.get())
-        st = self.set('Close')
+        st = self.set('close')
         while not st.done:
             time.sleep(.5)
 
@@ -95,7 +95,7 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
             while not prev_st.done:
                 time.sleep(.1)   
         if self._was_open:
-            st = self.set('Open')
+            st = self.set('open')
             while not st.done:
                 time.sleep(.5)
 

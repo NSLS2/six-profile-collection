@@ -68,23 +68,25 @@ class align_class():
         '''
 
         initial_position = m1.pit.user_readback.value
-        num = [ 36] # all lists here should have the same length, corresponding to the number of scan performed
+        num = [ 89] # all lists here should have the same length, corresponding to the number of scan performed
         start = [ -110]
         stop = [ 110]
-        roi1_minx = [ 592]
-        roi1_sizex = [ 44]
-    
+        roi1_minx = [ 604] #592
+        roi1_sizex = [ 20] #44
+        roi1_miny = [ 370] #592
+        roi1_sizey = [ 200] #44
 
         initial_m3diag = m3diag.y.position
 
         
         yield from m3diag.yag
+        yield from count([m3diag.cam])
 
         for i in range(0, len(start)):
-            yield from mv(m3diag.cam.roi1_minx, roi1_minx[i], m3diag.cam.roi1_sizex, roi1_sizex[i])
+            yield from mv(m3diag.cam.roi1_minx, roi1_minx[i], m3diag.cam.roi1_sizex, roi1_sizex[i], m3diag.cam.roi1_miny, roi1_miny[i], m3diag.cam.roi1_sizey, roi1_sizey[i])
             uid = yield from rel_scan([m3diag.cam], m1.pit, start[i], stop[i], num[i])
             if uid is not None:
-                yield from mv(m1.pit, peaks.cen['m3_diag_cam_stats1_total'])   
+                yield from mv(m1.pit, peaks.cen['m3_diag_cam_stats1_total'])   #peaks.max['m3_diag_cam_stats1_total'][0]
                 print('For scan {} of {} the center is {}'.format(i+1, len(start), peaks.cen['m3_diag_cam_stats1_total']))
                 print('\t moved from {} to {}'.format(initial_position,peaks.cen['m3_diag_cam_stats1_total']))
             else:
@@ -93,6 +95,6 @@ class align_class():
 
         yield from count([m3diag.cam])
 
-        yield from mv(m3diag.y, initial_m3diag)
+        yield from m3diag.out
         
 align = align_class()

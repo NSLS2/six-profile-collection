@@ -17,5 +17,15 @@ for chan in sclr.channels.read_attrs:
     chanNUM.kind = Kind.omitted
 
 sclr.channels.chan1.kind = Kind.normal #this is the time base
-sclr.channels.chan2.kind = Kind.hinted #this is the first detector channel on the scalar card.
+sclr.channels.chan2.kind = Kind.hinted #this is the first detector channel on the scalar card. - changed these to 
 sclr.channels.chan8.kind = Kind.hinted #
+
+def sclr_enable():
+    sclr.channels.chan2.kind = Kind.hinted
+    sclr.channels.chan8.kind = Kind.hinted
+
+def sclr_disable():
+    sclr.channels.chan2.kind = Kind.normal
+    sclr.channels.chan8.kind = Kind.normal
+
+

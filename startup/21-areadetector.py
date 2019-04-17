@@ -155,10 +155,9 @@ class StandardProsilicaROI(StandardProsilica):
 class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
-              write_path_template='/XF02ID1/prosilica_data/%Y/%m/%d',
-              root='/XF02ID1')
+              write_path_template='/nsls2/xf02id1/data/prosilica_data/%Y/%m/%d',
+              root='/nsls2/xf02id1')
         
-            
 diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
 m3_diag_cam = StandardProsilicaSaving('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')

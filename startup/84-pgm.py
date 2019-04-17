@@ -40,8 +40,8 @@ class PGM_ES(Device):
     grxrb = Cpt(EpicsSignalRO,'GXEnc}Mtr.RBV')
 
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.19904035, 'groff', 82.07181566999999 ,'grx', -63.0, 'grlines', 500], 
-	 'ubg': ['m2off', 84.20214532, 'groff', 82.1000625816 , 'grx', -1,'grlines', 1800] }) #'ubg': ['m2off', 84.2093608, 'groff', 82.1053369716 , 'grx', -1,'grlines', 1800] })
+         'mbg': ['m2off', 84.20033028, 'groff', 82.0737638 ,'grx', -63.0, 'grlines', 500], #'mbg': ['m2off', 84.19904035, 'groff', 82.07181566999999] before 1/31/2019
+	 'ubg': ['m2off', 84.20592917, 'groff', 82.1019478816 , 'grx', -1,'grlines', 1800] }) #'ubg': ['m2off', 84.20214532, 'groff', 82.1000625816] before 1/31/2019
 pgmjoe = PGMjoe('XF:02IDB-OP{Mono:1-Ax:9', name='pgmjoe')
 espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')
 
