@@ -266,6 +266,6 @@ qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
 qem12.current1.mean_value.kind = Kind.hinted
 qem12.current3.mean_value.kind = Kind.hinted
 
-print ('21-areadetector.py {start_time-time.monotonic()}')
+print(f'21-areadetector.py {start_time-time.monotonic()}')
 
 start_time=time.monotonic()
