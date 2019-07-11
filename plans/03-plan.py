@@ -342,17 +342,17 @@ def rixscam_m6_pit_optimization2():
     #1250 l/mm grating values (wide range)
     #NOTE : grating:m7
     #m7_dict={4.85:4.256,4.95:4.452,5.05:4.623,5.09:4.683, 5.12:4.806,5.15:4.778, 5.18:4.8205, 5.25: 4.928, 5.35:5.072,5.45:5.207}
-    m7_dict={5.2841:5.1148}
+    m7_dict={4.9281:4.8445}#6.1385:5.3433,6.3385:5.7303,6.4385:5.9003}
     x_motor=m6.pit
-    x_ideal= 1.412
-    x_start= x_ideal+3*.001
-    x_stop= x_ideal-3*.001  
+    x_ideal= 1.3777
+    x_start= x_ideal+5*.001
+    x_stop= x_ideal-5*.001  
 
     y_motor=espgm.m7pit
     y_ideal = m7_dict[gr_pit]
-    y_start= y_ideal+3*.001
-    y_stop= y_ideal-3*.001
-    num = 7
+    y_start= y_ideal+5*.001
+    y_stop= y_ideal-5*.001
+    num = 11
 
     yield from mv(gvbt1,'close')
     f_string=''
@@ -365,7 +365,7 @@ def rixscam_m6_pit_optimization2():
         yield from mv (x_motor,x_val,y_motor,y_val)
         yield from sleep(10)
         yield from mv(gvbt1,'open')
-        uid = yield from count([rixscam],num=1, md = {'reason':'{} m6 first order focus - 30um vg'.format(extra_md)})        
+        uid = yield from count([rixscam],num=1, md = {'reason':'{} m6 first order focus - 20um vg'.format(extra_md)})        
         if uid == None:
             uid = -1
         f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': m6_pit = ' + str(x_val) + \
@@ -391,6 +391,50 @@ def rixscam_m6_pit_optimization2():
 
     print (f_string)
 
+def rixscam_m6_pit_optimization2_centroid(num_scan):
+#according to joe's calcs, 0.5mrad makes a signf change.  this is 0.028 deg in m6
+# beyond  +/- 0.25deg it could be very difficult to see something...especially if focusing well.
+    precison_digit = 4
+    gr_pit=round(espgm.grpit.user_readback.value,precison_digit)
+    
+    extra_md = 'gr = {}'.format(gr_pit)
+
+    #NOTE : grating:m7
+    m7_dict={6.2476:5.7229}
+    x_motor=m6.pit
+    x_ideal= 1.3777
+    x_start= x_ideal+5*.001
+    x_stop= x_ideal-5*.001  
+
+    y_motor=espgm.m7pit
+    y_ideal = m7_dict[gr_pit]
+    y_start= y_ideal+5*.001
+    y_stop= y_ideal-5*.001
+    num = 11
+
+    
+    f_string=''
+
+    yield from count([rixscam], num=1)
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , precison_digit)        
+        y_val = round (y_start + i * (y_stop - y_start) / (num - 1) , precison_digit) 
+        yield from mv (x_motor,x_val,y_motor,y_val)
+        yield from sleep(10)
+
+        for i in range(num_scan):
+            uid = yield from count([rixscam],num=1, md = {'reason':'{} m6 first order focus - 20um vg'.format(extra_md)})        
+            if uid == None:
+                uid = -1
+            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': m6_pit = ' + str(x_val) + \
+                        ' , m7_pit = ' + str(y_val) + '\n'
+    
+    yield from mv(gvbt1,'close')
+
+    print (f_string)
+
+
 def rixscam_gr_m6_pit_optimization2():
 
     yield from align.m1pit
@@ -406,26 +450,118 @@ def rixscam_gr_m6_pit_optimization2():
 def rixscam_m7_gr_2_axis(  extra_md = ' '):
     precison_digit = 4
     y_motor= espgm.m7pit
-    y_ideal= 4.8357
-    y_start = 4.756
-    y_stop = 4.9125
+    #y_ideal= 4.8445#5.5349 
+    #y_start = 4.7971#4.7813#5.4959
+    #y_stop = 4.8919#5.5734
+    y_ideal = 5.086414 
+    y_start = 5.036414
+    y_stop = 5.136414
+
 
     x_motor=  espgm.grpit
-    x_ideal= 4.8709
-    x_start= 4.8209
-    x_stop=  4.9209
-    num= 11 #12
+    #x_ideal= 4.9281#6.2368
+    #x_start= 4.8981#4.8881#6.2168
+    #x_stop=  4.9581#6.2568
+    x_ideal= 5.2939
+    x_start= 5.2639
+    x_stop = 5.3229
+    num= 14 #12
     
     f_string=''
 
-    yield from count([rixscam], md = {'reason':'dummy'})
+    yield from count([rixscam,sclr], md = {'reason':'dummy'})
 
     for i in range(num):
         x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , precison_digit)   
         y_val = round (y_start + i * (y_stop - y_start) / (num - 1) , precison_digit)      
         yield from mv (x_motor,x_val,y_motor,y_val)
+        #yield from mv(gvbt1,'open')
+        uid = yield from count([rixscam,sclr],num=1, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
+        if uid == None:
+            uid = -1
+        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': gr_pit = ' + str(x_val) + \
+                    ' , m7_pit = ' + str(y_val) + '\n'
+        #yield from mv(gvbt1,'close')
+    #yield from mv(gvbt1,'open')
+    #yield from mv(gvsc1,'close')
+    #uid = yield from count([rixscam,sclr],num=1, md = {'reason':'gv:sc1 dark'})        
+    #if uid == None:
+    #    uid = -1
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+    
+    #yield from mv(x_motor,x_ideal,y_motor, y_ideal)
+    #yield from mv(gvsc1,'open')
+    #uid = yield from count([rixscam],num=1, md = {'reason':'returned to center'})        
+    #if uid == None:
+        #uid = -1
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': gr_pit = ' + str(x_ideal) + \
+#                    ' , m7_pit = ' + str(y_ideal) + '\n'
+
+    yield from mv(gvbt1,'close')
+    
+    print (f_string) 
+
+def rixscam_m7_gr_2_axis_centroid_temp(cts, num_scans=1, extra_md = ' '):
+    precison_digit = 4
+    y_motor= espgm.m7pit
+    #y_ideal= 4.8445#5.5349 
+    #y_start = 4.7971#4.7813#5.4959
+    #y_stop = 4.8919#5.5734
+    y_ideal = 5.3915
+    y_start = 5.3915-0.004*6
+    y_stop = 5.3915+0.004*6
+
+
+    x_motor=  espgm.grpit
+    #x_ideal= 4.9281#6.2368
+    #x_start= 4.8981#4.8881#6.2168
+    #x_stop=  4.9581#6.2568
+    x_ideal= 6.0139
+    x_start= 6.0139-0.002*6
+    x_stop = 6.0139+0.002*6
+    num= 13
+    
+    f_string=''
+
+    #yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , precison_digit)   
+        y_val = round (y_start + i * (y_stop - y_start) / (num - 1) , precison_digit)      
+        yield from mv (x_motor,x_val,y_motor,y_val)
+        for s in range(num_scans):
+            uid = yield from count([rixscam],num=cts, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
+            if uid == None:
+                uid = -1
+            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': gr_pit = ' + str(x_val) + \
+                        ' , m7_pit = ' + str(y_val) + '\n'
+
+    yield from mv(gvbt1,'close')
+    
+    print (f_string) 
+
+
+def rixscam_m7_gr_2_axis_v1(  extra_md = ' '):
+    precison_digit = 4
+    y_motor= espgm.m7pit
+    y_ideal= 5.543500 
+    y_list = [5.3433,5.5433,5.7303,5.9003]
+
+    x_motor=  espgm.grpit
+    x_ideal= 6.238500 
+    x_list=[6.1385,6.2385,6.3385,6.4385]
+    num= 4 #12
+    
+    f_string=''
+    yield from mv(rixscam.cam.acquire_time, 300)
+    yield from count([rixscam,sclr], md = {'reason':'dummy'})
+
+    for i in range(num):
+        x_val = x_list[i]  
+        y_val = y_list[i]   
+        yield from mv (x_motor,x_val,y_motor,y_val)
         yield from mv(gvbt1,'open')
-        uid = yield from count([rixscam],num=1, md = {'reason':' {}'. format(extra_md)})        
+        uid = yield from count([rixscam,sclr],num=1, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
         if uid == None:
             uid = -1
         f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': gr_pit = ' + str(x_val) + \
@@ -433,7 +569,7 @@ def rixscam_m7_gr_2_axis(  extra_md = ' '):
         yield from mv(gvbt1,'close')
     yield from mv(gvbt1,'open')
     yield from mv(gvsc1,'close')
-    uid = yield from count([rixscam],num=1, md = {'reason':'gv:sc1 dark'})        
+    uid = yield from count([rixscam,sclr],num=1, md = {'reason':'gv:sc1 dark'})        
     if uid == None:
         uid = -1
     f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
@@ -447,9 +583,26 @@ def rixscam_m7_gr_2_axis(  extra_md = ' '):
 #                    ' , m7_pit = ' + str(y_ideal) + '\n'
 
     yield from mv(gvbt1,'close')
-    yield from mv(gvsc1,'open')
+    
+    print (f_string) 
 
-    print (f_string)       
+def rixscam_cff_m7_gr():
+    #cffs = [2.22,2.24,2.25,2.26,2.27,2.28,2.29,2.30,2.32,2.34]  # for mbg
+    cffs = [2.10,2.12,2.14,2.16,2.18,2.20,2.22,2.24,2.26]  # for mbg
+    
+    #yield from mv(sclr.preset_time, 180)
+    #yield from mv(extslt.vg, 10)
+    #extslt_vg = np.round(extslt.vg.user_readback.value,1)
+    #yield from mv(rixscam.cam.acquire_time, 180)
+    for cff in cffs:
+        yield from mv(pgm.cff,  cff)#Fcryo_z
+        yield from sleep(10)
+        yield from mv(pgm.en, 1085)
+        #yield from rixscam_m7_gr_2_axis(extra_md = np.str(cff)+np.str(extslt_vg))
+    #yield from mv(sclr.preset_time, 1)
+    yield from mv(rixscam.cam.acquire_time, 5)
+    #yield from count([rixscam,sclr])
+    yield from count([rixscam])
 
 def rixscam_pgm_en(extra_md = '' ):
     """
@@ -457,10 +610,11 @@ def rixscam_pgm_en(extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_ideal = 526.36 #852.4 #1250lmm   
-    x_start =  516 #821.4 #1250lmm   
-    x_stop =  530
-    num = 8
+    x_ideal = 1095 #462 #852.4 #1250lmm   
+    x_start = 1060 #451 #821.4 #1250lmm   
+    x_stop = 1130 #465
+    num = 6 #8
+    cts=60
 
     #yield from m1m3_max()
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
@@ -468,12 +622,13 @@ def rixscam_pgm_en(extra_md = '' ):
     yield from mv(gvbt1,'open')
     f_string=''
 
-    yield from count([rixscam])
+    yield from count([rixscam], md={'reason':'dummy'})
 
     for i in range(num):
         x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 2)        
         yield from mv (x_motor,x_val)
-        uid = yield from count([rixscam],num=1, md = {'reason':'{} energy calibration {}l/mm - {}um vg'.format(extra_md, extslt_vg_value, extslt_vg_value )})        
+        uid = yield from count([rixscam, ring_curr], num=cts, md = {'reason':'{} energy calibration - {}um vg'.format(extra_md, extslt_vg_value)})            
+        #uid = yield from count([rixscam],num=1, md = {'reason':'{} energy calibration - {}um vg'.format(extra_md, extslt_vg_value)})        
         if uid == None:
             uid = -1
         f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm_en = ' + str(x_val) + '\n'
@@ -483,6 +638,38 @@ def rixscam_pgm_en(extra_md = '' ):
 
     print (f_string)
     yield from mv(x_motor,x_ideal)  
+
+
+
+
+def rixscam_m4slt(extra_md = '1800 + 2500 set' ):
+
+    vgs = [1]
+    hgs = [1.5]
+    eslt = [10]
+    num=4
+
+    extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
+    
+    yield from mv(gvbt1,'open')
+    f_string=''
+
+    yield from count([rixscam], md={'reason':'dummy'})
+
+    for i in range(num):
+        #x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 2)        
+        #yield from mv (x_motor,x_val)
+        uid = yield from count([rixscam],num=1, md = {'reason':'{} energy calibration - {}um vg'.format(extra_md, extslt_vg_value)})        
+        if uid == None:
+            uid = -1
+        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm_en = '# + str(x_val) + '\n'
+   
+
+    yield from mv(gvbt1,'close')
+    yield from mv(rixscam.cam.acquire_time, 5)
+    yield from count([rixscam],num=1, md = {'reason':'dummy'})
+    print (f_string)
+    #yield from mv(x_motor,x_ideal)  
 
 
 def rixscam_energies(extra_md = '' ):
@@ -579,7 +766,8 @@ def rixscam_energies(extra_md = '' ):
     
     print (f_string) 
 
-def rixscam_acquire(detectors, Ei_vals, m7_pit_vals, num_rixs_im, pol_type=None, extra_md = ' ' ):
+def rixscam_acquire(detectors
+, Ei_vals, m7_pit_vals, num_rixs_im, pol_type=None, extra_md = ' ' ):
     """
     Parameters
     ----------
@@ -650,14 +838,14 @@ def rixscam_acquire(detectors, Ei_vals, m7_pit_vals, num_rixs_im, pol_type=None,
         yield from mv(gvbt1,'close')
          
         #DARKS
-    yield from mv(gvbt1,'open')
-    yield from mv(gvsc1,'close')
-    for i in range(0,2):
-        uid = yield from count(detectors,num=1, md = {'reason':'gv:sc1 dark'})        
-        if uid == None:
-           uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
-    yield from mv(gvbt1,'close')
+    #yield from mv(gvbt1,'open')
+    #yield from mv(gvsc1,'close')
+    #for i in range(0,2):
+        #uid = yield from count(detectors,num=1, md = {'reason':'gv:sc1 dark'})        
+        #if uid == None:
+        #  uid = -1
+        #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+    #yield from mv(gvbt1,'close')
     yield from mv(gvsc1,'open')
     
     #print(f_string) 
@@ -1019,33 +1207,33 @@ def rixscam_Ei_dep(extra_md = '' ):
     print (f_string) 
 
 
-def rixscam_dc_z_optimaztion(extra_md = '' ):
+def rixscam_dc_z_optimization(extra_md = '' ):
     x_motor=  dc.z
-    x_ideal= 200
-    x_start= x_ideal + 60
-    x_stop=  x_ideal - 60
-    num=  7 #12
+    x_ideal= 260
+    x_start= x_ideal + 12
+    x_stop=  x_ideal - 12
+    num=  9 #12
     yield from mv(gvbt1,'open')
     f_string=''
 
     yield from count([rixscam], md = {'reason':'dummy'})
-    yield from mv(gvbt1,'close')
+    yield from mv(gvbt1,'open')
     for i in range(num):
         x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 3)        
         yield from mv (x_motor,x_val)#,y_motor,y_val)
-        yield from mv(gvbt1,'open') 
+        #yield from mv(gvbt1,'open') 
         uid = yield from count([rixscam],num=1, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
            uid = -1
         f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': dc_z = ' + str(x_val) + '\n'#\
                    # ' , m7_pit = ' + str(y_val) + '\n'
-        yield from mv(gvbt1,'close')
+        #yield from mv(gvbt1,'close')
 
     yield from mv(gvsc1,'close')
-    uid = yield from count([rixscam],num=1, md = {'reason':'gv:sc1 dark'})        
-    if uid == None:
-        uid = -1
-    f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+    #uid = yield from count([rixscam],num=1, md = {'reason':'gv:sc1 dark'})        
+    #if uid == None:
+    #    uid = -1
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
     
     #yield from mv(x_motor,x_ideal)#,y_motor, y_ideal)
     yield from mv(gvsc1,'open')
@@ -1059,12 +1247,114 @@ def rixscam_dc_z_optimaztion(extra_md = '' ):
     yield from mv (x_motor,x_ideal)
     print (f_string)
 
+
+def rixscam_dc_z_optimization_centroid(num_scan):
+    x_motor=  dc.z
+    x_ideal= 260
+    x_start= x_ideal + 12
+    x_stop=  x_ideal - 12
+    num=  9 #12
+    yield from mv(gvbt1,'open')
+    f_string=''
+
+    yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 3)        
+        yield from mv (x_motor,x_val)#,y_motor,y_val)
+        
+        for i in range(num_scan):
+            uid = yield from count([rixscam],num=1)        
+            if uid == None:
+                uid = -1
+            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': dc.z = ' + str(x_val) + '\n'
+        
+    yield from mv(gvbt1,'close')
+    yield from mv (x_motor,x_ideal)
+    print (f_string)
+
+
 def rixscam_cff_optimization(extra_md = '' ):
     x_motor= pgm.cff
-    x_ideal= 2.32
-    x_start= x_ideal + 0.06
-    x_stop=  x_ideal - 0.08
-    num= 8#12
+    y_motor= pgm.en
+    y_val= 1085
+    x_ideal= 2.26
+    x_start= x_ideal -0.16 #0.04#
+    x_stop=  x_ideal +0.08 #0.04#
+    num= 13 #5 #12
+    yield from mv(gvbt1,'open')
+    f_string=''
+
+    yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 4)        
+        yield from mv (x_motor,x_val)
+        yield from sleep(5)
+        yield from mv (y_motor,y_val)
+        uid = yield from count([rixscam],num=1, md = {'reason':' {}'. format(extra_md)})        
+        if uid == None:
+            uid = -1
+        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'#\
+                   # ' , m7_pit = ' + str(y_val) + '\n'
+    #yield from mv(gvsc1,'close')
+    #uid = yield from count([rixscam],num=1, md = {'reason':'gv:sc1 dark'})        
+    #if uid == None:
+    #    uid = -1
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+    
+    #yield from mv(x_motor,x_ideal)#,y_motor, y_ideal)
+    #yield from mv(gvsc1,'open')
+   # uid = yield from count([rixscam],num=1, md = {'reason':'returned to center'})        
+    #if uid == None:
+    #    uid = -1
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_ideal) + '\n'#\
+    #                #' , m7_pit = ' + str(y_ideal) + '\n'
+
+    yield from mv(gvbt1,'close')
+    yield from mv (x_motor,x_ideal)
+    print (f_string)
+
+
+
+
+def rixscam_cff_optimization_centroid(num_scan):
+    x_motor= pgm.cff
+    y_motor= pgm.en
+    y_val= 1085
+    x_ideal= 2.20
+    x_start= x_ideal -0.1 #0.04#
+    x_stop=  x_ideal +0.1 #0.04#
+    num= 11 #5 #12
+    yield from mv(gvbt1,'open')
+    f_string=''
+
+    yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 4)        
+        yield from mv (x_motor,x_val)
+        yield from sleep(5)
+        yield from mv (y_motor,y_val)
+        for i in range(num_scan):
+            uid = yield from count([rixscam],num=1)        
+            if uid == None:
+                uid = -1
+            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+  
+    yield from mv(gvbt1,'close')
+    yield from mv (x_motor,x_ideal)
+    print (f_string)
+
+
+def rixscam_exit_slit_optimization(extra_md = '' ):
+    x_motor= extslt.vg
+    y_motor= pgm.en
+    y_val= 850.7
+    x_ideal= 10
+    x_start= x_ideal +70
+    x_stop=  x_ideal
+    num= 8 #12
     yield from mv(gvbt1,'open')
     f_string=''
 
@@ -1072,11 +1362,13 @@ def rixscam_cff_optimization(extra_md = '' ):
 
     for i in range(num):
         x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , 4)        
-        yield from mv (x_motor,x_val)#,y_motor,y_val)
+        yield from mv (x_motor,x_val)
+        yield from sleep(5)
+        yield from mv (y_motor,y_val)
         uid = yield from count([rixscam],num=1, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'#\
+        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': extslt.vg = ' + str(x_val) + '\n'#\
                    # ' , m7_pit = ' + str(y_val) + '\n'
     yield from mv(gvsc1,'close')
     uid = yield from count([rixscam],num=1, md = {'reason':'gv:sc1 dark'})        
@@ -1089,7 +1381,7 @@ def rixscam_cff_optimization(extra_md = '' ):
    # uid = yield from count([rixscam],num=1, md = {'reason':'returned to center'})        
     #if uid == None:
     #    uid = -1
-    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_ideal) + '\n'#\
+    #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': extslt.vg = ' + str(x_ideal) + '\n'#\
     #                #' , m7_pit = ' + str(y_ideal) + '\n'
 
     yield from mv(gvbt1,'close')
@@ -1154,249 +1446,6 @@ def rixscam_m7_pit():
     print (f_string)
     yield from mv(gvbt1,'close')
 
-
-def n2gascell_vs_M1roll():
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,300)
-    yield from mv(pgm.cff,2.3277)
-    yield from mv(pgm.en,398.8)
-    yield from sleep(10)
-
-    yield from multi_scan([qem07],5,m1.rol,1700,2500,pgm.en,398.8,402.3,num=301)
-
-def n2gascell_vs_M3yaw_M3y():
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,300)
-    yield from mv(pgm.cff,2.3277)
-    yield from mv(pgm.en,400)
-    yield from sleep(10)
-
-    yield from multi_scan([qem07],5,m3.yaw,-0.75,-0.25,pgm.en,401.8,405.5,num=351)
-
-    yield from mv(m3.yaw,-0.5)
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    yield from mv(pgm.cff,2.3277)
-    yield from mv(pgm.en,400)
-    yield from sleep(10)
-
-    yield from multi_scan([qem07],5,m3.y,-0.05,0.05,pgm.en,401.8,405.5,num=351)
-
-    yield from mv(m3.y,0)
-
-def mixed_gascell_vs_cff():
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    ene_n2=400.3
-    ene_neon=866.2 
-    yield from gcdiag.grid
-    yield from mv(pgm.en,ene_n2)
-    yield from pol_H(2.2)
-    #yield from sleep(600)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    for i in list(np.arange(2.18,2.45,0.02)):
-        yield from mv(pgm.cff,i)
-        yield from mv(pgm.en,398.8)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,398.8,402.5,251, md = {'reason':'N2-K XAS vs c_ff'})
-
-    for i in list(np.arange(2.18,2.45,0.02)):
-        yield from mv(pgm.cff,i)
-        yield from mv(pgm.en,398.8)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,398.8,402.5,251, md = {'reason':'N2-K XAS vs c_ff'})
-
-
-    yield from mv(pgm.en,ene_neon)
-    yield from pol_H(-2.8)
-    yield from align.m1pit
-    yield from m3_check()
-    yield from sleep(300)
-    yield from align.m1pit
-    yield from m3_check()
-    yield from sleep(900)
-    yield from align.m1pit
-    yield from m3_check()
-    for i in list(np.arange(2.11,2.4,0.02)):
-        yield from mv(pgm.cff,i)
-        yield from mv(pgm.en,863)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,863,871,301, md = {'reason':'Ne-K XAS vs c_ff'})
-
-
-    yield from align.m1pit
-    yield from m3_check()
-    for i in list(np.arange(2.11,2.4,0.02)):
-        yield from mv(pgm.cff,i)
-        yield from mv(pgm.en,863)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,863,871,301, md = {'reason':'Ne-K XAS vs c_ff'})
-
-
-def mixed_gascell_vs_extslt():
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    ene_n2=400.3
-    ene_neon=866.2 
-    best_cff = 2.32
-    best_cff_neon = 2.23
-    extslt_vgs = [10, 20, 30, 40]
-    yield from gcdiag.grid
-    #yield from mv(pgm.en,ene_n2)
-    #yield from pol_H(2.2)
-    #yield from sleep(600)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    yield from mv(pgm.cff,best_cff)
-
-    for gap in extslt_vgs:
-        yield from mv(extslt.vg,gap)
-        yield from mv(pgm.en,398.8)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,398.8,402.5,251, md = {'reason':'N2-K XAS vs extslt vg {:.0f}'.format(gap)})
-
- 
-
-    #yield from mv(pgm.en,ene_neon)
-    #yield from pol_H(-2.8)
-    #yield from align.m1pit
-    #yield from m3_check()
-    #yield from sleep(300)
-    #yield from align.m1pit
-    #yield from m3_check()
-    #yield from sleep(900)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    #yield from mv(pgm.cff,best_cff_neon)
-    #for gap in extslt_vgs:
-        #yield from mv(extslt.vg,gap)
-        #yield from mv(pgm.en,863)
-        #yield from sleep(10)
-        #yield from scan([qem07,ring_curr],pgm.en,863.5,870.5,251, md = {'reason':'Ne-K XAS vs extslt vg {:.0f}'.format(gap)})
-
-
-    #yield from align.m1pit
-    #yield from m3_check()
-    #for gap in extslt_vgs:
-        #yield from mv(extslt.vg,gap)
-        #yield from mv(pgm.en,863)
-        #yield from sleep(10)
-        #yield from scan([qem07,ring_curr],pgm.en,863,871,301, md = {'reason':'Ne-K XAS vs extslt vg {:.0f}'.format(gap)})
-
-
-def n2gascell_vs_cff():
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    ene_n2=400.3
-    cff_ideal_500=2.3277
-    yield from gcdiag.grid
-    #yield from pol_H(2.2)
-    #yield from align.m1pit
-    #yield from m3_check()
-    #yield from mv(pgm.en,398.5)
-    #yield from sleep(10)
-    #yield from scan([qem07,ring_curr],pgm.en,398.5,403.5,401)
-
-    #for i in range(-5, 6):
-        #yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        #yield from mv(pgm.en,398.5)
-        #yield from sleep(10)
-        #yield from scan([qem07,ring_curr],pgm.en,398.5,403.5,401)
-
-    #yield from pol_V(3)
-    #yield from align.m1pit
-    #yield from m3_check()
-    #yield from mv(pgm.en,398.5)
-
-    for i in range(-1, 7):
-        yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        yield from mv(pgm.en,399.5)
-        yield from sleep(10)
-        yield from scan([qem07,ring_curr],pgm.en,399.5,401.7,101)
-
-def neon_gascell_vs_cff():
-    
-    ene_neon=867.2 
-    cff_ideal_500=2.2848
-    #cff_ideal_1200=3.7782
-       
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    
-    #Grating 500l/mm
-    #yield from pgm.mbg    
-    #yield from mv(pgm.cff, cff_ideal_500)
-   
-    yield from mv(pgm.m2off,84.244630)
-    yield from mv(pgm.groff,82.102040)
-    yield from gcdiag.grid
-
-    yield from pol_V(3)
-    yield from sleep(300)
-    yield from align.m1pit
-    yield from m3_check()
-
-    for i in range(-5, 6):
-        yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        yield from mv(pgm.en,863)
-        yield from sleep(120)
-        yield from scan([qem07,ring_curr],pgm.en,863,872,301)
- 
-    yield from pol_H(-2.8)
-    yield from sleep(300)
-    yield from align.m1pit
-    yield from m3_check()
-
-    for i in range(-5, 6):
-        yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        yield from mv(pgm.en,863)
-        yield from sleep(120)
-        yield from scan([qem07,ring_curr],pgm.en,863,872,301)
-
-    
-    yield from mv(pgm.m2off,84.183168)
-    yield from mv(pgm.groff,82.065227)
-    yield from align.m1pit
-    yield from m3_check()
-
-    yield from sleep(300)
-    
-    for i in range(-7, 4):
-        yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        yield from mv(pgm.en,864)
-        yield from sleep(120)
-        yield from scan([qem07,ring_curr],pgm.en,864,873,301)
-
-
-    yield from mv(pgm.m2off,84.244630)
-    yield from mv(pgm.groff,82.102040)
- 
-    #Grating 1200l/mm
-    #yield from pgm.hbg    
-    #yield from mv(pgm.cff, cff_ideal_1200)
-    #yield from mv(pgm.en,ene_neon)
-    #yield from sleep(7200)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    #yield from scan([qem07,ring_curr],pgm.en,861,871,401)
-    #yield from mv(extslt.vg,20)
-    #for i in range(-8, 8):
-        #yield from m1_check()
-        #yield from sleep(5)
-        #yield from mv(pgm.cff,cff_ideal_1200+i*0.03)
-        #yield from mv(pgm.en,861)
-        #yield from sleep(10)
-        #yield from scan([qem07,ring_curr],pgm.en,861,871,401)
-    
-    #yield from pgm.mbg
-    #yield from mv(pgm.cff, cff_ideal_500)
-    #yield from mv(pgm.en,ene_neon) 
-    #yield from mv(extslt.vg,30)
 
 
 def m1_check():
@@ -1467,17 +1516,17 @@ def m1_align_fine():
         yield from rel_scan([qem05],m1.x,-3.5,3.5,36)
     yield from mv(m1.pit,m1pit_start)
     
-def m1_align_fine2():
+#def m1_align_fine2():  ## MOVED to STANDAR-PLANS in STartup
 
-    m1x_init=m1.x.user_readback.value
-    m1pit_init=m1.pit.user_readback.value
-    m1pit_step=50
-    m1pit_start=m1pit_init-3*m1pit_step
+#    m1x_init=m1.x.user_readback.value
+#    m1pit_init=m1.pit.user_readback.value
+#    m1pit_step=50
+#    m1pit_start=m1pit_init-3*m1pit_step
     
-    for i in range(0,7):
-        yield from mv(m1.pit,m1pit_start+i*m1pit_step)
-        yield from rel_scan([qem05],m1.x,-3.5,3.5,36)
-    yield from mv(m1.pit,m1pit_start)
+#    for i in range(0,7):
+#        yield from mv(m1.pit,m1pit_start+i*m1pit_step)
+#        yield from rel_scan([qem05],m1.x,-3.5,3.5,36)
+#    yield from mv(m1.pit,m1pit_start)
 
 
 def find_energy():
@@ -1586,6 +1635,21 @@ def m3_stability_focus():
         yield from relative_scan([qem07],extslt.hc,-0.12,0.12,41)
         yield from mv(extslt.hc,peaks['cen']['gc_diag_diode']-0.2)
 
+
+def find_center_of_rot():
+    ow_start = 39.45
+    ow_step = 0.01
+    m4pit_start = -4.0435
+    m4pit_step = 0.005
+    
+    for i in range(0,30):
+        yield from mv(m4.pit,m4pit_start-i*m4pit_step)
+        yield from sleep(10)
+        print('Current cycle number: {}' .format(i))
+        yield from scan([qem11],ow,ow_start-25*ow_step,ow_start+25*ow_step,51)    
+        yield from sleep(10)
+
+
 def center_of_rot():
     yield from mv(epu1.gap,41.2)
     yield from mv(pgm.en,930)
@@ -1666,28 +1730,42 @@ def epu_calib_left():
 
 
 def m4_yaw_roll():  
+    #cryo.x.settle_time=0.2
+    #cryo.y.settle_time=0.2
+    
+    #r_md = 'V beam with yaw roll'
+    
+    #yield from mv(extslt.vg,30)
+    #yield from mv(extslt.hg,150)
+    #yield from mv(epu1.gap,40.8) #detunedyield from mv(cryo.x,33.50)
+#    mir4_rol_init = 1.421
+#    mir4_rol_step= 0.002
+    mir4_yaw_init = -0.7064
+    mir4_yaw_step = 0.0003 #0.002
+
+    for i in range(-5,6):
+        yield from mv(m4.yaw, mir4_yaw_init + mir4_yaw_step * (1 * i))
+        #yield from mv(m4.rol,mir4_rol_init+mir4_rol_step*(1*i))
+        #yield from mv(cryo.x,39.0)
+        yield from mv(cryo.y,90.010) # to be adjusted
+        yield from sleep(5)
+        yield from rel_scan([sclr],cryo.y,0,0.03,91)
+        #yield from rel_scan([sclr],cryo.y,0,0.04,121, md={'reason':r_md})
+
+
+def pitch_and_yaw():
     cryo.x.settle_time=0.2
     cryo.y.settle_time=0.2
     
-    yield from mv(extslt.vg,30)
-    yield from mv(extslt.hg,150)
-    #yield from mv(epu1.gap,40.8) #detunedyield from mv(cryo.x,33.50)
-    mir4_rol_init = 2.552
-    mir4_rol_step= 0.003
-    mir4_yaw_init = -1.202
-    mir4_yaw_step= 0.002
+    
+    #yield from mv(extslt.hg,150)
+    mir4_pit_init = -4.1027
+    mir4_pit_step = -0.0003
 
-    for i in range(0, 5):
-        yield from mv(m4.yaw,mir4_yaw_init+mir4_yaw_step*(1*i+1))
-        #yield from mv(m4.rol,mir4_rol_init+mir4_rol_step*(1*i-3))
-        yield from mv(cryo.x,40.0)
-        yield from mv(cryo.y,94.38)
-        yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.10,31)
-        #yield from mv(cryo.y,98.0)
-        #yield from mv(cryo.x,37.65)
-        #yield from sleep(30)
-        #yield from scan([sclr],cryo.x,37.65,37.95,91)
+    for i in range(0,6):
+        yield from mv(m4.pit, mir4_pit_init + mir4_pit_step * (1 * i))
+        yield from m4_yaw_roll()
+
 
 def m4_y():  
     
@@ -1699,24 +1777,27 @@ def m4_y():
     
     for i in range(1, 7):
         yield from mv(m4.y,mir4_y_init+mir4_y_step*(1*i-3))
-        yield from mv(cryo.x,40.0)
+        yield from mv(cryo.x,39.3)
         yield from mv(cryo.y,94.47)
         yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.10,31)
+        yield from relative_scan([sclr],cryo.y,0,0.15,31)
         
 def m4_pit():
-    yield from mv(extslt.vg,30)
+    cryo.x.settle_time=0.2
+    cryo.y.settle_time=0.2
+    #yield from mv(extslt.vg,30)
     yield from mv(extslt.hg,150)
     #yield from mv(epu1.gap,40.8) #detuned EPU @930 eV
-    mir4_pit_init = -4.056
-    mir4_pit_step= 0.002
+    mir4_pit_init = -4.1024
+    mir4_pit_step= 0.0003 #0.001
 
-    for i in range(9):
-        yield from mv(m4.pit,mir4_pit_init+mir4_pit_step*(1*i-4))
-        yield from mv(cryo.x,40.0)
-        yield from mv(cryo.y,94.44) # to be adjusted
+    for i in range(-7, 8):
+        yield from mv(m4.pit,mir4_pit_init+1*mir4_pit_step*(1*i))
+        #yield from mv(cryo.x,37.8)
+        yield from mv(cryo.y,90.152) # to be adjusted
         yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.10,31)
+        yield from relative_scan([sclr],cryo.y,0,0.02,41)
+        #yield from relative_scan([sclr],cryo.y,0,0.10,31)
         #yield from mv(cryo.y,97.5)
         #yield from mv(cryo.x,43.350+0.08*(1*i))
         #yield from mv(cryo.x,42.7) # to be adjusted
@@ -1836,21 +1917,70 @@ def m4_x():
 def m4_vexitslt_focus():
     d11=[qem11]
     extslt_ini=5
-    extslt_final=50
-    extslt_step=5
+    extslt_final=40
+    extslt_step=2.5
     
     for i in range(0, 1+round(abs(extslt_ini-extslt_final)/extslt_step)):
         yield from mv(extslt.vg,extslt_ini+i*extslt_step)
-        yield from sleep(30)
-        yield from mv(cryo.x,36.85)
-        yield from mv(cryo.y,95.91) # to be adjusted
-        yield from sleep(30)
-        yield from relative_scan(d11,cryo.y,-0.06,0.06,61)
+        #yield from sleep(5)
+        #yield from mv(cryo.x,40.6)
+        yield from mv(cryo.y,90.01) # to be adjusted
+        yield from sleep(10)
+        yield from relative_scan([sclr],cryo.y,0,0.025,76)
         #yield from mv(cryo.y,98)
         #yield from mv(cryo.x,43.2) # to be adjusted
         #yield from sleep(30)
         #yield from relative_scan(d11,cryo.x,0,0.4,151)  
 
+    yield from mv(epu1.gap,39.29)
+    for i in range(0, 1+round(abs(extslt_ini-extslt_final)/extslt_step)):
+        yield from mv(extslt.vg,extslt_ini+i*extslt_step)
+        #yield from sleep(5)
+        #yield from mv(cryo.x,40.6)
+        yield from mv(cryo.y,90.01) # to be adjusted
+        yield from sleep(10)
+        yield from relative_scan([sclr],cryo.y,0,0.025,76)
+        #yield from mv(cryo.y,98)
+        #yield from mv(cryo.x,43.2) # to be adjusted
+        #yield from sleep(30)
+        #yield from relative_scan(d11,cryo.x,0,0.4,151)  
+
+
+    yield from mv(cryo.y,89.91) 
+
+def m4_depth_of_focus():
+    cryo.x.settle_time=0.2
+    cryo.y.settle_time=0.2
+    yield from mv(extslt.vg,10)
+    yield from mv(extslt.hg,150)
+    cryo_z_init = 0.1#-0.8
+    cryo_z_step= 0.15
+    v_focus_x = 37.65
+    v_focus_y = 89.950
+
+    for i in range(-6, 21): #-15, 16
+        yield from mv(cryo.z,cryo_z_init + cryo_z_step * (1 * i))
+        yield from mv(cryo.x, v_focus_x)
+        yield from mv(cryo.y, v_focus_y) 
+        yield from sleep(5)
+        print('\n\n\t\tMoved cryo.z for i = {}\n\n'.format(i))
+        yield from rel_scan([sclr],cryo.y,0,0.035,106)
+
+    yield from mv(cryo.z,cryo_z_init)
+    cryo_x_init = 38.45
+
+    yield from mv(cryo.y,88.9550)
+    x_offset = -0.014
+    c = 0
+    #yield from mv(cryo.x,38.42)
+    for i in range(-6, 21): #-15, 16
+        c = c + 1
+        yield from mv(cryo.z, cryo_z_init + cryo_z_step * (1 * i))
+        yield from mv(cryo.x, cryo_x_init + c * x_offset)
+        #yield from mv(cryo.x,cryo_x_init)
+        yield from sleep(5)
+        print('\n\n\t\tMoved cryo.z for i = {}\n\n'.format(i))
+        yield from rel_scan([sclr],cryo.x,0,0.2,201)
   
 def m4_cryo_x_vfocus():
     d11=[qem11]
@@ -2118,7 +2248,18 @@ def beam_profile_vs_m4_surface():
         yield from sleep(10)
         yield from scan(d11,cryo.x,21.3,23.3,401)
 
+def beam_position_vs_m4_height_v():
+#Beam Profile with Si-blade aligned at the center of rotation of SC
+    # Optics Wheel should be at 50.9 deg to have the photodiode located behind the cryostat
+    dets = [sclr]
+    m4slt_bot_init= -2.0
+    step_x = 0.2
 
+    yield from mv(m4slt.vg,0.25)
+    for i in range(0, 19):
+        yield from mv(m4slt.vc,m4slt_bot_init+step_x*i)
+        yield from sleep(10)
+        yield from scan(dets,cryo.y,90,90.1,301)
 
 def beam_profile_vs_m4_surface_v():
 #Beam Profile with Si-blade aligned at the center of rotation of SC
@@ -2397,39 +2538,38 @@ def epu_calib_gs_phase_0mm_Mar2018():
         yield from sleep(10)
         yield from relative_scan(d,epu1.gap,0,1.0,75)
 
-def alignM3x():
-    # get the exit slit positions to return to at the end
-    vg_init = extslt.vg.user_setpoint.value
-    hg_init = extslt.hg.user_setpoint.value
-    hc_init = extslt.hc.user_setpoint.value
-    print('Saving exit slit positions for later')
+#def alignM3x():
+#    # get the exit slit positions to return to at the end
+#    vg_init = extslt.vg.user_setpoint.value
+#    hg_init = extslt.hg.user_setpoint.value
+#    hc_init = extslt.hc.user_setpoint.value
+#    print('Saving exit slit positions for later')
     
-    # get things out of the way
-    yield from m3diag.out
-    # read gas cell diode
-    yield from gcdiag.grid
+#    # get things out of the way
+#    yield from m3diag.out
+#    # read gas cell diode
+#    yield from gcdiag.grid
 
-    # set detector e.g. gas cell diagnostics qem
-    detList=[qem07]
-    # set V exit slit value to get enough signal
-    yield from mv(extslt.vg, 30)
-    # open H slit full open
-    yield from mv(extslt.hg, 9000)
+#    # set detector e.g. gas cell diagnostics qem
+#    detList=[qem07]
+#    # set V exit slit value to get enough signal
+#    yield from mv(extslt.vg, 30)
+#    # open H slit full open
+#    yield from mv(extslt.hg, 9000)
 
-    #move extslt.hs appropriately and scan m3.x
-    yield from mv(extslt.hc,-9)
-    yield from relative_scan(detList,m3.x,-6,6,61)
+#    #move extslt.hs appropriately and scan m3.x
+#    yield from mv(extslt.hc,-9)
+#    yield from relative_scan(detList,m3.x,-6,6,61)
 
-    yield from mv(extslt.hc,-3)
-    yield from relative_scan(detList,m3.x,-6,6,61)
+#    yield from mv(extslt.hc,-3)
+#    yield from relative_scan(detList,m3.x,-6,6,61)
 
-    yield from mv(extslt.hc,3)
-    yield from relative_scan(detList,m3.x,-6,6,61)
+#    yield from mv(extslt.hc,3)
+#    yield from relative_scan(detList,m3.x,-6,6,61)
     
-    print('Returning exit slit positions to the inital values')
-    yield from mv(extslt.hc,hc_init)
-    yield from mv(extslt.vg, vg_init, extslt.hg, hg_init)
-
+#    print('Returning exit slit positions to the inital values')
+#    yield from mv(extslt.hc,hc_init)
+#   yield from mv(extslt.vg, vg_init, extslt.hg, hg_init)
 
 def detectorz():
     yield from mv(rixscam.cam.acquire_time,480)
@@ -2438,7 +2578,7 @@ def detectorz():
     for i in range (0,75,1):
         yield from mvr(dc.z,-5)
         yield from count([rixscam],md = {'reason':'carbon-tape dc_z scans'})
-        x_val = db[-1].table('baseline')['dc_z'][1]
+        x_val = db[-1].table('baseli5.24235')['dc_z'][1]
         f_string = 'scan no ' + str(db[-1].start['scan_id']) + ': dc_z = ' + str(x_val) + \
                     ' , i = ' + str(i) + '\n'
         print(f_string)
@@ -2480,5 +2620,12 @@ def temp_eq(templimit=1,checktime=5):
 
 
 
+def beam_profile_vs_cryoz():
+    for i in range(0, 31):
+        yield from mv(cryo.z,0.1+i*0.1)
+        yield from sleep(10)
+        yield from rel_scan([sclr],cryo.y,0,0.08,51)
 
-   
+
+
+    

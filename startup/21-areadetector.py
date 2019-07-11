@@ -145,7 +145,7 @@ class StandardProsilicaROI(StandardProsilica):
         '''   
 
         if status is 'Enable' or status is 'Disable':
-            getattr(self, 'roi' + str(roi_num) + '.enable').set(status)
+            getattr(self, 'roi' + str(roi_num) + '.enablE').set(status)
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
 

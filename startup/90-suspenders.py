@@ -2,7 +2,7 @@
 from bluesky.suspenders import SuspendFloor
                
 
-ring_suspender = SuspendFloor(ring_curr, 350, resume_thresh=380, sleep=120)
+ring_suspender = SuspendFloor(ring_curr, 190, resume_thresh=200, sleep=120)
 # Is this the right PV???
 #fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Enbl-Sts'), sleep=20*60)
 

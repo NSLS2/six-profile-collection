@@ -1,3 +1,5 @@
 history.sqlite
 db/
 *~
+static/
+backupstartup/

@@ -1,0 +1,10 @@
+%run -i /home/xf02id1/.ipython/profile_collection/startup/00-startup.py
+%run -i /home/xf02id1/.ipython/profile_collection/startup/01-olog-integration.py           
+%run -i /home/xf02id1/.ipython/profile_collection/startup/04-epu.py                        
+%run -i /home/xf02id1/.ipython/profile_collection/startup/10-mirror.py                     
+%run -i /home/xf02id1/.ipython/profile_collection/startup/12-slits.py                      
+%run -i /home/xf02id1/.ipython/profile_collection/startup/13-chamber.py                    
+%run -i /home/xf02id1/.ipython/profile_collection/startup/14-mask.py                       
+%run -i /home/xf02id1/.ipython/profile_collection/startup/15-valves_and_shutters.py       
+%run -i /home/xf02id1/.ipython/profile_collection/startup/20-diagon.py                    
+%run -i /home/xf02id1/.ipython/profile_collection/startup/21-areadetector.py 

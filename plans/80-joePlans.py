@@ -1,4 +1,98 @@
 
+def pivotBeamAboutM3_a(M4_deltaX_mm):
+    # pivot the beam about M3 while maintaining the same angle of incidence on M4
+    # positions are relative to M3, listed are the nominal positions
+
+    # nominal starting positions
+    # distances in mm, angles in rad
+
+    # M3 position
+    M3_x = 0
+    M3_z = 0
+    # exit slit
+    Xslit_x = 0
+    Xslit_z = 8002
+    # M4 slits position
+    M4slit_x = 0
+    M4slit_z = 13602
+    # M4 position
+    M4_pitch0 = np.radians(1.5) # nominal pitch
+    M4_x = 0+M4_deltaX_mm
+    M4_z = 14002
+    # focus position
+    foc_x = -1000*np.sin(2*M4_pitch0)
+    foc_z = 14002+1000*np.cos(2*M4_pitch0)
+
+    M3_deltaP = 0.5*M4_deltaX_mm/(M4_z-M3_z)
+    Xslit_delX = 2*M3_deltaP*(Xslit_z-M3_z)
+    M4slit_delX = 2*M3_deltaP*(M4slit_z-M3_z)
+    #
+    asq = (M4_x-M3_x)**2 + (M4_z-M3_z)**2
+    bsq = (M4_x-foc_x)**2 + (M4_z-foc_z)**2
+    csq = (foc_x-M3_x)**2 + (foc_z-M3_z)**2
+    cosTheta = (asq+bsq-csq)/(2*np.sqrt(asq)*np.sqrt(bsq))
+    M4_deltaP = 2*M3_deltaP    
+
+    string1 = 'M4 delta pitch = {:.7f} deg, {:.1f} urad'.format(np.degrees(M4_deltaP),M4_deltaP*1e6)
+    string2 = 'M4 delta X = {:.4} mm'.format(M4_deltaX_mm)
+    string3 = 'M4 slit delta X = {:.4} mm'.format(M4slit_delX)
+    string4 = 'Exit slit delta X = {:.4} mm'.format(Xslit_delX)
+    string5 = 'M3 delta pitch = {:.7f} deg, {:.1f} urad'.format(np.degrees(M3_deltaP),M3_deltaP*1e6)
+    print(string1)
+    print(string2)
+    print(string3)
+    print(string4)
+    print(string5)
+
+
+
+def pivotBeamAboutM3_b(M4_deltaX_mm):
+    # pivot the beam about M3 maintaining a fixed position at the sample
+    # positions are relative to M3, listed are the nominal positions
+
+    # nominal starting positions
+    # distances in mm, angles in rad
+
+    # M3 position
+    M3_x = 0
+    M3_z = 0
+    # exit slit
+    Xslit_x = 0
+    Xslit_z = 8002
+    # M4 slits position
+    M4slit_x = 0
+    M4slit_z = 13602
+    # M4 position
+    M4_pitch0 = np.radians(1.5) # nominal pitch
+    M4_x = 0+M4_deltaX_mm
+    M4_z = 14002
+    # focus position
+    foc_x = -1000*np.sin(2*M4_pitch0)
+    foc_z = 14002+1000*np.cos(2*M4_pitch0)
+
+    M3_deltaP = 0.5*M4_deltaX_mm/(M4_z-M3_z)
+    Xslit_delX = 2*M3_deltaP*(Xslit_z-M3_z)
+    M4slit_delX = 2*M3_deltaP*(M4slit_z-M3_z)
+    #
+    asq = (M4_x-M3_x)**2 + (M4_z-M3_z)**2
+    bsq = (M4_x-foc_x)**2 + (M4_z-foc_z)**2
+    csq = (foc_x-M3_x)**2 + (foc_z-M3_z)**2
+    cosTheta = (asq+bsq-csq)/(2*np.sqrt(asq)*np.sqrt(bsq))
+    M4_pitch = 0.5*(np.pi-np.arccos(cosTheta))
+    M4_deltaP = M4_pitch0-M4_pitch
+
+    string1 = 'M4 delta pitch = {:.7f} deg, {:.1f} urad'.format(np.degrees(M4_deltaP),M4_deltaP*1e6)
+    string2 = 'M4 delta X = {:.4} mm'.format(M4_deltaX_mm)
+    string3 = 'M4 slit delta X = {:.4} mm'.format(M4slit_delX)
+    string4 = 'Exit slit delta X = {:.4} mm'.format(Xslit_delX)
+    string5 = 'M3 delta pitch = {:.7f} deg, {:.1f} urad'.format(np.degrees(M3_deltaP),M3_deltaP*1e6)
+    print(string1)
+    print(string2)
+    print(string3)
+    print(string4)
+    print(string5)
+
+
 def monoOrdersScan1():
     # read gas cell photodiode
     yield from gcd_diode()

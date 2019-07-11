@@ -102,14 +102,44 @@ class FileStoreHDF5Single(FileStorePluginBase):
         return self.parent.cam.num_images.get()
 
     def stage(self):
-        super().stage()
+        #super().stage()
         # this over-rides the behavior is the base stage
+        
+        import itertools
+        for j in itertools.count():
+            try:
+                return super().stage()
+            except TimeoutError:
+                N_try = 20
+                if j < 20:
+                    print(f"failed to stage on try{j}/{N_try}, may try again")
+                    continue
+                else:
+                    raise
+
         self._fn = self._fp
 
         resource_kwargs = {'template': self.file_template.get(),
                            'filename': self.file_name.get(),
                            'frame_per_point': self.get_frames_per_point()}
         self._generate_resource(resource_kwargs)
+
+
+    def unstage(self, *args, **kwargs):
+        import itertools
+        for j in itertools.count():
+            try:   
+                ret = super().unstage()
+            except TimeoutError:
+                N_try = 20
+                if j < N_try:
+                    print(f"failed to unstage on attempt {j}/{N_try}, may try again")
+                    continue    
+                else:
+                    raise
+            else:
+                break
+        return ret
 
 
 class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single, FileStoreIterativeWrite):
@@ -317,9 +347,24 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
 
     # write a new stage method that adds `column_names` and `key` to
     # resource_kwargs.
+
     def stage(self):
-        super().stage()
+        #super().stage()
         # this over-rides the behavior is the base stage
+        
+        import itertools
+        for j in itertools.count():
+            try:
+                return super().stage()
+            except TimeoutError:
+                N_try = 20
+                if j < 20:
+                    print(f"failed to stage on try{j}/{N_try}, may try again")
+                    continue
+                else:
+                    raise
+
+
         self._fn = self._fp
 
         resource_kwargs = {'template': self.file_template.get(),
@@ -328,6 +373,23 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
                            'column_names': self.column_names,
                            'frame_per_point': self.get_frames_per_point()}
         self._generate_resource(resource_kwargs)
+
+
+    def unstage(self, *args, **kwargs):
+        import itertools
+        for j in itertools.count():
+            try:   
+                ret = super().unstage()
+            except TimeoutError:
+                N_try = 20
+                if j < N_try:
+                    print(f"failed to unstage on attempt {j}/{N_try}, may try again")
+                    continue    
+                else:
+                    raise
+            else:
+                break
+        return ret
 
 
 class RIXSSingleTrigger(SingleTrigger):
@@ -561,7 +623,6 @@ rixscam.hdf2.enable.set('Enable')
 
 #rixscam.read_attrs = ['hdf5']
 rixscam.read_attrs = ['hdf5','hdf2', 'xip']
-#rixscam.read_attrs = ['hdf2', 'xip']
 
 #TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs
 rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
