@@ -1,7 +1,7 @@
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     cur_mono_e = pgm.en.user_readback.value
-    yield from mv(epu1.table,3)
+    yield from mv(epu1.table,6)
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,28.5)
@@ -13,7 +13,7 @@ def pol_V(offset=None):
 def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     cur_mono_e = pgm.en.user_readback.value
-    yield from mv(epu1.table,1)
+    yield from mv(epu1.table,5)
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,0)
@@ -43,9 +43,10 @@ def m3_check():
     yield from mv(extslt.vg,30)
     #yield from gcdiag.grid # RE-COMMENT THIS LINE 5/7/2019
     #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
-    yield from rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
+    yield from rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'})
     #yield from mv(m3.pit,peaks['cen']['gc_diag_grid'])
     yield from mv(m3.pit,peaks['cen']['sclr_channels_chan8'])
+    #yield from mv(m3.pit,peaks['cen']['sclr_channels_chan2'])
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)
@@ -148,6 +149,7 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
     yield from mv(sclr.preset_time,sec_per_point)
     yield from scan(dets,pgm.en,start_en,stop_en,num_points)
     E_max = peaks['max']['sclr_channels_chan2'][0] 
+    E_com = peaks['com']['sclr_channels_chan2']
 
     if flag == 0:
        print('Piezo Shutter remains disabled')   
@@ -155,11 +157,11 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
        print('Piezo Shutter is going to renabled')
        yield from pzshutter_enable()  
     yield from mv(sclr.preset_time,sclr_set_time)
-    return E_max
+    return E_com, E_max
 
 
 #TODO put this inside of rixscam
-def get_threshold(Ei = None):
+def rixscam_get_threshold(Ei = None):
     '''Calculate the minimum and maximum threshold for RIXSCAM single photon counting (LS mode) 
     Ei\t:\t float -  incident energy (default is beamline current energy)
     '''
@@ -174,14 +176,14 @@ def get_threshold(Ei = None):
     return t_min, t_max
 
 #TODO put this insdie of rixscam
-def set_rixcam_centroid(Ei=None):
+def rixscam_set_threshold(Ei=None):
     '''Setup the RIXSCAM.XIP plugin values for a specific energy for single photon counting and
      centroiding in LS mode.  
      Ei\t:\t float -  incident energy (default is beamline current energy)
     '''
     if Ei is None:
         Ei = pgm.en.user_readback.value
-    thold_min, thold_max = get_threshold(Ei)
+    thold_min, thold_max = rixscam_get_threshold(Ei)
     yield from mv(rixscam.xip.beamline_energy, Ei, 
                   rixscam.xip.sum_3x3_threshold_min, thold_min, 
                   rixscam.xip.sum_3x3_threshold_max, thold_max)

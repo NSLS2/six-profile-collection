@@ -1915,38 +1915,23 @@ def m4_x():
         yield from scan(d11,cryo.x,37.5+(1*i-5)*0.1,37.8+(1*i-5)*0.1,91)
 
 def m4_vexitslt_focus():
-    d11=[qem11]
+    #d11=[qem11]
+    d11=[sclr]
     extslt_ini=5
-    extslt_final=40
+    extslt_final=42.5
     extslt_step=2.5
     
     for i in range(0, 1+round(abs(extslt_ini-extslt_final)/extslt_step)):
         yield from mv(extslt.vg,extslt_ini+i*extslt_step)
         #yield from sleep(5)
         #yield from mv(cryo.x,40.6)
-        yield from mv(cryo.y,90.01) # to be adjusted
-        yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.025,76)
+        yield from mv(cryo.y,67.065) # to be adjusted
+        yield from sleep(1)
+        yield from relative_scan([sclr],cryo.y,0,0.015,46)
         #yield from mv(cryo.y,98)
         #yield from mv(cryo.x,43.2) # to be adjusted
         #yield from sleep(30)
         #yield from relative_scan(d11,cryo.x,0,0.4,151)  
-
-    yield from mv(epu1.gap,39.29)
-    for i in range(0, 1+round(abs(extslt_ini-extslt_final)/extslt_step)):
-        yield from mv(extslt.vg,extslt_ini+i*extslt_step)
-        #yield from sleep(5)
-        #yield from mv(cryo.x,40.6)
-        yield from mv(cryo.y,90.01) # to be adjusted
-        yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.025,76)
-        #yield from mv(cryo.y,98)
-        #yield from mv(cryo.x,43.2) # to be adjusted
-        #yield from sleep(30)
-        #yield from relative_scan(d11,cryo.x,0,0.4,151)  
-
-
-    yield from mv(cryo.y,89.91) 
 
 def m4_depth_of_focus():
     cryo.x.settle_time=0.2

@@ -1,3 +1,70 @@
+
+
+def epu_calib_gr1800_Aug2019(dets = [sclr, ring_curr]):
+
+    print('\n\n WARNING WARNING WARNING:\n\t check if there scalar is installed or not!!!!')
+    yield from gcdiag.diode
+
+    # srs settings for diode =  SRS settings:  5  x1  uA/v , time = 1.0
+    yield from mv(m1_simple_fbk,0)
+    yield from mv(m3_simple_fbk,0)
+    
+    # PHASE = 0 mm
+    yield from mv(epu1.phase, 0)
+    yield from mv(epu1.table,1)
+    yield from sleep(30)
+    #yield from mv(feslt.hg,2.0)
+    #yield from mv(feslt.vg,2.0)
+    #yield from bp.mv(pgm.cff,5.2707)
+
+    for i in range(250,1351,50):
+        yield from mv(pgm.en,i)
+        yield from sleep(5)
+        start_gap = epu1.gap.readback.value  
+        yield from mv(epu1.gap,start_gap-1.5)
+        yield from sleep(10)
+        yield from rel_scan(dets, epu1.gap,0,3,31)
+        yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0] -1)
+        yield from sleep(10)
+        yield from rel_scan(dets, epu1.gap,0,2,101)
+
+    # PHASE = 28.5 mm
+    yield from mv(epu1.phase, 28.5)
+    yield from mv(epu1.table,3)
+    yield from sleep(30)
+    yield from mv(pgm.en,850)
+    yield from beamline_align_v2()
+    yield from mv(m1_simple_fbk,0)
+    yield from mv(m3_simple_fbk,0)
+
+    
+    yield from mv(pgm.en,350)
+    yield from sleep(5)
+    yield from mv(epu1.gap,18.01)
+    yield from sleep(10)
+    yield from rel_scan(dets, epu1.gap,0,2,31)
+    yield from mv(epu1.gap, 18.01)
+    yield from sleep(10)
+    yield from rel_scan(dets, epu1.gap,0,1,51)
+
+    for i in range(400,1351,50):
+        yield from mv(pgm.en,i)
+        yield from sleep(5)
+        start_gap = epu1.gap.readback.value  
+        yield from mv(epu1.gap,start_gap-1)
+        yield from sleep(10)
+        yield from rel_scan(dets, epu1.gap,0,2,31)
+        yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0] -1)
+        yield from sleep(10)
+        yield from rel_scan(dets, epu1.gap,0,2,101)
+    
+    # LEAVING THE BEAMLINE READY FOR NEXT TEST
+    yield from mv(epu1.phase, 0)
+    yield from mv(epu1.table,1)
+    yield from sleep(30)
+    yield from mv(pgm.en,530)
+    yield from beamline_align_v2()
+
 def epu_calib_gr500(dets = [sclr, ring_curr]):
 
     print('\n\n WARNING WARNING WARNING:\n\t check if there scalar is installed or not!!!!')
@@ -80,16 +147,16 @@ def epu_calib_gr1800(dets = [sclr, ring_curr]):
 
     yield from sleep(100)
     #800-1550 eV, 3rd harmonic
-    for i in range(800,2001,50):
-        calc_gap=e2g(i/3)
-        yield from mv(pgm.en,i)
-        yield from sleep(5)
-        yield from mv(epu1.gap,calc_gap-2)
-        yield from sleep(10)
-        yield from rel_scan(dets, epu1.gap,0,4,41)
-        yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0]-0.5)
-        yield from sleep(10)
-        yield from rel_scan(dets, epu1.gap,0,1.0,76)
+    #for i in range(800,2001,50):
+        #calc_gap=e2g(i/3)
+        #yield from mv(pgm.en,i)
+        #yield from sleep(5)
+        #yield from mv(epu1.gap,calc_gap-2)
+        #yield from sleep(10)
+        #yield from rel_scan(dets, epu1.gap,0,4,41)
+        #yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0]-0.5)
+        #yield from sleep(10)
+        #yield from rel_scan(dets, epu1.gap,0,1.0,76)
 
     calc_gap=e2g(850)
     yield from mv(pgm.en,850)
@@ -204,20 +271,21 @@ def epu_calib_ph28p5_gr1800(dets = [sclr, ring_curr]):
 
     yield from sleep(30)
     #800-1550 eV, 3rd harmonic
-    for i in range(1100,2001,50):
-        calc_gap=e2g(i/3)
-        yield from mv(pgm.en,i)
-        yield from sleep(5)
-        yield from mv(epu1.gap,calc_gap-8.5-(i-1000)*0.0027)
-        yield from sleep(10)
-        yield from rel_scan(dets, epu1.gap,0,2,31)
-        yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0]-0.5)
-        yield from sleep(10)
-        yield from rel_scan(dets, epu1.gap,0,1.0,76)
+    #for i in range(1100,2001,50):
+        #calc_gap=e2g(i/3)
+        #yield from mv(pgm.en,i)
+        #yield from sleep(5)
+        #yield from mv(epu1.gap,calc_gap-8.5-(i-1000)*0.0027)
+        #yield from sleep(10)
+        #yield from rel_scan(dets, epu1.gap,0,2,31)
+        #yield from mv(epu1.gap, peaks['max']['sclr_channels_chan2'][0]-0.5)
+        #yield from sleep(10)
+        #yield from rel_scan(dets, epu1.gap,0,1.0,76)
 
     calc_gap=e2g(850)
-    yield from mv(pgm.en,850)
+    yield from mv(pgm.en,530)
     yield from sleep(5)
+    yield from mv(epu1.phase,0)
     yield from mv(epu1.gap,28.01)
     yield from mv(shutterb,'close') 
     print('\n\n WARNING WARNING WARNING:\n\t EPU Table/Interpolation disabled!!!!')

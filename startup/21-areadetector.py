@@ -218,8 +218,8 @@ def name_qem(qem, chan_name):
     qem.read_attrs = read_attrs
     return qem
 
-qem01 = name_qem(SIXQuadEM('XF:02IDA-BI{EM:1}EM180:', name='qem01'),
-                 ['m1slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
+#qem01 = name_qem(SIXQuadEM('XF:02IDA-BI{EM:1}EM180:', name='qem01'),
+#                 ['m1slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
 qem02 = name_qem(SIXQuadEM('XF:02IDB-BI{EM:2}EM180:', name='qem02'),
                  ['pgmslt_u_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])

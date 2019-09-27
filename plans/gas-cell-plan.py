@@ -268,87 +268,104 @@ def neon_gascell_vs_cff():
     ene_neon=867.2 
     cff_ideal_500=2.24
     #cff_ideal_1800=5.2428
-    cff_ideal_1800 = 4.4
+    cff_ideal_1800 = 4.25
     
     det_list=[sclr, ring_curr]
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
     
-    ######################### Grating 500l/mm  ##################################3
-    #yield from pgm.mbg    
-    #yield from mv(pgm.cff, cff_ideal_500)c
-
-
-    #yield from mv(pgm.m2off,84.244630)
-    #yield from mv(pgm.groff,82.102040)
-    #yield from gcdiag.grid
-
-    #yield from pol_V(3)
-    #yield from sleep(300)
-    #yield from align.m1pit
-    #yield from m3_check()
-    yield from mv(extslt.vg,30)
-
-    for i in range(-6, 7):
-        yield from mv(pgm.cff,cff_ideal_1800+i*0.05) #fine
-        yield from mv(pgm.en,864)
-        yield from sleep(30)
-        yield from scan(det_list,pgm.en,864,872,241)
-    yield from mv(pgm.cff,cff_ideal_1800)
-    #yield from pol_H(-2.8)
-    #yield from sleep(300)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    #for i in range(-5, 6):
-        #yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        #yield from mv(pgm.en,863)
-        #yield from sleep(120)
-        #yield from scan([qem07,ring_curr],pgm.en,863,872,301)
-
-    
-    #yield from mv(pgm.m2off,84.183168)
-    #yield from mv(pgm.groff,82.065227)
-    #yield from align.m1pit
-    #yield from m3_check()
-
-    #yield from sleep(300)
-    
-    #for i in range(-7, 4):
-        #yield from mv(pgm.cff,cff_ideal_500+i*0.02)
-        #yield from mv(pgm.en,864)
-        #yield from sleep(120)
-        #yield from scan([qem07,ring_curr],pgm.en,864,873,301)
-
-
-    #yield from mv(pgm.m2off,84.244630)
-    #yield from mv(pgm.groff,82.102040)
- 
     ###################### grating 1800l/mm  ###############################
     #yield from pgm.ubg    
     #yield from mv(pgm.cff, cff_ideal_1800)
     #yield from mv(pgm.en,ene_neon)
     #yield from sleep(100)
-    #yield from align.m1pit
-    #yield from m3_check()
+    #yield from beamline_align_v2() ## Remember to check eletrometer for m3_check!!!!!
+   
+    yield from mv(extslt.vg,11)
+    #yield from scan(det_list,pgm.en,864,872,401)
+    
+    offset=0
 
-    #yield from mv(extslt.vg,10)
-    #yield from scan(det_list,pgm.en,864,873,451)
-    
-    #for i in range(-14, -1):
-    #    #yield from m1_check()
-    #    #yield from sleep(5)
-    #    yield from mv(pgm.cff,cff_ideal_1800+i*0.1)
-    #    yield from sleep(5)
-    #    yield from mv(pgm.en,864)
-    #    yield from sleep(10)
-    #    yield from scan(det_list,pgm.en,864,872,401)
-    
+    for i in range(-7, 8):
+        yield from mv(pgm.cff,cff_ideal_1800+i*0.05) #fine
+        yield from sleep(10)
+        yield from mv(pgm.en,864-offset)
+        yield from sleep(30)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+
+    yield from mv(pgm.cff,cff_ideal_1800)
+    yield from mv(pgm.en, 867.16)
+    yield from sleep(30)
+    yield from count(det_list,num=36000)
     #yield from pgm.ubg
     #yield from mv(pgm.cff, cff_ideal_1800)
     #yield from mv(pgm.en,ene_neon) 
     #yield from mv(extslt.vg,10)
 
+    
+
+    ######################### Grating 500l/mm  ##################################3
+    #yield from pgm.mbg 
+    #yield from sleep(300)
+    #yield from mv(pgm.m2pit,88.28578)
+    #yield from mv(pgm.grpit,87.60104)
+    #yield from mv(pgm.cff, cff_ideal_500)
+    #yield from mv(pgm.en, 867)
+    
+    #yield from mv(extslt.vg,7)
+    #yield from beamline_align_v2()
+    #yield from sleep(3600)
+    #yield from beamline_align_v2()
+
+    #offset=0
+    
+    #for i in range(-7, 8):
+    #    yield from mv(pgm.cff,cff_ideal_500+i*0.05) #fine
+    #    yield from mv(pgm.en,863-offset)
+    #    yield from sleep(30)
+    #    yield from scan(det_list,pgm.en,863-offset,873-offset,251)
+    #yield from mv(pgm.cff,cff_ideal_500)
+    
+
+def gas_cell_gr500():
+    ######################### Grating 500l/mm  ##################################
+    det_list=[sclr, ring_curr]
+    yield from mv(sclr.preset_time, 1)
+    yield from mv(extslt.hg,150)
+
+    cff_ideal_500 = 2.20
+    yield from mv(pgm.cff, cff_ideal_500)
+    yield from mv(extslt.vg,11)
+    offset=0
+    
+    for i in range(-4, 5):
+        yield from mv(pgm.cff,cff_ideal_500+i*0.02) #fine
+        yield from mv(pgm.en,864-offset)
+        yield from sleep(30)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,201)
+    yield from mv(pgm.cff,cff_ideal_500)
+
+
+def gas_cell_gr1800():
+    ######################### Grating 1800l/mm  ##################################
+    det_list=[sclr, ring_curr]
+    yield from mv(sclr.preset_time, 1)
+    yield from mv(extslt.hg,150)
+    yield from sleep(3600)
+    yield from beamline_align_v2()
+    yield from sleep(120)
+    cff_ideal_1800 = 4.40
+    yield from mv(pgm.cff, cff_ideal_1800)
+    yield from mv(extslt.vg,11)
+    offset=0
+
+    yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+    for i in range(-6, 7):
+        yield from mv(pgm.cff,cff_ideal_1800+i*0.025) #fine
+        yield from mv(pgm.en,864-offset)
+        yield from sleep(30)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+    yield from mv(pgm.cff,cff_ideal_1800)
 
 
 def n2gascell_vs_M1roll():
