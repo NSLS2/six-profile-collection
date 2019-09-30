@@ -1,6 +1,6 @@
 from bluesky.suspenders import SuspendFloor, SuspendBoolHigh         
 
-ring_suspender = SuspendFloor(ring_curr, 190, resume_thresh=200, sleep=120, post_plan=beamline_align_v2)
+ring_suspender = SuspendFloor(ring_curr, 190, resume_thresh=200, sleep=120)#, post_plan=beamline_align_v2)
 
 #shutterb_suspender = SuspendBoolHigh(EpicsSignalRO(shutterb.status.pvname), sleep=5, post_plan=beamline_align_v2)
 
