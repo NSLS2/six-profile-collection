@@ -1,3 +1,9 @@
+# DAMA hot fix to increase the set_and_wait() timeout to 5 seconds.
+# See https://github.com/NSLS-II-SIX/profile_collection/issues/24 for the error report.
+import ophyd
+import functools
+ophyd.utils.epics_pvs.set_and_wait = functools.partial(ophyd.utils.epics_pvs.set_and_wait, timeout=30)
+
 import nslsii
 nslsii.configure_base(get_ipython().user_ns, 'six')
 

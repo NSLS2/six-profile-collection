@@ -111,6 +111,10 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
 
 #Piezoshutter mode signal:
 def snap(dets): 
+    # DAMA/MR (20190930): Try to work-around the issue with half-staged detectors left from previous iteration.
+    for d in dets:
+        yield from bps.unstage(d)
+
     for d in dets: 
         yield from bps.stage(d) 
     for d in dets: 
