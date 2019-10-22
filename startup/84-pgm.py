@@ -45,8 +45,8 @@ class PGM_ES(Device):
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
          'mbg': ['m2off', 84.20549404, 'groff', 82.07813352 ,'grx', -63.0, 'grlines', 500, 'm3slt_hs', -37.5,
 				 'm3slt_ha',-17.2], #'offset values changed on 08/11/2019 ['m2off', 84.20033028, 'groff', 82.0737638 ,'grx', -63.0, 'grlines', 500]
-	 	 'ubg': ['m2off', 84.20861191, 'groff', 82.1055395916 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
-				 'm3slt_ha',-17.8] }) #before 08/10/2019 'ubg': ['m2off', 84.20265344, 'groff', 82.1012242016 , 'grx', -1,'grlines', 1800] })
+	 	 'ubg': ['m2off', 84.2072359100, 'groff', 82.105016851 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
+				 'm3slt_ha',-17.8] }) #before 10/20/2019 'ubg': ['m2off', 84.20861191, 'groff', 82.1055395916 , 'grx', -1,'grlines', 1800] })
 pgmjoe = PGMjoe('XF:02IDB-OP{Mono:1-Ax:9', name='pgmjoe')
 espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')
 

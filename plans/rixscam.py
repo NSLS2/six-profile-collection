@@ -144,10 +144,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 2.22
-    x_start= x_ideal - 0.02*3 #0.04#
-    x_stop=  x_ideal + 0.02*3 #.04#
-    number= 7
+    x_ideal= 4.30
+    x_start= x_ideal - 0.005 * 4 #0.04#
+    x_stop=  x_ideal + 0.005 * 4 #.04#
+    number= 9
     yield from mv(gvbt1,'open')
     f_string=''
 
@@ -174,17 +174,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 6.9676 #5.4367 #5.3635 
-    y_start = y_ideal - 0.005 * 4
-    y_stop = y_ideal + 0.005 * 4
+    y_ideal = 5.4490 #5.4367 #5.3635 
+    y_start = y_ideal - 0.004 * 3
+    y_stop = y_ideal + 0.004 * 0
     #fine steps 0.004*4
 
     x_motor=  espgm.grpit
-    x_ideal= 8.4697 #6.026594
-    x_start= x_ideal - 0.0025 * 4
-    x_stop = x_ideal + 0.0025 * 4
+    x_ideal= 6.0312 #6.026594
+    x_start= x_ideal - 0.002 * 3
+    x_stop = x_ideal + 0.002 * 0
     #fine steps 0.002*4
-    num =9
+    num =6
     
     f_string=''
 
@@ -213,16 +213,16 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4321
-    y_start= y_ideal - 0.001 * 4
-    y_stop = y_ideal + 0.001 * 4
+    y_ideal = 1.4225
+    y_start= y_ideal - 0.0005 * 5
+    y_stop = y_ideal + 0.0005 * 8
     # fine step is 0.0005
 
     x_motor=  espgm.m7pit
-    x_ideal=  6.9876
-    x_start= x_ideal - 0.001 * 4
-    x_stop = x_ideal + 0.001 * 4
-    num = 9
+    x_ideal=  5.4495
+    x_start= x_ideal - 0.0005 * 5
+    x_stop = x_ideal + 0.0005 * 8
+    num = 14
     
     f_string=''
 
@@ -250,11 +250,11 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
 def rixscam_dc_optimization_centroid(cts, num_scans=1, extra_md = '' ):
     dets = [ ring_curr, rixscam, sclr]
     x_motor= dc.z
-    x_ideal= 226.5
+    x_ideal= 241.5
     step=2.5
-    x_start= x_ideal 
-    x_stop=  x_ideal -10*step 
-    number=  11 
+    x_start = x_ideal - 11 * step 
+    x_stop =  x_ideal - 5 * step 
+    number = 7
     yield from mv(gvbt1,'open')
     f_string=''
 
