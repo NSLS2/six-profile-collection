@@ -1,7 +1,9 @@
 from ophyd import Device, EpicsMotor
 from ophyd import Component as Cpt
 from ophyd import DeviceStatus
-#from nslsii.devices import TwoButtonShutter  #TODO why are we not suing the facility TwoButtonShutter?
+# from nslsii.devices import TwoButtonShutter  #TODO why are we not suing the facility TwoButtonShutter?
+from nslsii.devices import _time_fmtstr  # TODO(DAMA/MR/20191022): this is a temp workaround for a missing var
+
 
 class TwoButtonShutter(Device):  #Why custom and not facility?
 
@@ -82,7 +84,7 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
         prev_st = self._set_st
         if prev_st is not None:
             while not prev_st.done:
-                time.sleep(.1)   
+                time.sleep(.1)
         self._was_open = (self.open_val == self.status.get())
         st = self.set('close')
         while not st.done:
@@ -93,7 +95,7 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
         prev_st = self._set_st
         if prev_st is not None:
             while not prev_st.done:
-                time.sleep(.1)   
+                time.sleep(.1)
         if self._was_open:
             st = self.set('open')
             while not st.done:
@@ -110,19 +112,38 @@ class TwoButtonShutter(Device):  #Why custom and not facility?
         self.read_attrs = ['status']
 
 #Piezoshutter mode signal:
-def snap(dets): 
-    # DAMA/MR (20190930): Try to work-around the issue with half-staged detectors left from previous iteration.
+def snap(dets):
+    # DAMA/MR (20191022): Try to work-around the issue with half-staged detectors left from previous iteration.
+    def _unstage_dets():
+        for d in dets:
+            yield from bps.unstage(d)
+
+    for i in range(5):
+        try:
+            yield from _unstage_dets()
+        except TimeoutError as e:
+            print('*'*50)
+            print(f'Unsuccessful attempt #{i+1} to unstage the detectors')
+            print(f"Exception: {e}")
+            print('*'*50)
+            yield from bps.sleep(5)
+
     for d in dets:
-        yield from bps.unstage(d)
-
-    for d in dets: 
-        yield from bps.stage(d) 
-    for d in dets: 
+        yield from bps.stage(d)
+    for d in dets:
         yield from bps.trigger(d, group='snap')
-    yield from bps.wait(group='snap') 
+    yield from bps.wait(group='snap')
 
-    for d in dets: 
-        yield from bps.unstage(d) 
+    for i in range(5):
+        try:
+            yield from _unstage_dets()
+        except TimeoutError as e:
+            print('*'*50)
+            print(f'Unsuccessful attempt #{i+1} to unstage the detectors')
+            print(f"Exception: {e}")
+            print('*'*50)
+            yield from bps.sleep(5)
+
 
 pzshutter = EpicsSignal('XF:02ID1-ES{RIXSCam}:cam1:ShutterMode', name = 'pzshutter')
 def pzshutter_enable():
