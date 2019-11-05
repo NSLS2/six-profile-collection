@@ -50,7 +50,7 @@ def m3_check():
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)
-    yield from sleep(5)
+    yield from sleep(20)
     #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.value)
     yield from mv(m3_simple_fbk_target,extslt_cam.stats1.centroid.x.value)#m3_simple_fbk_cen.value)
     yield from mv(m3_simple_fbk,1)

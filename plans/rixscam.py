@@ -144,9 +144,9 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 4.30
-    x_start= x_ideal - 0.005 * 4 #0.04#
-    x_stop=  x_ideal + 0.005 * 4 #.04#
+    x_ideal= 2.24
+    x_start= x_ideal - 0.01 * 4 #0.04#
+    x_stop=  x_ideal + 0.01 * 4 #.04#
     number= 9
     yield from mv(gvbt1,'open')
     f_string=''
@@ -174,17 +174,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.4490 #5.4367 #5.3635 
+    y_ideal = 6.4532
     y_start = y_ideal - 0.004 * 3
-    y_stop = y_ideal + 0.004 * 0
+    y_stop = y_ideal + 0.004 * 3
     #fine steps 0.004*4
 
     x_motor=  espgm.grpit
-    x_ideal= 6.0312 #6.026594
+    x_ideal= 7.6156
     x_start= x_ideal - 0.002 * 3
-    x_stop = x_ideal + 0.002 * 0
+    x_stop = x_ideal + 0.002 * 3
     #fine steps 0.002*4
-    num =6
+    num =11
     
     f_string=''
 
@@ -213,16 +213,16 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4225
-    y_start= y_ideal - 0.0005 * 5
-    y_stop = y_ideal + 0.0005 * 8
+    y_ideal = 1.4331
+    y_start= y_ideal - 0.001 * 9
+    y_stop = y_ideal - 0.001 * 4
     # fine step is 0.0005
 
     x_motor=  espgm.m7pit
-    x_ideal=  5.4495
-    x_start= x_ideal - 0.0005 * 5
-    x_stop = x_ideal + 0.0005 * 8
-    num = 14
+    x_ideal= 6.4572
+    x_start= x_ideal - 0.001 * 9
+    x_stop = x_ideal - 0.001 * 4
+    num = 5
     
     f_string=''
 
@@ -281,9 +281,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 402
-    x_stop =  415
-    num = 14
+    x_start = 516
+    x_stop =  536
+    num = 11
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
@@ -413,4 +413,20 @@ def stubborn_test(num_input):
             continue
     return fails
 
+
+
+
+
+from epics import caget 
+rixscam_vog_s1 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_OG_1',name='rixscam_vog_s1')
+rixscam_vdc_s1 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_HVDC_1',name='rixscam_vdc_s1')
+rixscam_vog_s2 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_OG_2',name='rixscam_vog_s2')
+rixscam_vdc_s2 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_HVDC_2',name='rixscam_vdc_s2')
+rixscam_temp = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:TemperatureActual',name='rixscam_temp')
+
+def test_rixscam_voltages(cts, num_scans=1):
+    yield from mv(gvbt1,'open')
+    for i in range(num_scans):
+        yield from count([rixscam,rixscam_vdc_s1,rixscam_vog_s1,rixscam_vdc_s2, rixscam_vog_s2, rixscam_temp],num=cts)
+    yield from mv(gvbt1,'close')
 
