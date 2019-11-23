@@ -144,10 +144,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 2.24
-    x_start= x_ideal - 0.01 * 4 #0.04#
-    x_stop=  x_ideal + 0.01 * 4 #.04#
-    number= 9
+    x_ideal= 4.44
+    x_start= x_ideal - 0.01 * 0 #0.04#
+    x_stop=  x_ideal + 0.01 * 6 #.04#
+    number= 7
     yield from mv(gvbt1,'open')
     f_string=''
 
@@ -165,7 +165,6 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
             uid = -1
         f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
 
-
     yield from mv(gvbt1,'close')
     #yield from mv (x_motor,x_ideal)
     print (f_string)
@@ -174,17 +173,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 6.4532
-    y_start = y_ideal - 0.004 * 3
-    y_stop = y_ideal + 0.004 * 3
+    y_ideal = 5.8957
+    y_start = y_ideal - 0.01 * 4
+    y_stop = y_ideal + 0.01 * 4
     #fine steps 0.004*4
 
     x_motor=  espgm.grpit
-    x_ideal= 7.6156
-    x_start= x_ideal - 0.002 * 3
-    x_stop = x_ideal + 0.002 * 3
+    x_ideal= 6.7392
+    x_start= x_ideal - 0.005 * 4
+    x_stop = x_ideal + 0.005 * 4
     #fine steps 0.002*4
-    num =11
+    num = 9
     
     f_string=''
 
@@ -213,16 +212,16 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4331
-    y_start= y_ideal - 0.001 * 9
-    y_stop = y_ideal - 0.001 * 4
+    y_ideal = 1.4291
+    y_start= y_ideal - 0.001 * 10
+    y_stop = y_ideal - 0.001 * 7
     # fine step is 0.0005
 
     x_motor=  espgm.m7pit
-    x_ideal= 6.4572
-    x_start= x_ideal - 0.001 * 9
-    x_stop = x_ideal - 0.001 * 4
-    num = 5
+    x_ideal= 5.8957
+    x_start= x_ideal - 0.001 * 10
+    x_stop = x_ideal - 0.001 * 7
+    num = 4
     
     f_string=''
 
@@ -277,13 +276,13 @@ def rixscam_dc_optimization_centroid(cts, num_scans=1, extra_md = '' ):
 
 def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
-    Looks like 20um extslt_vg is typical.
+    Looks like 20um extslt_vg is typical. 
     """
 
     x_motor=pgm.en
-    x_start = 516
-    x_stop =  536
-    num = 11
+    x_start = 702.00
+    x_stop =  710.00
+    num = 9
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
