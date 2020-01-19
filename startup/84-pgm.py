@@ -43,10 +43,15 @@ class PGM_ES(Device):
     grxrb = Cpt(EpicsSignalRO,'GXEnc}Mtr.RBV')
 
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.20549404, 'groff', 82.07813352 ,'grx', -63.0, 'grlines', 500, 'm3slt_hs', -37.5,
-				 'm3slt_ha',-17.2], #'offset values changed on 08/11/2019 ['m2off', 84.20033028, 'groff', 82.0737638 ,'grx', -63.0, 'grlines', 500]
-	 	 'ubg': ['m2off', 84.2072359100, 'groff', 82.105016851 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
-				 'm3slt_ha',-17.8] }) #before 10/20/2019 'ubg': ['m2off', 84.20861191, 'groff', 82.1055395916 , 'grx', -1,'grlines', 1800] })
+         'mbg': ['m2off', 84.20095245038944, 'groff', 82.08049027069194,'grx', -63.0, 'grlines', 500, 'm3slt_hs', -37.8,
+				 'm3slt_ha',-17.2], #'offset values changed on 01/18/2020 'm2off', 84.20066918198582, 'groff', 82.07958117700636  
+
+         'hbg': ['m2off', 84.2048110501493, 'groff',82.13655866499273,'grx', 61.0, 'grlines', 1200, 'm3slt_hs', -37.8,
+				 'm3slt_ha',-17.2],
+
+	 	 'ubg': ['m2off', 84.20377334307703, 'groff', 82.11198321011099 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
+				 'm3slt_ha',-17.8] }) #before 01/16/2020 'm2off', 84.2072359100, 'groff', 82.105016851 
+                                      
 pgmjoe = PGMjoe('XF:02IDB-OP{Mono:1-Ax:9', name='pgmjoe')
 espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')
 

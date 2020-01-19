@@ -1,7 +1,7 @@
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     cur_mono_e = pgm.en.user_readback.value
-    yield from mv(epu1.table,6)
+    yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,28.5)
@@ -13,7 +13,7 @@ def pol_V(offset=None):
 def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     cur_mono_e = pgm.en.user_readback.value
-    yield from mv(epu1.table,5)
+    yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,0)

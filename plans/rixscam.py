@@ -144,10 +144,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 4.44
-    x_start= x_ideal - 0.01 * 0 #0.04#
-    x_stop=  x_ideal + 0.01 * 6 #.04#
-    number= 7
+    x_ideal= 4.55
+    x_start= x_ideal - 0.05 * 4 #0.04#
+    x_stop=  x_ideal + 0.05 * 4 #.04#
+    number= 9
     yield from mv(gvbt1,'open')
     f_string=''
 
@@ -173,17 +173,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.8957
-    y_start = y_ideal - 0.01 * 4
-    y_stop = y_ideal + 0.01 * 4
-    #fine steps 0.004*4
+    y_ideal = 5.439000
+    y_start = y_ideal - 0.008 * 0
+    y_stop = y_ideal + 0.008 * 0
+    #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal= 6.7392
-    x_start= x_ideal - 0.005 * 4
-    x_stop = x_ideal + 0.005 * 4
-    #fine steps 0.002*4
-    num = 9
+    x_ideal= 6.028200
+    x_start= x_ideal - 0.004 * 0
+    x_stop = x_ideal + 0.004 * 0
+    #fine steps 0.002
+    num = 1
     
     f_string=''
 
@@ -211,17 +211,17 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     #yield from beamline_align_v2()
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
-    y_motor= m6.pit
-    y_ideal = 1.4291
-    y_start= y_ideal - 0.001 * 10
-    y_stop = y_ideal - 0.001 * 7
+    y_motor= m6
+    y_ideal = 1.4220
+    y_start= y_ideal - 0.001 * 4
+    y_stop = y_ideal + 0.001 * 4
     # fine step is 0.0005
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.8957
-    x_start= x_ideal - 0.001 * 10
-    x_stop = x_ideal - 0.001 * 7
-    num = 4
+    x_ideal= 5.443000
+    x_start= x_ideal - 0.001 * 4
+    x_stop = x_ideal + 0.001 * 4
+    num = 9
     
     f_string=''
 
@@ -230,7 +230,7 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     for i in range(num):
         x_val = round (x_start + i * (x_stop - x_start) / (num - 1) , precison_digit)   
         y_val = round (y_start + i * (y_stop - y_start) / (num - 1) , precison_digit)      
-        yield from mv (x_motor,x_val,y_motor,y_val)
+        yield from mv(x_motor,x_val,y_motor,y_val)
         yield from sleep(20)
         for s in range(num_scans):
             uid = yield from count(dets, num=cts, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
@@ -280,9 +280,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 702.00
-    x_stop =  710.00
-    num = 9
+    x_start = 1465.00
+    x_stop =  1555.00
+    num = 10
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
@@ -422,6 +422,12 @@ rixscam_vdc_s1 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_HVDC_1',name
 rixscam_vog_s2 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_OG_2',name='rixscam_vog_s2')
 rixscam_vdc_s2 = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:VOLT_BIAS_HVDC_2',name='rixscam_vdc_s2')
 rixscam_temp = EpicsSignalRO('XF:02ID1-ES{RIXSCam}:cam1:TemperatureActual',name='rixscam_temp')
+
+tilt_3AA_xz = EpicsSignalRO('XF:02IDD-ES{3AA:1-TiltM:1}Axis:X-I',name='tilt_3AA_xz')
+tilt_3AA_yx = EpicsSignalRO('XF:02IDD-ES{3AA:1-TiltM:1}Axis:Y-I',name='tilt_3AA_yx')
+
+tilt_DAA_xz = EpicsSignalRO('XF:02IDD-ES{DAA:1-TiltM:2}Axis:X-I',name='tilt_DAA_xz')
+tilt_DAA_yx = EpicsSignalRO('XF:02IDD-ES{DAA:1-TiltM:2}Axis:Y-I',name='tilt_DAA_yx')
 
 def test_rixscam_voltages(cts, num_scans=1):
     yield from mv(gvbt1,'open')

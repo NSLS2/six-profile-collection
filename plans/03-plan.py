@@ -1740,16 +1740,16 @@ def m4_yaw_roll():
     #yield from mv(epu1.gap,40.8) #detunedyield from mv(cryo.x,33.50)
 #    mir4_rol_init = 1.421
 #    mir4_rol_step= 0.002
-    mir4_yaw_init = -0.7064
+    mir4_yaw_init = -0.70585
     mir4_yaw_step = 0.0003 #0.002
 
-    for i in range(-5,6):
+    for i in range(-10,-3):
         yield from mv(m4.yaw, mir4_yaw_init + mir4_yaw_step * (1 * i))
         #yield from mv(m4.rol,mir4_rol_init+mir4_rol_step*(1*i))
         #yield from mv(cryo.x,39.0)
-        yield from mv(cryo.y,90.010) # to be adjusted
+        yield from mv(cryo.y,11.938) # to be adjusted
         yield from sleep(5)
-        yield from rel_scan([sclr],cryo.y,0,0.03,91)
+        yield from rel_scan([sclr],cryo.y,0,0.02,61)
         #yield from rel_scan([sclr],cryo.y,0,0.04,121, md={'reason':r_md})
 
 

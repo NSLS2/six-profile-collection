@@ -22,7 +22,7 @@
 #dc.z, dc.twoth]
 
 
-sd.baseline = [ring_curr, gcpress, voltage_dc, current_rbk,
+sd.baseline = [ring_curr, gcpress, # voltage_dc, current_rbk,
 epu1, 
 feslt, 
 m1, 

@@ -333,7 +333,7 @@ def gas_cell_gr500():
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
 
-    cff_ideal_500 = 2.20
+    cff_ideal_500 = 2.30
     yield from mv(pgm.cff, cff_ideal_500)
     yield from mv(extslt.vg,11)
     offset=0
@@ -351,22 +351,43 @@ def gas_cell_gr1800():
     det_list=[sclr, ring_curr]
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
-    yield from sleep(3600)
-    yield from beamline_align_v2()
-    yield from sleep(120)
-    cff_ideal_1800 = 4.40
+    # yield from sleep(3600)
+    # yield from beamline_align_v2()
+    # yield from sleep(120)
+    cff_ideal_1800 = 4.55
     yield from mv(pgm.cff, cff_ideal_1800)
     yield from mv(extslt.vg,11)
-    offset=0
+    offset = 0
 
-    yield from scan(det_list,pgm.en,864-offset,872-offset,401)
-    for i in range(-6, 7):
-        yield from mv(pgm.cff,cff_ideal_1800+i*0.025) #fine
+    # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+    for i in range(-3, 4):
+        yield from mv(pgm.cff,cff_ideal_1800+i*0.025) #fine step: 0.025
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
-        yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,401) # fine step: 401
     yield from mv(pgm.cff,cff_ideal_1800)
 
+def gas_cell_gr1200():
+    ######################### Grating 1200l/mm  ##################################
+    yield from pgm.hbg
+    det_list=[sclr, ring_curr]
+    yield from mv(sclr.preset_time, 1)
+    yield from mv(extslt.hg,150)
+    # yield from sleep(3600)
+    # yield from beamline_align_v2()
+    # yield from sleep(120)
+    cff_ideal_1200 = 3.9
+    yield from mv(pgm.cff, cff_ideal_1200)
+    yield from mv(extslt.vg,11)
+    offset = 0
+
+    # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
+    for i in range(0, 9):
+        yield from mv(pgm.cff,cff_ideal_1200+i*0.025) #fine step: 0.025
+        yield from mv(pgm.en,864-offset)
+        yield from sleep(30)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,301) # fine step: 401
+#    yield from mv(pgm.cff,cff_ideal_1200)
 
 
 def n2gascell_vs_M1roll():
