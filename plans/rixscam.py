@@ -173,17 +173,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.439000
-    y_start = y_ideal - 0.008 * 0
-    y_stop = y_ideal + 0.008 * 0
+    y_ideal = 5.443
+    y_start = y_ideal - 0.008 * 3
+    y_stop = y_ideal + 0.008 * 3
     #fine steps 0.004
 
     x_motor=  espgm.grpit
     x_ideal= 6.028200
-    x_start= x_ideal - 0.004 * 0
-    x_stop = x_ideal + 0.004 * 0
+    x_start= x_ideal - 0.004 * 3
+    x_stop = x_ideal + 0.004 * 3
     #fine steps 0.002
-    num = 1
+    num = 7
     
     f_string=''
 
