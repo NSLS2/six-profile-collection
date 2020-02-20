@@ -43,10 +43,10 @@ def m3_check():
     yield from mv(extslt.vg,30)
     #yield from gcdiag.grid # RE-COMMENT THIS LINE 5/7/2019
     #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
-    yield from rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'})
-    #yield from mv(m3.pit,peaks['cen']['gc_diag_grid'])
-    yield from mv(m3.pit,peaks['cen']['sclr_channels_chan8'])
-    #yield from mv(m3.pit,peaks['cen']['sclr_channels_chan2'])
+    peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8')
+    yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
+    print(f'!!! m3_check: peaks["max"]: {peaks["max"]}')
+    yield from mv(m3.pit, peaks['cen'])
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)
@@ -120,11 +120,16 @@ def beamline_align():
     yield from mv(m1_fbk,1)
 
 
+@bpp.set_run_key_decorator('alignment')
 def beamline_align_v2():
     yield from mv(m1_simple_fbk,0)
     yield from mv(m3_simple_fbk,0)
     yield from mv(m1_fbk,0)
 
+    # Comes from 43-alignment_scans.py:
+    # @property
+    # def m1pit(self):
+    #     ............
     yield from align.m1pit
     yield from sleep(5)
     yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.value)
@@ -147,15 +152,21 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
        yield from pzshutter_disable()
        flag = 1
     yield from mv(sclr.preset_time,sec_per_point)
-    yield from scan(dets,pgm.en,start_en,stop_en,num_points)
-    E_max = peaks['max']['sclr_channels_chan2'][0] 
-    E_com = peaks['com']['sclr_channels_chan2']
+    if dets[0].name == 'rixscam':
+        det_field = 'rixscam_xip_count_possible_event'
+    else:
+        det_field = 'sclr_channels_chan2'
+    peaks = bluesky.callbacks.fitting.PeakStats(pgm.en.name, det_field)
+    yield from bpp.subs_wrapper(scan(dets,pgm.en,start_en,stop_en,num_points), peaks)
+    print(f"!!! xas: peaks['max']: {peaks['max']}")
+    E_max = peaks['max'][0]
+    E_com = peaks['com']
 
     if flag == 0:
        print('Piezo Shutter remains disabled')   
     if flag == 1:
        print('Piezo Shutter is going to renabled')
-       yield from pzshutter_enable()  
+       yield from pzshutter_enable()
     yield from mv(sclr.preset_time,sclr_set_time)
     return E_com, E_max
 

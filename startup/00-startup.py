@@ -2,7 +2,7 @@
 # See https://github.com/NSLS-II-SIX/profile_collection/issues/24 for the error report.
 
 import nslsii
-nslsii.configure_base(get_ipython().user_ns, 'six')
+nslsii.configure_base(get_ipython().user_ns, 'six', bec=False)
 
 from bluesky.log import current_handler
 current_handler.setLevel('CRITICAL')
@@ -50,3 +50,16 @@ def relabel_fig(fig, new_label):
 # Implementing grid on plots:
 import matplotlib as mpl
 mpl.rcParams['axes.grid'] = True
+
+
+from event_model import RunRouter
+from bluesky.callbacks.best_effort import BestEffortCallback
+
+
+def factory(name, doc):
+    bec = BestEffortCallback()
+    bec(name, doc)
+    return [bec], []
+
+rr = RunRouter([factory])
+RE.subscribe(rr)
