@@ -63,3 +63,11 @@ def factory(name, doc):
 
 rr = RunRouter([factory])
 RE.subscribe(rr)
+
+
+def peaks_not_found():
+    msg = (f'\n{"="*80}\n'
+           f'            No peaks were found. Calibration is not successful.'
+           f'\n{"="*80}\n')
+    print(msg)
+    raise RuntimeError(msg)

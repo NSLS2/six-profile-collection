@@ -1,3 +1,6 @@
+import uuid
+
+
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     cur_mono_e = pgm.en.user_readback.value
@@ -45,8 +48,11 @@ def m3_check():
     #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
     peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8')
     yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
-    print(f'!!! m3_check: peaks["max"]: {peaks["max"]}')
-    yield from mv(m3.pit, peaks['cen'])
+    print(f'!!! m3_check: peaks["cen"]: {peaks["cen"]}')
+    if peaks['cen'] is not None:
+        yield from mv(m3.pit, peaks['cen'])
+    else:
+        peaks_not_found()  # raises an exception!
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)
@@ -58,7 +64,8 @@ def m3_check():
        print('Piezo Shutter remains disabled')   
     if flag == 1:
        print('Piezo Shutter is going to renabled')
-       yield from pzshutter_enable()  
+       yield from pzshutter_enable()
+
 
 def m1_align_fine2():
 
@@ -120,8 +127,33 @@ def beamline_align():
     yield from mv(m1_fbk,1)
 
 
-@bpp.set_run_key_decorator('alignment')
 def beamline_align_v2():
+    yield from mv(m1_simple_fbk,0)
+    yield from mv(m3_simple_fbk,0)
+    yield from mv(m1_fbk,0)
+
+    # Comes from 43-alignment_scans.py:
+    # @property
+    # def m1pit(self):
+    #     ............
+    yield from align.m1pit
+    yield from sleep(5)
+    yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.value)
+    yield from mv(m1_simple_fbk,1)
+
+    yield from sleep(5)
+    yield from m3_check()
+
+
+def beamline_align_v2_for_suspenders():
+    # We create a unique run name in case
+    # multiple suspenders are tripped at the same time.
+    run_name = f'alignment-{str(uuid.uuid4())[:8]}'
+    yield from bpp.set_run_key_wrapper(beamline_align_v2(), run=run_name)
+
+
+#@bpp.set_run_key_decorator('alignment')
+def beamline_align_v3():
     yield from mv(m1_simple_fbk,0)
     yield from mv(m3_simple_fbk,0)
     yield from mv(m1_fbk,0)

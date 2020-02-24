@@ -47,7 +47,10 @@ class align_class():
             uid = yield from bpp.subs_wrapper(rel_scan([gcdiag.qem], m3.pit, start[i], stop[i], num[i]), peaks)
             print(f'!!!! our peaks for m3pit: {peaks.cen}')
             if uid is not None:
-                yield from mv(m3.pit, peaks.cen)
+                if peaks['cen'] is not None:
+                    yield from mv(m3.pit, peaks.cen)
+                else:
+                    peaks_not_found()  # raises an exception
                 print('For scan {} of {} the center is {}'.format(i+1, len(start), peaks.cen))
             else:
                 print ("m3.pit -> peaks.cen")
@@ -91,7 +94,10 @@ class align_class():
             uid = yield from bpp.subs_wrapper(rel_scan([m3diag.cam], m1.pit, start[i], stop[i], num[i]), peaks)
             print(f'!!!! our peaks for m1pit: {peaks.cen}')
             if uid is not None:
-                yield from mv(m1.pit, peaks.cen)   #peaks.max['m3_diag_cam_stats1_total'][0]
+                if peaks['cen'] is not None:
+                    yield from mv(m1.pit, peaks.cen)   #peaks.max['m3_diag_cam_stats1_total'][0]
+                else:
+                    peaks_not_found()  # raises an exception
                 print('For scan {} of {} the center is {}'.format(i+1, len(start), peaks.cen))
                 print('\t moved from {} to {}'.format(initial_position, peaks.cen))
             else:

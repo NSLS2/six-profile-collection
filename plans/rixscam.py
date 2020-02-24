@@ -144,9 +144,9 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 2.26
-    x_start= x_ideal - 0.01 * 3 #0.04#
-    x_stop=  x_ideal + 0.01 * 3 #.04#
+    x_ideal= 4.88
+    x_start= x_ideal - 0.02 * 3 #0.04#
+    x_stop=  x_ideal + 0.02 * 3 #.04#
     number= 7
     yield from mv(gvbt1,'open')
     f_string=''
@@ -173,17 +173,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.5765
-    y_start = y_ideal - 0.004 * 0
+    y_ideal = 6.4627
+    y_start = y_ideal - 0.004 * 5
     y_stop = y_ideal + 0.004 * 5
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal= 6.2335
-    x_start= x_ideal - 0.002 * 0
+    x_ideal= 7.6186
+    x_start= x_ideal - 0.002 * 5
     x_stop = x_ideal + 0.002 * 5
     #fine steps 0.002
-    num = 6
+    num = 11
     
     f_string=''
 
@@ -207,19 +207,52 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     print (f_string) 
 
 
+def rixscam_exitSlit(cts, num_scans=1, extra_md = ' '):
+    #yield from beamline_align_v2()
+    dets = [ ring_curr, rixscam, sclr]
+    precison_digit = 4
+    y_motor= extslt.vg
+    y_ideal = 11
+    y_start= y_ideal
+    y_stop = y_ideal + 5 * 4
+    num = 5
+    f_string=''
+
+    #yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'open')
+    for i in range(num):
+        
+        y_val = round (y_start + i * (y_stop - y_start) / (num - 1) , precison_digit)      
+        yield from mv(y_motor,y_val)
+        yield from sleep(20)
+        for s in range(num_scans):
+            uid = yield from count(dets, num=cts, md = {'reason':' exit-slit scan {}'. format(extra_md)})        
+            if uid == None:
+                uid = -1
+            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': exit slit = ' + str(y_val) + '\n'
+
+    yield from mv(gvbt1,'close')
+
+    #yield from mv(x_motor, x_ideal, y_motor, y_ideal)
+    
+    
+    print (f_string)
+
+
+
 def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     #yield from beamline_align_v2()
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4236
+    y_ideal = 1.4326
     y_start= y_ideal - 0.0005 * 4
     y_stop = y_ideal + 0.0005 * 4
     # fine step is 0.0005
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.5755
+    x_ideal= 6.4627
     x_start= x_ideal - 0.0005 * 4
     x_stop = x_ideal + 0.0005 * 4
     num = 9
