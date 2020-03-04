@@ -1,8 +1,9 @@
 import uuid
-
+from ophyd import Device, EpicsMotor, EpicsSignal
 
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
+    yield from mv(m1_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.value
     yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
     if offset is not None:
@@ -10,11 +11,12 @@ def pol_V(offset=None):
     yield from mv(epu1.phase,28.5)
     yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
     yield from mv(pgm.en,cur_mono_e)
-    yield from mv(m1_simple_fbk,1)
+    yield from mv(m1_pid_fbk,'ON')
     print('\nFinished moving the polarization to vertical.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
+    yield from mv(m1_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.value
     yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
     if offset is not None:
@@ -22,12 +24,13 @@ def pol_H(offset=None):
     yield from mv(epu1.phase,0)
     yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
     yield from mv(pgm.en,cur_mono_e)
-    yield from mv(m1_simple_fbk,1)
+    yield from mv(m1_pid_fbk,'ON')
     print('\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 
 def m3_check():
     yield from mv(m3_simple_fbk,0)
+    yield from mv(m3_pid_fbk,'OFF')
     sclr_enable()
     if pzshutter.value == 0:
        print('Piezo Shutter is disabled')
@@ -58,8 +61,9 @@ def m3_check():
     yield from mv(gcdiag.y,temp_gcdiag)
     yield from sleep(20)
     #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.value)
-    yield from mv(m3_simple_fbk_target,extslt_cam.stats1.centroid.x.value)#m3_simple_fbk_cen.value)
-    yield from mv(m3_simple_fbk,1)
+    #yield from mv(m3_pid_target,extslt_cam.stats1.centroid.x.value)#m3_simple_fbk_cen.value)
+    yield from mv(m3_pid_target, m3_pid_cen.value)
+    yield from mv(m3_pid_fbk,'ON')
     if flag == 0:
        print('Piezo Shutter remains disabled')   
     if flag == 1:
@@ -156,6 +160,8 @@ def beamline_align_v2_for_suspenders():
 def beamline_align_v3():
     yield from mv(m1_simple_fbk,0)
     yield from mv(m3_simple_fbk,0)
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
     yield from mv(m1_fbk,0)
 
     # Comes from 43-alignment_scans.py:
@@ -164,8 +170,8 @@ def beamline_align_v3():
     #     ............
     yield from align.m1pit
     yield from sleep(5)
-    yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.value)
-    yield from mv(m1_simple_fbk,1)
+    yield from mv(m1_pid_target_ratio,m1_pid_ratio.value)
+    yield from mv(m1_pid_fbk,'ON')
 
     yield from sleep(5)
     yield from m3_check()
@@ -249,5 +255,15 @@ m1_simple_fbk_ratio = EpicsSignal('XF:02IDA-OP{M1_simp_feed}FB-Ratio', name = 'm
 m3_simple_fbk = EpicsSignal('XF:02IDA-OP{M3_simp_feed}FB-Ena', name = 'm3_simple_fbk')
 m3_simple_fbk_target = EpicsSignal('XF:02IDA-OP{M3_simp_feed}FB-Targ', name = 'm3_simple_fbk_target')
 m3_simple_fbk_cen = EpicsSignal('XF:02IDA-OP{M3_simp_feed}FB_inpbuf', name = 'm3_simple_fbk_cen')
+
+
+# Definition signals PID feedback system 02/25/2020
+m1_pid_fbk = EpicsSignal('XF:02ID-OP{FBTEST2}Sts:FB-Sel', name = 'm1_pid_fbk')
+m1_pid_target_ratio = EpicsSignal('XF:02ID-OP{FBTEST2}PID-SP', name = 'm1_pid_target_ratio')
+m1_pid_ratio = EpicsSignal('XF:02ID-OP{FBTEST2}Inp-Sts.A', name = 'm1_pid_ratio')
+
+m3_pid_fbk = EpicsSignal('XF:02ID-OP{FBTEST3}Sts:FB-Sel', name = 'm3_pid_fbk')
+m3_pid_target = EpicsSignal('XF:02ID-OP{FBTEST3}PID-SP', name = 'm3_pid_fbk_target')
+m3_pid_cen = EpicsSignal('XF:02ID-OP{FBTEST3}Inp-Sts.A', name = 'm3_pid_cen')
 
 

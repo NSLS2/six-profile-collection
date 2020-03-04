@@ -144,10 +144,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 4.88
-    x_start= x_ideal - 0.02 * 3 #0.04#
-    x_stop=  x_ideal + 0.02 * 3 #.04#
-    number= 7
+    x_ideal= 4.02
+    x_start= x_ideal - 0.02 * 4 #0.04#
+    x_stop=  x_ideal + 0.02 * 4 #.04#
+    number= 9
     yield from mv(gvbt1,'open')
     f_string=''
 
@@ -173,17 +173,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 6.4627
-    y_start = y_ideal - 0.004 * 5
-    y_stop = y_ideal + 0.004 * 5
+    y_ideal = 5.440500
+    y_start = y_ideal - 0.004 * 4
+    y_stop = y_ideal + 0.004 * 4
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal= 7.6186
-    x_start= x_ideal - 0.002 * 5
-    x_stop = x_ideal + 0.002 * 5
+    x_ideal= 6.026200
+    x_start= x_ideal - 0.002 * 4
+    x_stop = x_ideal + 0.002 * 4
     #fine steps 0.002
-    num = 11
+    num = 9
     
     f_string=''
 
@@ -245,17 +245,17 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam, sclr]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4326
-    y_start= y_ideal - 0.0005 * 4
-    y_stop = y_ideal + 0.0005 * 4
+    y_ideal = 1.419500
+    y_start= y_ideal - 0.001* 4
+    y_stop = y_ideal + 0.001 * 7
     # fine step is 0.0005
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 6.4627
-    x_start= x_ideal - 0.0005 * 4
-    x_stop = x_ideal + 0.0005 * 4
-    num = 9
+    x_ideal= 5.436497
+    x_start= x_ideal - 0.001 * 4
+    x_stop = x_ideal + 0.001 * 7
+    num = 4
     
     f_string=''
 
@@ -314,9 +314,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 445.00
-    x_stop =  465.00
-    num = 10
+    x_start = 920
+    x_stop =  936
+    num = 17
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
