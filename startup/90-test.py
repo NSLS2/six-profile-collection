@@ -65,7 +65,7 @@ def save_scan2csv(first_id, last_id):
 
 ## spec count
 def ct_bfl():
-    print('top blade:\t',qem07.current1.mean_value.value)
+    print('top blade:\t',qem07.current1.mean_value.get())
 
 
 #pitch mirror 1
@@ -76,16 +76,16 @@ def ct_bfl():
    # mir1[0.234,0.236,0.336]
    # for i range(0,4):
     #    yield from bp.mv(m1.pit,mir1[i])
-    #   print('Moving M1 to ',m1.pit.user_readback.value)
+    #   print('Moving M1 to ',m1.pit.user_readback.get())
     #    yield from bp.mv()
     #    yield from dscan(m3.pit,-0.2,0.22,0)
         # this should work below
-    #    olog('Scan ID {} m3 pitch scan {}m1 pitch {} m3 trans'.format(db[-1].start.scan_id,m1.pit.user_readback.value,m3.x.user_readback.value))
+    #    olog('Scan ID {} m3 pitch scan {}m1 pitch {} m3 trans'.format(db[-1].start.scan_id,m1.pit.user_readback.get(),m3.x.user_readback.get()))
         
 
 #def myplan2(m1_stp,m3_stp):
-   # m1_start = m1.pit.user_readback.value
-   # m3_start = m3.x.user_readback.value
+   # m1_start = m1.pit.user_readback.get()
+   # m3_start = m3.x.user_readback.get()
    # yield from bp.sleep(0.3)
    # for i range(0,4):
        # yield from bp.mv(m1.pit,m1_start+i*m1_stp,m3.x+i*m3_stp)

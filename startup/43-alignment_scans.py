@@ -26,7 +26,7 @@ class align_class():
             position of the peak found after each M3 pitch scan, and is printed to the command line.
 
         '''
-        initial_position = m3.pit.user_readback.value
+        initial_position = m3.pit.user_readback.get()
         num = [31] # all lists here should have the same length, corresponding to the number of scan performed
         start = [ -0.001]
         stop = [ 0.001]
@@ -73,7 +73,7 @@ class align_class():
 
         '''
 
-        initial_position = m1.pit.user_readback.value
+        initial_position = m1.pit.user_readback.get()
         num = [ 89] # all lists here should have the same length, corresponding to the number of scan performed
         start = [ -110]
         stop = [ 110]

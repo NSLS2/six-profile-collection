@@ -4,6 +4,7 @@ from ophyd import Device, EpicsMotor, EpicsSignal
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.value
     yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
     if offset is not None:
@@ -12,11 +13,13 @@ def pol_V(offset=None):
     yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
     yield from mv(pgm.en,cur_mono_e)
     yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to vertical.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.value
     yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
     if offset is not None:
@@ -25,6 +28,7 @@ def pol_H(offset=None):
     yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
     yield from mv(pgm.en,cur_mono_e)
     yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 
@@ -32,17 +36,17 @@ def m3_check():
     yield from mv(m3_simple_fbk,0)
     yield from mv(m3_pid_fbk,'OFF')
     sclr_enable()
-    if pzshutter.value == 0:
+    if pzshutter.get() == 0:
        print('Piezo Shutter is disabled')
        flag = 0
-    if pzshutter.value == 2:
+    if pzshutter.get() == 2:
        print('Piezo Shutter is enabled: going to be disabled')
        yield from pzshutter_disable()
        flag = 1
 
-    temp_extslt_vg=extslt.vg.user_readback.value
-    temp_extslt_hg=extslt.hg.user_readback.value
-    temp_gcdiag = gcdiag.y.user_readback.value
+    temp_extslt_vg=extslt.vg.user_readback.get()
+    temp_extslt_hg=extslt.hg.user_readback.get()
+    temp_gcdiag = gcdiag.y.user_readback.get()
     #yield from mv(qem07.averaging_time, 1)
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,10)
@@ -59,10 +63,10 @@ def m3_check():
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)
-    yield from sleep(20)
-    #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.value)
-    #yield from mv(m3_pid_target,extslt_cam.stats1.centroid.x.value)#m3_simple_fbk_cen.value)
-    yield from mv(m3_pid_target, m3_pid_cen.value)
+    yield from sleep(60)
+    #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.get())
+    #yield from mv(m3_pid_target,extslt_cam.stats1.centroid.x.get())#m3_simple_fbk_cen.get())
+    yield from mv(m3_pid_target, m3_pid_cen.get())
     yield from mv(m3_pid_fbk,'ON')
     if flag == 0:
        print('Piezo Shutter remains disabled')   
@@ -73,8 +77,8 @@ def m3_check():
 
 def m1_align_fine2():
 
-    m1x_init=m1.x.user_readback.value
-    m1pit_init=m1.pit.user_readback.value
+    m1x_init=m1.x.user_readback.get()
+    m1pit_init=m1.pit.user_readback.get()
     m1pit_step=50
     m1pit_start=m1pit_init-1*m1pit_step
     
@@ -86,9 +90,9 @@ def m1_align_fine2():
 
 def alignM3x():
     # get the exit slit positions to return to at the end
-    vg_init = extslt.vg.user_setpoint.value
-    hg_init = extslt.hg.user_setpoint.value
-    hc_init = extslt.hc.user_setpoint.value
+    vg_init = extslt.vg.user_setpoint.get()
+    hg_init = extslt.hg.user_setpoint.get()
+    hc_init = extslt.hc.user_setpoint.get()
     print('Saving exit slit positions for later')
     
     # get things out of the way
@@ -127,7 +131,7 @@ def beamline_align():
     #yield from mv(m1_fbk_cam_time,0.002)
     #yield from mv(m1_fbk_th,1500)
     yield from sleep(5)
-    yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.value)
+    yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.get())
     yield from mv(m1_fbk,1)
 
 
@@ -142,7 +146,7 @@ def beamline_align_v2():
     #     ............
     yield from align.m1pit
     yield from sleep(5)
-    yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.value)
+    yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.get())
     yield from mv(m1_simple_fbk,1)
 
     yield from sleep(5)
@@ -155,6 +159,11 @@ def beamline_align_v2_for_suspenders():
     run_name = f'alignment-{str(uuid.uuid4())[:8]}'
     yield from bpp.set_run_key_wrapper(beamline_align_v2(), run=run_name)
 
+def beamline_align_v3_for_suspenders():
+    # We create a unique run name in case
+    # multiple suspenders are tripped at the same time.
+    run_name = f'alignment-{str(uuid.uuid4())[:8]}'
+    yield from bpp.set_run_key_wrapper(beamline_align_v3(), run=run_name)
 
 #@bpp.set_run_key_decorator('alignment')
 def beamline_align_v3():
@@ -170,7 +179,7 @@ def beamline_align_v3():
     #     ............
     yield from align.m1pit
     yield from sleep(5)
-    yield from mv(m1_pid_target_ratio,m1_pid_ratio.value)
+    yield from mv(m1_pid_target_ratio,m1_pid_ratio.get())
     yield from mv(m1_pid_fbk,'ON')
 
     yield from sleep(5)
@@ -180,12 +189,12 @@ def beamline_align_v3():
 def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
 
     sclr_enable()
-    sclr_set_time=sclr.preset_time.value
+    sclr_set_time=sclr.preset_time.get()
 
-    if pzshutter.value == 0:
+    if pzshutter.get() == 0:
        print('Piezo Shutter is disabled')
        flag = 0
-    if pzshutter.value == 2:
+    if pzshutter.get() == 2:
        print('Piezo Shutter is enabled: going to be disabled')
        yield from pzshutter_disable()
        flag = 1
