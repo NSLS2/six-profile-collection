@@ -5,7 +5,7 @@ def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
-    cur_mono_e = pgm.en.user_readback.value
+    cur_mono_e = pgm.en.user_readback.get()
     yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
     if offset is not None:
         yield from mv(epu1.offset,offset)
@@ -20,7 +20,7 @@ def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
-    cur_mono_e = pgm.en.user_readback.value
+    cur_mono_e = pgm.en.user_readback.get()
     yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
     if offset is not None:
         yield from mv(epu1.offset,offset)
@@ -224,7 +224,7 @@ def rixscam_get_threshold(Ei = None):
     Ei\t:\t float -  incident energy (default is beamline current energy)
     '''
     if Ei is None:
-        Ei = pgm.en.user_readback.value
+        Ei = pgm.en.user_readback.get()
     t_min = 0.7987 * Ei - 97.964
     t_max = 1.4907 * Ei + 38.249
     print('\n\n\tMinimum value for RIXSCAM threshold (LS mode):\t{}'.format(t_min))
@@ -240,7 +240,7 @@ def rixscam_set_threshold(Ei=None):
      Ei\t:\t float -  incident energy (default is beamline current energy)
     '''
     if Ei is None:
-        Ei = pgm.en.user_readback.value
+        Ei = pgm.en.user_readback.get()
     thold_min, thold_max = rixscam_get_threshold(Ei)
     yield from mv(rixscam.xip.beamline_energy, Ei, 
                   rixscam.xip.sum_3x3_threshold_min, thold_min, 
@@ -253,7 +253,7 @@ def rixscam_set_threshold(Ei=None):
 m1_fbk = EpicsSignal('XF:02IDA-OP{FBck}Sts:FB-Sel', name = 'm1_fbk')
 m1_fbk_sp = EpicsSignal('XF:02IDA-OP{FBck}PID-SP', name = 'm1_fbk_sp')
 m1_fbk_th = extslt_cam.stats1.centroid_threshold
-#m1_fbk_pix_x = extslt_cam.stats1.centroid.x.value
+#m1_fbk_pix_x = extslt_cam.stats1.centroid.x.get()
 m1_fbk_cam_time = extslt_cam.cam.acquire_time
 
 #(mv(m1_fbk_th,1500)
@@ -275,4 +275,6 @@ m3_pid_fbk = EpicsSignal('XF:02ID-OP{FBTEST3}Sts:FB-Sel', name = 'm3_pid_fbk')
 m3_pid_target = EpicsSignal('XF:02ID-OP{FBTEST3}PID-SP', name = 'm3_pid_fbk_target')
 m3_pid_cen = EpicsSignal('XF:02ID-OP{FBTEST3}Inp-Sts.A', name = 'm3_pid_cen')
 
-
+#voltage_dc = EpicsSignal('XF:02IDD{K2611:1}SP-VLvl', name = 'voltage_dc')
+#keithley_output = EpicsSignal('XF:02IDD{K2611:1}Cmd:Out-Ena', name = 'keithley_output')
+#current_rbk = EpicsSignal('XF:02IDD{K2611:1}RB-MeasI', name = 'current_rbk')

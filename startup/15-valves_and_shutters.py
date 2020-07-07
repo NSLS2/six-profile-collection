@@ -151,7 +151,8 @@ def pzshutter_enable():
     rixscam_exp = 1
     yield from mv(rixscam.cam.acquire_time, rixscam_exp)
     yield from mv(pzshutter,'Detector output')
-    yield from count([rixscam])#,yield from snap([rixscam]) -- num=1, md = {'reason': 'enable pzshutter'})
+    #yield from count([rixscam])#,
+    yield from snap([rixscam]) #-- num=1, md = {'reason': 'enable pzshutter'})
     yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
 def pzshutter_disable():
@@ -159,7 +160,8 @@ def pzshutter_disable():
     rixscam_exp = 1
     yield from mv(rixscam.cam.acquire_time, rixscam_exp)
     yield from mv(pzshutter,'None')
-    yield from count([rixscam])#,yield from snap --  num=1, md = {'reason': 'enable pzshutter'})
+    #yield from count([rixscam])#,
+    yield from snap([rixscam])#--  num=1, md = {'reason': 'enable pzshutter'})
     yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
 #Define the shutters from the above class.
