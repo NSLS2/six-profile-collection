@@ -44,7 +44,16 @@ m6,
 espgm.m7pit, espgm.grpit, espgm.grxrb, espgmmask, #espgm.grx, espgm.cff, espgm.en
 oc,
 dcslt,
-dc]
+dc,
+voltage_dc,
+current_dc,
+current_rbk,
+voltage_rbk,
+current_pulse,
+time_pulse,
+interval_pulse,
+voltage_pulse_rbk
+]
 
 
 # To avoid baseline are printed on screen:

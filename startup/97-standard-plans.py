@@ -1,12 +1,15 @@
 import uuid
 from ophyd import Device, EpicsMotor, EpicsSignal
 
+epu_table_mode = EpicsSignal('XF:02ID-ID{EPU:1}Enbl:Mode-Sel', name='epu_table_mode')
+
 def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.get()
     yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,28.5)
@@ -22,6 +25,7 @@ def pol_H(offset=None):
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = pgm.en.user_readback.get()
     yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
     if offset is not None:
         yield from mv(epu1.offset,offset)
     yield from mv(epu1.phase,0)
@@ -30,6 +34,53 @@ def pol_H(offset=None):
     yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+###########################################
+epu_forw_int_mode_input = EpicsSignal('XF:02ID-ID{EPU:1-FLT}Enbl:Inp1-Sel', name = 'epu_forw_int_mode_input')
+epu_forw_int_mode_output = EpicsSignal('XF:02ID-ID{EPU:1-FLT}Enbl:Out1-Sel', name = 'epu_forw_int_mode_output')
+epu_rev_int_mode_input = EpicsSignal('XF:02ID-ID{EPU:1-RLT}Enbl:Inp1-Sel', name = 'epu_rev_int_mode_input')
+
+def epu_control_disable():
+    '''The function disables the EPU control so that the PGM and the EPU can be operated fully independetly. This function doesn't require any parameter.'''
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    print(' The EPU table and control with the PGM energy are going to be disabled....')
+    yield from mv(epu_table_mode,'Disable')
+    yield from mv(epu_forw_int_mode_input, 0)
+    yield from mv(epu_forw_int_mode_output, 0)
+    yield from mv(epu_rev_int_mode_input, 0)
+    yield from sleep(2)
+    print(' The EPU table and control is now disabled.')
+    print(' The M1 and M3 PID Feedback systems are switched OFF ' )
+
+def epu_control_enable(pol):
+    '''The function can enable the EPU control either for Linear Horizontal or Linear Vertical polarization. The function accepts the polarization as input parameter: use 'H' for Linear Horizontal or 'V' for Linear Vertical.'''
+    print(' The EPU control with the PGM energy is going to be enabled....')
+    yield from mv(epu_forw_int_mode_input, 1)
+    yield from mv(epu_forw_int_mode_output, 1)
+    yield from mv(epu_rev_int_mode_input, 1)
+    yield from sleep(2)
+    cur_mono_e = pgm.en.user_readback.get()
+    if pol == 'H':
+       yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
+       yield from mv(epu_table_mode,'Enable')
+       yield from mv(epu1.phase,0)
+       yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+       yield from mv(pgm.en,cur_mono_e)
+
+    if pol =='V':
+       yield from mv(epu1.table,6) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
+       yield from mv(epu_table_mode,'Enable')
+       yield from mv(epu1.phase,28.5)
+       yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+       yield from mv(pgm.en,cur_mono_e)
+
+    else:
+       print('ERROR: Polarization not correctly selected. Please define the desired polarization as a function argument, either V or H within quotes')
+
+    print(' The EPU Table and the control with the PGM energy is now enabled for E=:\t{}'.format(cur_mono_e))
+    print(' ATTENTION 1: You need to run a beamline alignment routine now.')
+    print(' ATTENTION 2: Please, make sure the offset for your EPU table is correct. The current one is: \t{}'.format(epu1.offset.value))
 
 
 def m3_check():
@@ -53,13 +104,17 @@ def m3_check():
     yield from mv(extslt.vg,30)
     #yield from gcdiag.grid # RE-COMMENT THIS LINE 5/7/2019
     #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
-    peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8')
+    peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8') # Good for Normal Operation
+    # peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan2')  #Goof for Gas Cell
     yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
     print(f'!!! m3_check: peaks["cen"]: {peaks["cen"]}')
     if peaks['cen'] is not None:
         yield from mv(m3.pit, peaks['cen'])
     else:
+        yield from mv(extslt.hg,temp_extslt_hg)
+        yield from mv(extslt.vg,temp_extslt_vg)
         peaks_not_found()  # raises an exception!
+
     yield from mv(extslt.hg,temp_extslt_hg)
     yield from mv(extslt.vg,temp_extslt_vg)
     yield from mv(gcdiag.y,temp_gcdiag)

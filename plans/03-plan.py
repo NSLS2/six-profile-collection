@@ -1731,7 +1731,7 @@ def epu_calib_left():
 
 def m4_yaw_roll():  
     #cryo.x.settle_time=0.2
-    #cryo.y.settle_time=0.2
+    cryo.y.settle_time=0.2
     
     #r_md = 'V beam with yaw roll'
     
@@ -1788,15 +1788,16 @@ def m4_pit():
     #yield from mv(extslt.vg,30)
     yield from mv(extslt.hg,150)
     #yield from mv(epu1.gap,40.8) #detuned EPU @930 eV
-    mir4_pit_init = -4.1024
+    mir4_pit_init = -4.1045
     mir4_pit_step= 0.0003 #0.001
 
-    for i in range(-7, 8):
+    for i in range(-10, -5):
         yield from mv(m4.pit,mir4_pit_init+1*mir4_pit_step*(1*i))
         #yield from mv(cryo.x,37.8)
-        yield from mv(cryo.y,90.152) # to be adjusted
+        yield from mv(cryo.y,56.653) # to be adjusted
+        yield from sleep(5)
+        yield from relative_scan([sclr],cryo.y,0,0.02,61)
         yield from sleep(10)
-        yield from relative_scan([sclr],cryo.y,0,0.02,41)
         #yield from relative_scan([sclr],cryo.y,0,0.10,31)
         #yield from mv(cryo.y,97.5)
         #yield from mv(cryo.x,43.350+0.08*(1*i))
