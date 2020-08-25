@@ -370,8 +370,7 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
                #write_path_template='X:\nsls2\xf02id1\RIXSCAM\DATA\\%Y\\%m\\%d\\',
                #read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
                #root='/XF02ID1',
-               root='/nsls2/xf02id1',
-               reg=db.reg)
+               root='/nsls2/xf02id1')
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
@@ -379,8 +378,7 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
                read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',
 	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
                write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',
-               root='/nsls2/xf02id1',
-               reg=db.reg)
+               root='/nsls2/xf02id1')
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     # Delays
