@@ -147,7 +147,7 @@ def snap(dets):
 
 pzshutter = EpicsSignal('XF:02ID1-ES{RIXSCam}:cam1:ShutterMode', name = 'pzshutter')
 def pzshutter_enable():
-    rixscam_exp_temp = rixscam.cam.acquire_time.get()
+    rixscam_exp_temp = (yield from bps.rd(rixscam.cam.acquire_time))
     rixscam_exp = 1
     yield from mv(rixscam.cam.acquire_time, rixscam_exp)
     yield from mv(pzshutter,'Detector output')
@@ -156,7 +156,7 @@ def pzshutter_enable():
     yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
 def pzshutter_disable():
-    rixscam_exp_temp = rixscam.cam.acquire_time.get()
+    rixscam_exp_temp = (yield from bps.rd(rixscam.cam.acquire_time))
     rixscam_exp = 1
     yield from mv(rixscam.cam.acquire_time, rixscam_exp)
     yield from mv(pzshutter,'None')
