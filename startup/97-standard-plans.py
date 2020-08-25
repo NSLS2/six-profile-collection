@@ -330,6 +330,3 @@ m3_pid_fbk = EpicsSignal('XF:02ID-OP{FBTEST3}Sts:FB-Sel', name = 'm3_pid_fbk')
 m3_pid_target = EpicsSignal('XF:02ID-OP{FBTEST3}PID-SP', name = 'm3_pid_fbk_target')
 m3_pid_cen = EpicsSignal('XF:02ID-OP{FBTEST3}Inp-Sts.A', name = 'm3_pid_cen')
 
-#voltage_dc = EpicsSignal('XF:02IDD{K2611:1}SP-VLvl', name = 'voltage_dc')
-#keithley_output = EpicsSignal('XF:02IDD{K2611:1}Cmd:Out-Ena', name = 'keithley_output')
-#current_rbk = EpicsSignal('XF:02IDD{K2611:1}RB-MeasI', name = 'current_rbk')
