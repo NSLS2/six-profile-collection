@@ -50,11 +50,24 @@ mpl.rcParams['axes.grid'] = True
 
 
 from event_model import RunRouter
-from bluesky.callbacks.best_effort import BestEffortCallback
+from bluesky.callbacks.best_effort import BestEffortCallback, PeakResults
+
+
+peaks = PeakResults()
+
+
+class _CustomBestEffortCallback(BestEffortCallback):
+
+    def stop(self, doc):
+        global peaks
+        ret = super().stop(doc)
+        peaks = self.peaks
+
+        return ret
 
 
 def factory(name, doc):
-    bec = BestEffortCallback()
+    bec = _CustomBestEffortCallback()
     bec(name, doc)
     return [bec], []
 
