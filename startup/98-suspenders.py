@@ -18,6 +18,3 @@ fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sl
 RE.install_suspender(ring_suspender)
 RE.install_suspender(fe_shut_suspender)
 RE.install_suspender(shutterb_suspender)
-
-print("")
-print("You can safely ignore the 'SuspendOutBand' warning - this is a known issue that is fixed in a newer version.")
