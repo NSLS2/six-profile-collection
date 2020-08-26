@@ -7,7 +7,7 @@ def pol_V(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
-    cur_mono_e = pgm.en.user_readback.get()
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
     yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
     yield from mv(epu_table_mode,'Enable')
     if offset is not None:
@@ -23,7 +23,7 @@ def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
-    cur_mono_e = pgm.en.user_readback.get()
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
     yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
     yield from mv(epu_table_mode,'Enable')
     if offset is not None:
@@ -87,17 +87,17 @@ def m3_check():
     yield from mv(m3_simple_fbk,0)
     yield from mv(m3_pid_fbk,'OFF')
     sclr_enable()
-    if pzshutter.get() == 0:
+    if (yield from bps.rd(pzshutter)) == 0:
        print('Piezo Shutter is disabled')
        flag = 0
-    if pzshutter.get() == 2:
+    if (yield from bps.rd(pzshutter)) == 2:
        print('Piezo Shutter is enabled: going to be disabled')
        yield from pzshutter_disable()
        flag = 1
 
-    temp_extslt_vg=extslt.vg.user_readback.get()
-    temp_extslt_hg=extslt.hg.user_readback.get()
-    temp_gcdiag = gcdiag.y.user_readback.get()
+    temp_extslt_vg = (yield from bps.rd(extslt.vg.user_readback))
+    temp_extslt_hg = (yield from bps.rd(extslt.hg.user_readback))
+    temp_gcdiag = (yield from bps.rd(gcdiag.y.user_readback))
     #yield from mv(qem07.averaging_time, 1)
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,10)
@@ -132,8 +132,8 @@ def m3_check():
 
 def m1_align_fine2():
 
-    m1x_init=m1.x.user_readback.get()
-    m1pit_init=m1.pit.user_readback.get()
+    m1x_init = (yield from bps.rd(m1.x.user_readback))
+    m1pit_init = (yield from bps.rd(m1.pit.user_readback))
     m1pit_step=50
     m1pit_start=m1pit_init-1*m1pit_step
     
@@ -145,9 +145,9 @@ def m1_align_fine2():
 
 def alignM3x():
     # get the exit slit positions to return to at the end
-    vg_init = extslt.vg.user_setpoint.get()
-    hg_init = extslt.hg.user_setpoint.get()
-    hc_init = extslt.hc.user_setpoint.get()
+    vg_init = (yield from bps.rd(extslt.vg.user_setpoint))
+    hg_init = (yield from bps.rd(extslt.hg.user_setpoint))
+    hc_init = (yield from bps.rd(extslt.hc.user_setpoint))
     print('Saving exit slit positions for later')
     
     # get things out of the way
@@ -244,12 +244,12 @@ def beamline_align_v3():
 def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
 
     sclr_enable()
-    sclr_set_time=sclr.preset_time.get()
+    sclr_set_time = (yield from bps.rd(sclr.preset_time))
 
-    if pzshutter.get() == 0:
+    if (yield from bps.rd(pzshutter)) == 0:
        print('Piezo Shutter is disabled')
        flag = 0
-    if pzshutter.get() == 2:
+    if (yield from bps.rd(pzshutter)) == 2:
        print('Piezo Shutter is enabled: going to be disabled')
        yield from pzshutter_disable()
        flag = 1
@@ -279,7 +279,7 @@ def rixscam_get_threshold(Ei = None):
     Ei\t:\t float -  incident energy (default is beamline current energy)
     '''
     if Ei is None:
-        Ei = pgm.en.user_readback.get()
+        Ei = (yield from bps.rd(pgm.en.user_readback))
     t_min = 0.7987 * Ei - 97.964
     t_max = 1.4907 * Ei + 38.249
     print('\n\n\tMinimum value for RIXSCAM threshold (LS mode):\t{}'.format(t_min))
