@@ -50,24 +50,36 @@ espgm.m7pit, espgm.grpit, espgm.grx, espgmmask, # espgm.cff, espgm.e
 #oc,
 dcslt,
 #dc,
-voltage_dc,
-current_dc,
-current_rbk,
-voltage_rbk,
-current_pulse,
-time_pulse,
-interval_pulse,
-voltage_pulse_rbk,
-voltage_dc_B,
-current_dc_B,
-current_rbk_B,
-voltage_rbk_B,
-current_pulse_B,
-time_pulse_B,
-interval_pulse_B,
-voltage_pulse_rbk_B
+]
+optional = [
+"voltage_dc",
+"current_dc",
+"current_rbk",
+"voltage_rbk",
+"current_pulse",
+"time_pulse",
+"interval_pulse",
+"voltage_pulse_rbk",
+"voltage_dc_B",
+"current_dc_B",
+"current_rbk_B",
+"voltage_rbk_B",
+"current_pulse_B",
+"time_pulse_B",
+"interval_pulse_B",
+"voltage_pulse_rbk_B"
 ]
 
+for device_name in optional:
+    try:
+        # Get the device if it is defined.
+        device = globals()[device_name]
+    except KeyError:
+        # Skip it; it's probably unplugged.
+        print(f"Omitting {device_name} from baseline readings because it is not defined.")
+        pass
+    else:
+        sd.baseline.append(device)
 
 # To avoid baseline are printed on screen:
 # bec.disable_baseline()%
