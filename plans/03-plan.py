@@ -1740,20 +1740,20 @@ def m4_yaw_roll():
     #yield from mv(epu1.gap,40.8) #detunedyield from mv(cryo.x,33.50)
 #    mir4_rol_init = 1.421
 #    mir4_rol_step= 0.002
-    mir4_yaw_init = -0.70585
-    mir4_yaw_step = 0.0003 #0.002
+    mir4_yaw_init = -0.70645
+    mir4_yaw_step = 0.0003 #0.001
 
-    for i in range(-10,-3):
+    for i in range(-11,0):
         yield from mv(m4.yaw, mir4_yaw_init + mir4_yaw_step * (1 * i))
         #yield from mv(m4.rol,mir4_rol_init+mir4_rol_step*(1*i))
         #yield from mv(cryo.x,39.0)
-        yield from mv(cryo.y,11.938) # to be adjusted
+        yield from mv(cryo.y,56.81) # to be adjusted
         yield from sleep(5)
         yield from rel_scan([sclr],cryo.y,0,0.02,61)
         #yield from rel_scan([sclr],cryo.y,0,0.04,121, md={'reason':r_md})
 
 
-def pitch_and_yaw():
+def m4_pitch_and_yaw():
     cryo.x.settle_time=0.2
     cryo.y.settle_time=0.2
     
@@ -1788,13 +1788,13 @@ def m4_pit():
     #yield from mv(extslt.vg,30)
     yield from mv(extslt.hg,150)
     #yield from mv(epu1.gap,40.8) #detuned EPU @930 eV
-    mir4_pit_init = -4.1045
+    mir4_pit_init = -4.1069
     mir4_pit_step= 0.0003 #0.001
 
-    for i in range(-10, -5):
+    for i in range(-5, 6):
         yield from mv(m4.pit,mir4_pit_init+1*mir4_pit_step*(1*i))
         #yield from mv(cryo.x,37.8)
-        yield from mv(cryo.y,56.653) # to be adjusted
+        yield from mv(cryo.y,56.8150) # to be adjusted
         yield from sleep(5)
         yield from relative_scan([sclr],cryo.y,0,0.02,61)
         yield from sleep(10)
@@ -1926,7 +1926,7 @@ def m4_vexitslt_focus():
         yield from mv(extslt.vg,extslt_ini+i*extslt_step)
         #yield from sleep(5)
         #yield from mv(cryo.x,40.6)
-        yield from mv(cryo.y,67.065) # to be adjusted
+        yield from mv(cryo.y,56.813) # to be adjusted
         yield from sleep(1)
         yield from relative_scan([sclr],cryo.y,0,0.015,46)
         #yield from mv(cryo.y,98)

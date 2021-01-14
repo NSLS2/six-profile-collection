@@ -150,5 +150,7 @@ class Lakeshore336Picky(Device):
 
 stemp = Lakeshore336('XF:02IDD-ES{TCtrl:1', name='stemp')
 #stemp.hints = {'fields': ['stemp_temp_A', 'stemp_temp_B']}  #TODO this doesn't work at 2ID and it DID at 23ID (is it kind vs hints)
+stemp.temp.A.T.kind='hinted'
+stemp.temp.B.T.kind='hinted'
 
 

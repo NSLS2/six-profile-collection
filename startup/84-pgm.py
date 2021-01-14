@@ -37,17 +37,21 @@ class PGMjoe(Device):
 class PGM_ES(Device):
     cff = Cpt(EpicsMotor, 'cff}Mtr')
     en = Cpt(EpicsMotor, 'E}Mtr')
-    grx = Cpt(EpicsMotor, 'GXRaw}Mtr')
+    #grx = Cpt(EpicsMotor, 'GXRaw}Mtr') #Commented on  12/15/2020 because it doesn't work with BS
+    grx = Cpt(EpicsMotor, 'GX}Mtr')
     m7pit = Cpt(EpicsMotor, 'MP}Mtr')
     grpit = Cpt(EpicsMotor, 'GP}Mtr')
     grxrb = Cpt(EpicsSignalRO,'GXEnc}Mtr.RBV')
 
+    #grlines = Cpt(EpicsSignalRO, prefix='XF:02IDD-ES{Mono:2-Grt:1}Name-I.VAL') # Added on 12/15/2020
+
+
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
          'mbg': ['m2off', 84.20095245038944, 'groff', 82.08049027069194,'grx', -63.0, 'grlines', 500, 'm3slt_hs', -37.8,
-				 'm3slt_ha',-17.2], #'offset values changed on 01/18/2020 'm2off', 84.20066918198582, 'groff', 82.07958117700636  
+				 'm3slt_ha',-17.4], #'offset values changed on 01/18/2020 'm2off', 84.20066918198582, 'groff', 82.07958117700636  
 
-         'hbg': ['m2off', 84.2048110501493, 'groff',82.13655866499273,'grx', 61.0, 'grlines', 1200, 'm3slt_hs', -37.8,
-				 'm3slt_ha',-17.2],
+         'hbg': ['m2off', 84.2048110501493, 'groff',82.13655866499273,'grx', 61.0, 'grlines', 1200, 'm3slt_hs', -38,
+				 'm3slt_ha',-17.4],
 
 	 	 'ubg': ['m2off', 84.20377334307703, 'groff', 82.11198321011099 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
 				 'm3slt_ha',-17.8] }) #before 01/16/2020 'm2off', 84.2072359100, 'groff', 82.105016851 

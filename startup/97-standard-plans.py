@@ -54,21 +54,25 @@ def epu_control_disable():
     print(' The M1 and M3 PID Feedback systems are switched OFF ' )
 
 def epu_control_enable(pol):
-    '''The function can enable the EPU control either for Linear Horizontal or Linear Vertical polarization. The function accepts the polarization as input parameter: use 'H' for Linear Horizontal or 'V' for Linear Vertical.'''
+    '''The function can enable the EPU control either for Linear Horizontal or Linear Vertical polarization. The function accepts the polarization as input parameter: use 0 for Linear Horizontal or 28.5 for Linear Vertical.'''
     print(' The EPU control with the PGM energy is going to be enabled....')
+
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+
     yield from mv(epu_forw_int_mode_input, 1)
     yield from mv(epu_forw_int_mode_output, 1)
     yield from mv(epu_rev_int_mode_input, 1)
     yield from sleep(2)
     cur_mono_e = pgm.en.user_readback.get()
-    if pol == 'H':
+    if pol == 0:
        yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
        yield from mv(epu_table_mode,'Enable')
        yield from mv(epu1.phase,0)
        yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
        yield from mv(pgm.en,cur_mono_e)
 
-    if pol =='V':
+    if pol == 28.5:
        yield from mv(epu1.table,6) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
        yield from mv(epu_table_mode,'Enable')
        yield from mv(epu1.phase,28.5)
@@ -80,7 +84,7 @@ def epu_control_enable(pol):
 
     print(' The EPU Table and the control with the PGM energy is now enabled for E=:\t{}'.format(cur_mono_e))
     print(' ATTENTION 1: You need to run a beamline alignment routine now.')
-    print(' ATTENTION 2: Please, make sure the offset for your EPU table is correct. The current one is: \t{}'.format(epu1.offset.value))
+    print(' ATTENTION 2: Please, make sure the offset for your EPU table is correct. The current one is: \t{}'.format(epu1.offset.get()))
 
 
 def m3_check():
@@ -241,7 +245,7 @@ def beamline_align_v3():
     yield from m3_check()
 
 
-def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
+def xas_old(dets,motor,start_en,stop_en,num_points,sec_per_point):
 
     sclr_enable()
     sclr_set_time = (yield from bps.rd(sclr.preset_time))
@@ -258,6 +262,7 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
         det_field = 'rixscam_xip_count_possible_event'
     else:
         det_field = 'sclr_channels_chan2'
+
     peaks = bluesky.callbacks.fitting.PeakStats(pgm.en.name, det_field)
     yield from bpp.subs_wrapper(scan(dets,pgm.en,start_en,stop_en,num_points), peaks)
     print(f"!!! xas: peaks['max']: {peaks['max']}")
@@ -270,6 +275,50 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
        print('Piezo Shutter is going to renabled')
        yield from pzshutter_enable()
     yield from mv(sclr.preset_time,sclr_set_time)
+    return E_com, E_max
+
+def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
+
+    sclr_enable()
+    sclr_set_time_original = (yield from bps.rd(sclr.preset_time))
+
+    if (yield from bps.rd(pzshutter)) == 0:
+       print('Piezo Shutter is disabled')
+       flag = 0
+    if (yield from bps.rd(pzshutter)) == 2:
+       print('Piezo Shutter is enabled: going to be disabled')
+       yield from pzshutter_disable()
+       flag = 1
+    yield from mv(sclr.preset_time,sec_per_point)
+    if dets[0].name == 'rixscam':
+        det_field = 'rixscam_xip_count_possible_event'
+    else:
+        det_field = 'sclr_channels_chan2'
+
+    ####################################################################
+    dets_name = list([])
+    for i in dets:
+        dets_name.append(i.name)
+    if 'rixscam' in dets_name:
+        rixscam_set_time_original = rixscam.cam.acquire_time.get()
+        yield from mv(rixscam.cam.acquire_time, sec_per_point)
+    ####################################################################
+    peaks = bluesky.callbacks.fitting.PeakStats(pgm.en.name, det_field)
+    yield from bpp.subs_wrapper(scan(dets,pgm.en,start_en,stop_en,num_points), peaks)
+    print(f"!!! xas: peaks['max']: {peaks['max']}")
+    E_max = peaks['max'][0]
+    E_com = peaks['com']
+
+    if flag == 0:
+       print('Piezo Shutter remains disabled')   
+    if flag == 1:
+       print('Piezo Shutter is going to renabled')
+       yield from pzshutter_enable()
+    yield from sleep(5)
+    yield from mv(sclr.preset_time,sclr_set_time_original)
+    if 'rixscam' in dets_name:
+        yield from mv(rixscam.cam.acquire_time,rixscam_set_time_original)
+	
     return E_com, E_max
 
 
@@ -296,7 +345,7 @@ def rixscam_set_threshold(Ei=None):
     '''
     if Ei is None:
         Ei = pgm.en.user_readback.get()
-    thold_min, thold_max = rixscam_get_threshold(Ei)
+    thold_min, thold_max = yield from rixscam_get_threshold(Ei)
     yield from mv(rixscam.xip.beamline_energy, Ei, 
                   rixscam.xip.sum_3x3_threshold_min, thold_min, 
                   rixscam.xip.sum_3x3_threshold_max, thold_max)

@@ -558,7 +558,7 @@ rixscam.xip.enable.set('Enable')
 rixscam.hdf2.enable.set('Enable')
 
 #rixscam.read_attrs = ['hdf5']
-rixscam.read_attrs = ['hdf5','hdf2', 'xip']
+rixscam.read_attrs = ['hdf5','hdf2', 'xip'] 
 #rixscam.read_attrs = ['hdf2', 'xip']
 
 #TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs
