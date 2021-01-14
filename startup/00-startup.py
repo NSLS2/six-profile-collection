@@ -174,4 +174,3 @@ RE.md = PersistentDict(runengine_metadata_dir)
 
 
 import logging
-logging.getLogger('ophyd').setLevel('WARNING')  # ophyd is too verbose right now
