@@ -65,14 +65,14 @@ def epu_control_enable(pol):
     yield from mv(epu_rev_int_mode_input, 1)
     yield from sleep(2)
     cur_mono_e = pgm.en.user_readback.get()
-    if pol == 0:
+    if pol == 'H':
        yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
        yield from mv(epu_table_mode,'Enable')
        yield from mv(epu1.phase,0)
        yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
        yield from mv(pgm.en,cur_mono_e)
 
-    if pol == 28.5:
+    if pol == 'V':
        yield from mv(epu1.table,6) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
        yield from mv(epu_table_mode,'Enable')
        yield from mv(epu1.phase,28.5)
@@ -202,7 +202,7 @@ def beamline_align_v2():
     # Comes from 43-alignment_scans.py:
     # @property
     # def m1pit(self):
-    #     ............
+    #     .........``...
     yield from align.m1pit
     yield from sleep(5)
     yield from mv(m1_simple_fbk_target_ratio,m1_simple_fbk_ratio.get())
@@ -238,7 +238,12 @@ def beamline_align_v3():
     #     ............
     yield from align.m1pit
     yield from sleep(5)
-    yield from mv(m1_pid_target_ratio,m1_pid_ratio.get())
+    #yield from mv(m1_pid_target_ratio,m1_pid_ratio.get())
+    yield from mv(m1_pid_target_ratio,1) #Changed on 1/25/21: if m3slits are centered on the ROI, this should work better.
+    yield from sleep(5)
+    yield from count([m3diag.cam])
+    yield from m3diag.out
+
     yield from mv(m1_pid_fbk,'ON')
 
     yield from sleep(5)

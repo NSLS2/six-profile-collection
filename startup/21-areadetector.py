@@ -253,8 +253,9 @@ qem09 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:9}EM180:', name='qem09'),
 qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
                  ['sc_diode_{}'.format(s) for s in ('1','2','3','4')])
 
-qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
-                 ['sample_tey_{}'.format(s) for s in ('top','empty','bot')])
+#JPcommented this 20210426
+#qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
+#                 ['sample_tey_{}'.format(s) for s in ('top','empty','bot')])
 
 # qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
 qem07.current1.mean_value.kind = Kind.hinted
@@ -263,10 +264,11 @@ qem07.current2.mean_value.kind = Kind.normal
 qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
 #qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
 
-qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
-qem12.current1.mean_value.kind = Kind.hinted
-qem12.current3.mean_value.kind = Kind.hinted
+#JP commented this 20210426
+#qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
+#qem12.current1.mean_value.kind = Kind.hinted
+#qem12.current3.mean_value.kind = Kind.hinted
 
-print(f'21-areadetector.py {start_time-time.monotonic()}')
+
 
 start_time=time.monotonic()

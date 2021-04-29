@@ -104,8 +104,8 @@ class align_class():
                 print ("m1.pit -> peaks.cen")
                 print("For scan {} of {} the center is peaks.cen".format(i+1, len(start)))
 
-        yield from count([m3diag.cam])
+#        yield from count([m3diag.cam])   # Commented on 1/25/2021 as these lines have been moved to beamline_aling_v3()
 
-        yield from m3diag.out
+#        yield from m3diag.out  # Commented on 1/25/2021 as these lines have been moved to beamline_aling_v3()
 
 align = align_class()
