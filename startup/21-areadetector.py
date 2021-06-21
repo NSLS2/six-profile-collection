@@ -16,7 +16,7 @@ start_time=time.monotonic()
 class HDF5PluginWithFileStore(HDF5Plugin_V22, FileStoreHDF5IterativeWrite):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # In CSS help: "N < 0: Uop to abs(N) new directory levels will be created"
+        # In CSS help: "N < 0: Up to abs(N) new directory levels will be created"
         self.stage_sigs.update({"create_directory": -3})
 
     def stage(self, *args, **kwargs):
