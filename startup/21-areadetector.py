@@ -8,10 +8,20 @@ from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.cam import AreaDetectorCam
 from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV, ADBase
+from ophyd.areadetector.plugins import HDF5Plugin_V22
 
 start_time=time.monotonic()
 
-class HDF5PluginWithFileStore(HDF5Plugin, FileStoreHDF5IterativeWrite):
+
+class HDF5PluginWithFileStore(HDF5Plugin_V22, FileStoreHDF5IterativeWrite):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # In CSS help: "N < 0: Uop to abs(N) new directory levels will be created"
+        self.stage_sigs.update({"create_directory": -3})
+
+    def stage(self, *args, **kwargs):
+        self.create_directory.put(self.stage_sigs["create_directory"])
+        super().stage(*args, **kwargs)
 
     def get_frames_per_point(self):
         return self.parent.cam.num_images.get()  # HACK fixed from =1 to this self.
@@ -150,14 +160,13 @@ class StandardProsilicaROI(StandardProsilica):
             raise RuntimeError('in roi_enable status must be Enable or Disable')
 
 
-
-
 class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
-              write_path_template='/nsls2/xf02id1/data/prosilica_data/%Y/%m/%d',
-              root='/nsls2/xf02id1')
-        
+              write_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
+              root='/nsls2/data/six/legacy')
+
+
 diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
 m3_diag_cam = StandardProsilicaSaving('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
