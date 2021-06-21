@@ -144,12 +144,12 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     y_motor= pgm.en
     #y_val=  529.3
-    x_ideal= 3.95
+    #x_ideal= 3.92
 
-    #x_ideal= 2.24
-    x_start= x_ideal - 0.02 *8 #0.04#
-    x_stop=  x_ideal + 0.02 *8 #.04#
-    number= 17
+    x_ideal= 2.24
+    x_start= x_ideal - 0.02 *4 #0.04#
+    x_stop=  x_ideal + 0.02 *4 #.04#
+    number= 9
     yield from mv(gvbt1,'Open')
     f_string=''
 
@@ -175,17 +175,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.5876
-    y_start = y_ideal - 0.004 * 12
-    y_stop = y_ideal + 0.004 * 12
+    y_ideal = 6.2843
+    y_start = y_ideal - 0.004 * 6
+    y_stop = y_ideal + 0.004 * 6
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal= 6.2569
-    x_start= x_ideal - 0.002 * 12
-    x_stop = x_ideal + 0.002 * 12
+    x_ideal= 7.3540
+    x_start= x_ideal - 0.002 * 6
+    x_stop = x_ideal + 0.002 * 6
     #fine steps 0.002
-    num = 25
+    num = 13
     
     f_string=''
 
@@ -212,25 +212,25 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
 
 def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     #yield from beamline_align_v2()
-    dets = [ ring_curr, rixscam, sclr]
+    dets = [ ring_curr, rixscam]
     precison_digit = 4
     y_motor= m6.pit
     #y_ideal = 1.427409
-    y_ideal = 1.4275
+    y_ideal = 1.425979
     #y_ideal = 1.4269
-    y_start= y_ideal - 0.0005* 12
-    y_stop = y_ideal + 0.0005 *12
+    y_start= y_ideal - 0.0005* 4
+    y_stop = y_ideal + 0.0005 *4
     # fine step is 0.0005
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
     # x_ideal= 6.7267
-    x_ideal= 5.6156
+    x_ideal= 6.2683
     #x_ideal= 5.908233
 
-    x_start= x_ideal - 0.0005 * 12
-    x_stop = x_ideal + 0.0005 * 12
-    num = 25
+    x_start= x_ideal - 0.0005 * 4
+    x_stop = x_ideal + 0.0005 * 4
+    num = 9
 
     f_string=''
 
@@ -289,8 +289,8 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 844
-    x_stop =  860
+    x_start = 566
+    x_stop =  582
     num = 9
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
