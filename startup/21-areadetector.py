@@ -16,17 +16,9 @@ start_time=time.monotonic()
 class HDF5PluginWithFileStore(HDF5Plugin_V22, FileStoreHDF5IterativeWrite):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._old_create_directory = ""
-
-    def stage(self, *args, **kwargs):
-        self._old_create_directory = self.create_directory.get(as_string=True)
         # In CSS help: "N < 0: Up to abs(N) new directory levels will be created"
-        self.create_directory.put(-3)
-        super().stage(*args, **kwargs)
-
-    def unstage(self, *args, **kwargs):
-        super().unstage(*args, **kwargs)
-        self.create_directory.put(self._old_create_directory)
+        self.stage_sigs.update({"create_directory": -3})
+        self.stage_sigs.move_to_end("create_directory", last=False)
 
     def get_frames_per_point(self):
         return self.parent.cam.num_images.get()  # HACK fixed from =1 to this self.
