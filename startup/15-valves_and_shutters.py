@@ -5,6 +5,13 @@ from nslsii.devices import TwoButtonShutter  #TODO why are we not suing the faci
 from nslsii.devices import _time_fmtstr  # TODO(DAMA/MR/20191022): this is a temp workaround for a missing var
 
 
+class TwoButtonShutterSIX(TwoButtonShutter):
+    # This class is to override the default behavior of closing
+    # the shutter on suspending.
+    def stop(self, success=False):
+        pass
+
+
 # class TwoButtonShutter(Device):  #Why custom and not facility?
 
 #     open_cmd = Cpt(EpicsSignal, 'Cmd:Opn-Cmd', string=True)
@@ -165,10 +172,10 @@ def pzshutter_disable():
     yield from mv(rixscam.cam.acquire_time, rixscam_exp_temp)
 
 #Define the shutters from the above class.
-shutterfe = TwoButtonShutter('XF:02ID-PPS{Sh:FE}', name='shutterfe')
-shuttera = TwoButtonShutter('XF:02IDA-PPS{PSh}', name='shuttera')
-shutterb = TwoButtonShutter('XF:02IDB-PPS{PSh}', name='shutterb')
+shutterfe = TwoButtonShutterSIX('XF:02ID-PPS{Sh:FE}', name='shutterfe')
+shuttera = TwoButtonShutterSIX('XF:02IDA-PPS{PSh}', name='shuttera')
+shutterb = TwoButtonShutterSIX('XF:02IDB-PPS{PSh}', name='shutterb')
 
 #Define the gatevalves from the above class.
-gvbt1 = TwoButtonShutter('XF:02IDD-VA{BT:1-GV:1}', name='gvbt1')
-gvsc1 = TwoButtonShutter('XF:02IDD-VA{SC:1-GV:1}', name='gvsc1')
+gvbt1 = TwoButtonShutterSIX('XF:02IDD-VA{BT:1-GV:1}', name='gvbt1')
+gvsc1 = TwoButtonShutterSIX('XF:02IDD-VA{SC:1-GV:1}', name='gvsc1')
