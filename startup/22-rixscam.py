@@ -364,21 +364,29 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
-               read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',
+               # read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',  # commented out 2021 August 17
+               read_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
 	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
-               write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',
+               # write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',  # commented out 2021 August 17
+               write_path_template='X:\prosilica\\%Y\\%m\\%d\\',
                #write_path_template='X:\nsls2\xf02id1\RIXSCAM\DATA\\%Y\\%m\\%d\\',
                #read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
                #root='/XF02ID1',
-               root='/nsls2/xf02id1')
+               # root='/nsls2/xf02id1'  # commented out 2021 August 17
+               root='/nsls2/data/six/legacy/prosilica'
+    )
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
-               suffix='HDF2:',
-               read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',
+               suffix='HDF2:' ,
+               # read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',  # commented out 2021 August 17
+               read_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
 	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
-               write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',
-               root='/nsls2/xf02id1')
+               write_path_template='X:\prosilica\\%Y\\%m\\%d\\',
+               # write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',  # commented out 2021 August 17
+               # root='/nsls2/xf02id1'  # commented out 2021 August 17
+               root='/nsls2/data/six/legacy/prosilica'
+            )
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     # Delays
