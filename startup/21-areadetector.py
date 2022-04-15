@@ -23,6 +23,34 @@ class HDF5PluginWithFileStore(HDF5Plugin_V22, FileStoreHDF5IterativeWrite):
     def get_frames_per_point(self):
         return self.parent.cam.num_images.get()  # HACK fixed from =1 to this self.
 
+    def warmup(self):
+        """
+        A convenience method for 'priming' the plugin.
+
+        The plugin has to 'see' one acquisition before it is ready to capture.
+        This sets the array size, etc.
+        """
+        set_and_wait(self.enable, 1)
+        sigs = OrderedDict([(self.parent.cam.array_callbacks, 1),
+                            (self.parent.cam.image_mode, 'Single'),
+                            (self.parent.cam.trigger_mode, 'Fixed Rate'),
+                            # just in case tha acquisition time is set very long...
+                            (self.parent.cam.acquire_time, 1),
+                            (self.parent.cam.acquire_period, 1),
+                            (self.parent.cam.acquire, 1)])
+
+        original_vals = {sig: sig.get() for sig in sigs}
+
+        for sig, val in sigs.items():
+            ttime.sleep(0.1)  # abundance of caution
+            set_and_wait(sig, val)
+
+        ttime.sleep(2)  # wait for acquisition
+
+        for sig, val in reversed(list(original_vals.items())):
+            ttime.sleep(0.1)
+            set_and_wait(sig, val)
+
 
 #ALL OF THIS COMMENT DOWN TO testing m3_diag_cam is for testing only. DON'T DELETE 
 
