@@ -45,29 +45,31 @@ ow,
 m5,
 m5mask, m6_msk,
 m6,
-espgm.m7pit, espgm.grpit, espgm.grx, espgmmask, # espgm.cff, espgm.e
+espgm.m7pit, espgm.grpit, espgm.grx, 
+espgmmask, # espgm.cff, espgm.e
 #espgm.grlines, #added on 12/15/2020 DOESN'T WORK
-#oc,
+oc,
 dcslt,
-#dc,
+dc,
 ]
+
 optional = [
-"voltage_dc",
-"current_dc",
-"current_rbk",
-"voltage_rbk",
-"current_pulse",
-"time_pulse",
-"interval_pulse",
-"voltage_pulse_rbk",
-"voltage_dc_B",
-"current_dc_B",
-"current_rbk_B",
-"voltage_rbk_B",
-"current_pulse_B",
-"time_pulse_B",
-"interval_pulse_B",
-"voltage_pulse_rbk_B"
+"voltage_dc_1A",
+"current_dc_1A",
+"current_rbk_1A",
+"voltage_rbk_1A",
+"current_pulse_1A",
+"time_pulse_1A",
+"interval_pulse_1A",
+"voltage_pulse_rbk_1A",
+"voltage_dc_1B",
+"current_dc_1B",
+"current_rbk_1B",
+"voltage_rbk_1B",
+"current_pulse_1B",
+"time_pulse_1B",
+"interval_pulse_1B",
+"voltage_pulse_rbk_1B"
 ]
 
 for device_name in optional:

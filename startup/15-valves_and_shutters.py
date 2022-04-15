@@ -177,5 +177,6 @@ shuttera = TwoButtonShutterSIX('XF:02IDA-PPS{PSh}', name='shuttera')
 shutterb = TwoButtonShutterSIX('XF:02IDB-PPS{PSh}', name='shutterb')
 
 #Define the gatevalves from the above class.
+gvbt17 = TwoButtonShutterSIX('XF:02IDC-VA{BT:17-GV:17_D_1}', name='gvbt17')
 gvbt1 = TwoButtonShutterSIX('XF:02IDD-VA{BT:1-GV:1}', name='gvbt1')
 gvsc1 = TwoButtonShutterSIX('XF:02IDD-VA{SC:1-GV:1}', name='gvsc1')

@@ -1,5 +1,6 @@
 from ophyd.areadetector import AreaDetector, HDF5Plugin
 from ophyd.areadetector.plugins import PluginBase
+from ophyd.areadetector.cam import ADCpt
 
 from ophyd.areadetector.filestore_mixins import (FileStoreHDF5IterativeWrite,
                                                  FileStorePluginBase,
@@ -360,32 +361,23 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
     centroid_enable = Cpt(Signal, value=False)
 
     xip = Cpt(XIPPlugin, suffix='XIP1:')
+
+    trigger_mode = ADCpt(SignalWithRBV, 'TriggerMode', string=True)  # override string=False default
     
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
-               # read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',  # commented out 2021 August 17
-               read_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
-	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
-               # write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',  # commented out 2021 August 17
-               write_path_template='X:\prosilica\\%Y\\%m\\%d\\',
-               #write_path_template='X:\nsls2\xf02id1\RIXSCAM\DATA\\%Y\\%m\\%d\\',
-               #read_path_template='/XF02ID1/RIXSCAM/DATA/%Y/%m/%d',
-               #root='/XF02ID1',
-               # root='/nsls2/xf02id1'  # commented out 2021 August 17
-               root='/nsls2/data/six/legacy/prosilica'
+               write_path_template='X:\\%Y\\%m\\%d\\',
+               read_path_template='/nsls2/data/six/assets/%Y/%m/%d',
+               root='/nsls2/data/six/assets'
     )
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
                suffix='HDF2:' ,
-               # read_path_template='/nsls2/xf02id1/data/RIXSCAM/%Y/%m/%d',  # commented out 2021 August 17
-               read_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
-	       #read_path_template='/nsls2/xf02id1/RIXSCAM/DATA/%Y/%m/%d',
-               write_path_template='X:\prosilica\\%Y\\%m\\%d\\',
-               # write_path_template='X:\data\RIXSCAM\\%Y\\%m\\%d\\',  # commented out 2021 August 17
-               # root='/nsls2/xf02id1'  # commented out 2021 August 17
-               root='/nsls2/data/six/legacy/prosilica'
+               write_path_template='X:\\%Y\\%m\\%d\\',
+               read_path_template='/nsls2/data/six/assets/%Y/%m/%d',
+               root='/nsls2/data/six/assets'
             )
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
@@ -512,10 +504,12 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         yield from mv(self.delay_inttime,80)
         yield from mv(self.delay_serialT,255)
         yield from mv(self.delay_parT,151)
+        yield from self.set_LS_high_voltages()
 
+    def set_LS_high_voltages(self):
         #Calibration done on 10/10/2018 for the CCD HV values below using LED light
-        yield from mv(self.ccd1_hv,44.5)
-        yield from mv(self.ccd2_hv,45.1)
+        yield from mv(self.ccd1_hv,44.88) #Nov 08, 2021 #45.2V from Energy Calibration Oct 2021 #44.5V up to October 4 - 2021
+        yield from mv(self.ccd2_hv,45.47) #Nov 08, 2021 #45.6V from Energy Calibration Oct 2021 #45.1V up to October 4 - 2021
 
     def set_temp_control(self):
 
@@ -585,3 +579,11 @@ rixscam.configuration_attrs = ['cam.acquire_time', 'cam.acquire_period',
 #rixscam.xip.count_event_3x3.kind = Kind.hinted
 
 
+def rixscam_asleep():
+    yield from mv(rixscam.ccd1_hv,20)
+    yield from mv(rixscam.ccd2_hv,20)
+    print('RIXSCam HVs are set to 20V. Remember to run rixscam_awake() before resuming operation.')
+
+def rixscam_awake():
+    yield from rixscam.set_LS_high_voltages()
+    print('RIXSCam HVs are set to LS standard values. You can now use the detector for centroiding mode.')

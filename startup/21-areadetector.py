@@ -214,14 +214,16 @@ class SIXQuadEM(QuadEM):
 
 
 
-def name_qem(qem, chan_name):
+def name_qem(qem, chan_names, chan_numbers=None):
+    if chan_numbers is None:
+        chan_numbers = [j+1 for j in range(len(chan_names))]
     read_attrs = []
-    for j, n in enumerate(chan_name):
-        current = getattr(qem, f'current{j+1}')
-        current.mean_value.name = n
+    for j, chan_name in zip(chan_numbers, chan_names):
+        current = getattr(qem, f'current{j}')
+        current.mean_value.name = chan_name
         current.kind |= Kind.normal
         current.mean_value.kind |= Kind.normal
-        read_attrs.append(f'current{j+1}.mean_value')
+        read_attrs.append(f'current{j}.mean_value')
     qem.read_attrs = read_attrs
     return qem
 
@@ -244,7 +246,8 @@ qem06 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:6}EM180:', name='qem06'),
                  ['extslt_{}_tey'.format(s) for s in ('hdsl', 'hdsr')])
 
 qem07 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:7}EM180:', name='qem07'),
-                 ['gc_diag_{}'.format(s) for s in ('diode', 'empty', 'grid')])
+                 ['gc_diag_{}'.format(s) for s in ('diode', 'grid')],
+                 chan_numbers=[1, 3])
 
 qem08 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:8}EM180:', name='qem08'),
                  ['rs_diag_{}_tey'.format(s) for s in ('1','2')])
@@ -263,14 +266,15 @@ qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
 #qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),
 #                 ['sample_tey_{}'.format(s) for s in ('top','empty','bot')])
 
+# Maffettone commented this out 20220119 and replaced with a modified name_qem()
 # qem07.hints = {'fields': ['gc_diag_grid', 'gc_diag_diode']}
-qem07.current1.mean_value.kind = Kind.hinted
-qem07.current3.mean_value.kind = Kind.hinted
-qem07.current2.mean_value.kind = Kind.normal
-qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
-#qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
+# qem07.current1.mean_value.kind = Kind.hinted
+# qem07.current3.mean_value.kind = Kind.hinted
+# qem07.current2.mean_value.kind = Kind.normal
+# qem07.read_attrs = ['current1.mean_value', 'current3.mean_value']
 
 #JP commented this 20210426
+#qem12.hints = {'fields': ['sample_tey_top', 'sample_tey_bot']}
 #qem12.read_attrs = ['current1.mean_value', 'current3.mean_value']
 #qem12.current1.mean_value.kind = Kind.hinted
 #qem12.current3.mean_value.kind = Kind.hinted

@@ -8,7 +8,7 @@ def pol_V(offset=None):
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
-    yield from mv(epu1.table,6) # 4 = 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
     yield from mv(epu_table_mode,'Enable')
     if offset is not None:
         yield from mv(epu1.offset,offset)
@@ -24,7 +24,7 @@ def pol_H(offset=None):
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
-    yield from mv(epu1.table,5) # 2 = 3rd harmonic; 5 = "testing H" 1st harmonic
+    yield from mv(epu1.table,5) # 7 = "testing H" 3rd harmonic; 5 = "testing H" 1st harmonic
     yield from mv(epu_table_mode,'Enable')
     if offset is not None:
         yield from mv(epu1.offset,offset)
@@ -88,50 +88,56 @@ def epu_control_enable(pol):
 
 
 def m3_check():
-    yield from mv(m3_simple_fbk,0)
-    yield from mv(m3_pid_fbk,'OFF')
-    sclr_enable()
-    if (yield from bps.rd(pzshutter)) == 0:
-       print('Piezo Shutter is disabled')
-       flag = 0
-    if (yield from bps.rd(pzshutter)) == 2:
-       print('Piezo Shutter is enabled: going to be disabled')
-       yield from pzshutter_disable()
-       flag = 1
 
-    temp_extslt_vg = (yield from bps.rd(extslt.vg.user_readback))
-    temp_extslt_hg = (yield from bps.rd(extslt.hg.user_readback))
-    temp_gcdiag = (yield from bps.rd(gcdiag.y.user_readback))
-    #yield from mv(qem07.averaging_time, 1)
-    yield from mv(sclr.preset_time, 1)
-    yield from mv(extslt.hg,10)
-    yield from mv(extslt.vg,30)
-    #yield from gcdiag.grid # RE-COMMENT THIS LINE 5/7/2019
-    #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
-    peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8') # Good for Normal Operation
-    # peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan2')  #Goof for Gas Cell
-    yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
-    print(f'!!! m3_check: peaks["cen"]: {peaks["cen"]}')
-    if peaks['cen'] is not None:
-        yield from mv(m3.pit, peaks['cen'])
-    else:
+    if (gvbt17.status.get() == 'Not Open'):
+        print('ATTENTION: GV 17 is closed and you cannot perform m3_check() alignment function. \n Please, open GV 17 first, and then run m3_check() again.')
+    
+    if (gvbt17.status.get() == 'Open'):
+        yield from mv(m3_simple_fbk,0)
+        yield from mv(m3_pid_fbk,'OFF')
+    
+        sclr_enable()
+        if (yield from bps.rd(pzshutter)) == 0:
+            print('Piezo Shutter is disabled')
+            flag = 0
+        if (yield from bps.rd(pzshutter)) == 2:
+            print('Piezo Shutter is enabled: going to be disabled')
+            yield from pzshutter_disable()
+            flag = 1
+
+        temp_extslt_vg = (yield from bps.rd(extslt.vg.user_readback))
+        temp_extslt_hg = (yield from bps.rd(extslt.hg.user_readback))
+        temp_gcdiag = (yield from bps.rd(gcdiag.y.user_readback))
+        #yield from mv(qem07.averaging_time, 1)
+        yield from mv(sclr.preset_time, 1)
+        yield from mv(extslt.hg,10)
+        yield from mv(extslt.vg,30)
+        #yield from gcdiag.grid # RE-COMMENT THIS LINE 5/7/2019
+        #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
+        peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8') # Good for Normal Operation
+        # peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan2')  #Goof for Gas Cell
+        yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
+        print(f'!!! m3_check: peaks["cen"]: {peaks["cen"]}')
+        if peaks['cen'] is not None:
+            yield from mv(m3.pit, peaks['cen'])
+        else:
+            yield from mv(extslt.hg,temp_extslt_hg)
+            yield from mv(extslt.vg,temp_extslt_vg)
+            peaks_not_found()  # raises an exception!
+
         yield from mv(extslt.hg,temp_extslt_hg)
         yield from mv(extslt.vg,temp_extslt_vg)
-        peaks_not_found()  # raises an exception!
-
-    yield from mv(extslt.hg,temp_extslt_hg)
-    yield from mv(extslt.vg,temp_extslt_vg)
-    yield from mv(gcdiag.y,temp_gcdiag)
-    yield from sleep(60)
-    #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.get())
-    #yield from mv(m3_pid_target,extslt_cam.stats1.centroid.x.get())#m3_simple_fbk_cen.get())
-    yield from mv(m3_pid_target, m3_pid_cen.get())
-    yield from mv(m3_pid_fbk,'ON')
-    if flag == 0:
-       print('Piezo Shutter remains disabled')   
-    if flag == 1:
-       print('Piezo Shutter is going to renabled')
-       yield from pzshutter_enable()
+        yield from mv(gcdiag.y,temp_gcdiag)
+        yield from sleep(60)
+        #yield from mv(m1_fbk_sp,extslt_cam.stats1.centroid.x.get())
+        #yield from mv(m3_pid_target,extslt_cam.stats1.centroid.x.get())#m3_simple_fbk_cen.get())
+        yield from mv(m3_pid_target, m3_pid_cen.get())
+        yield from mv(m3_pid_fbk,'ON')
+        if flag == 0:
+            print('Piezo Shutter remains disabled')   
+        if flag == 1:
+            print('Piezo Shutter is going to renabled')
+            yield from pzshutter_enable()
 
 
 def m1_align_fine2():
@@ -240,11 +246,10 @@ def beamline_align_v3():
     yield from sleep(5)
     #yield from mv(m1_pid_target_ratio,m1_pid_ratio.get())
     yield from mv(m1_pid_target_ratio,1) #Changed on 1/25/21: if m3slits are centered on the ROI, this should work better.
-    yield from sleep(5)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from sleep(60)
     yield from count([m3diag.cam])
     yield from m3diag.out
-
-    yield from mv(m1_pid_fbk,'ON')
 
     yield from sleep(5)
     yield from m3_check()
@@ -307,6 +312,7 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
     if 'rixscam' in dets_name:
         rixscam_set_time_original = rixscam.cam.acquire_time.get()
         yield from mv(rixscam.cam.acquire_time, sec_per_point)
+        yield from mv(gvbt1,'Open')
     ####################################################################
     peaks = bluesky.callbacks.fitting.PeakStats(pgm.en.name, det_field)
     yield from bpp.subs_wrapper(scan(dets,pgm.en,start_en,stop_en,num_points), peaks)
@@ -323,7 +329,7 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
     yield from mv(sclr.preset_time,sclr_set_time_original)
     if 'rixscam' in dets_name:
         yield from mv(rixscam.cam.acquire_time,rixscam_set_time_original)
-	
+        yield from mv(gvbt1,'Close')
     return E_com, E_max
 
 

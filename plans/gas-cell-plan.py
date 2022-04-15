@@ -333,13 +333,13 @@ def gas_cell_gr500():
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
 
-    cff_ideal_500 = 2.30
+    cff_ideal_500 = 2.20
     yield from mv(pgm.cff, cff_ideal_500)
     yield from mv(extslt.vg,11)
     offset=0
     
     for i in range(-4, 5):
-        yield from mv(pgm.cff,cff_ideal_500+i*0.02) #fine
+        yield from mv(pgm.cff,cff_ideal_500+i*0.02) #fine 0.02
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
         yield from scan(det_list,pgm.en,864-offset,872-offset,201)
@@ -376,17 +376,17 @@ def gas_cell_gr1200():
     # yield from sleep(3600)
     # yield from beamline_align_v2()
     # yield from sleep(120)
-    cff_ideal_1200 = 3.91
+    cff_ideal_1200 = 3.92
     yield from mv(pgm.cff, cff_ideal_1200)
-    yield from mv(extslt.vg,11)
-    offset = -1
+    yield from mv(extslt.vg,12)
+    offset = 0
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
-    for i in range(-5, 6):
-        yield from mv(pgm.cff,cff_ideal_1200+i*0.03) #fine step: 0.025
+    for i in range(-4, 5):
+        yield from mv(pgm.cff,cff_ideal_1200+i*0.025) #fine step: 0.025
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
-        yield from scan(det_list,pgm.en,864-offset,872-offset,301) # fine step: 401
+        yield from scan(det_list,pgm.en,864-offset,872-offset,401) # fine step: 401
 #    yield from mv(pgm.cff,cff_ideal_1200)
 
 
