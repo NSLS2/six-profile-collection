@@ -64,7 +64,7 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
         if (initial_scan_id == 'current scan_id') and (uid is not None):
             initial_scan_id = db[uid].start['scan_id']
         
-        if (initial_scan_id is not 'current scan_id'): current_plan_time(initial_scan_id,total_num_scans)
+        if (initial_scan_id != 'current scan_id'): current_plan_time(initial_scan_id,total_num_scans)
 
     yield from mv(motorO,initial_posO)
     
