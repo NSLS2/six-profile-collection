@@ -4,6 +4,11 @@
 from datetime import datetime
 from ophyd.signal import EpicsSignalBase, EpicsSignal, DEFAULT_CONNECTION_TIMEOUT
 
+import bluesky.callbacks.mpl_plotting.initialize_qt_teleporter
+
+bluesky.callbacks.mpl_plotting.initialize_qt_teleporter()
+
+
 def print_now():
     return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
 
