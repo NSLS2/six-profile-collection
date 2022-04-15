@@ -180,7 +180,7 @@ class StandardProsilicaROI(StandardProsilica):
             The roi number to act, default is 1 and it must be 1,2,3 or 4.    
         '''   
 
-        if status is 'Enable' or status is 'Disable':
+        if (status == 'Enable') or (status == 'Disable'):
             getattr(self, 'roi' + str(roi_num) + '.enablE').set(status)
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
