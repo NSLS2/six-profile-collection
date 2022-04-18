@@ -4,7 +4,7 @@
 from datetime import datetime
 from ophyd.signal import EpicsSignalBase, EpicsSignal, DEFAULT_CONNECTION_TIMEOUT
 
-import bluesky.callbacks.mpl_plotting.initialize_qt_teleporter
+import bluesky.callbacks.mpl_plotting
 
 bluesky.callbacks.mpl_plotting.initialize_qt_teleporter()
 
