@@ -129,7 +129,11 @@ class UgapPositioner(DeadbandMixin, PVPositioner):
     safety_device_fail = Cpt(EpicsSignalRO, '}Sts:Safety-Sts', string=True)
     emergency_open_gap = Cpt(EpicsSignalRO, '}Sts:OpenGapCmd-Sts', string=True)
     # TODO subscribe kill switch prressed and stop motion
-    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tolerance.put(0.0005)
+
 
 class UphasePositioner(DeadbandMixin, PVPositioner):
     readback = Cpt(EpicsSignalRO, '-Ax:Phase}Mtr.RBV')
@@ -145,7 +149,10 @@ class UphasePositioner(DeadbandMixin, PVPositioner):
     safety_device_fail = Cpt(EpicsSignalRO, '}Sts:Safety-Sts', string=True)
     emergency_open_gap = Cpt(EpicsSignalRO, '}Sts:OpenGapCmd-Sts', string=True)
     # TODO subscribe kill switch prressed and stop motion
-    
+
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.tolerance.put(0.0005)
 
 
 class EPU(Device):
