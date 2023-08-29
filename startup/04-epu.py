@@ -1,9 +1,8 @@
-from ophyd import (PVPositioner, Component as Cpt, EpicsSignal, EpicsSignalRO,
+from ophyd import (PVPositioner, Component as Cpt, Signal, EpicsSignal, EpicsSignalRO,
                    Device, FormattedComponent as FmCpt)
-from ophyd.status import MoveStatus
 from ophyd.positioner import PositionerBase
-from ophyd.utils import ReadOnlyError
-import time as ttime
+import ophyd
+import warnings
 
 
 # path for the new standby mode
@@ -12,8 +11,78 @@ epu_sb = EpicsSignal('SR:C02-ID:G1A{EPU:1}Cmd:SBy-Cmd', name = 'epu_standby')
 epu_sb_ao = EpicsSignal('XF:02ID-ID{Ping}Enbl-SP', name = 'epu_standby_auto')
 # 
 
+
+class DeadbandMixin(Device, PositionerBase):
+    """
+    Borrowed with gratitude from SST.
+    # TODO:  Add to nslsii package after testing and refactor.
+
+
+    Should be the leftmost class in the inheritance list so that it grabs move first!
+
+    Must be combined with either EpicsMotor or PVPositioner, or some other class
+    that has a done_value attribute
+
+    An EpicsMotor subclass that has an absolute tolerance for moves.
+    If the readback is within tolerance of the setpoint, the MoveStatus
+    is marked as finished, even if the motor is still settling.
+
+    This prevents motors with long, but irrelevant, settling times from
+    adding overhead to scans.
+    """
+    tolerance = Cpt(Signal, value=-1, kind='config')
+    move_latch = Cpt(Signal, value=0, kind="omitted")
+
+    def _done_moving(self, success=True, timestamp=None, value=None, **kwargs):
+        '''Call when motion has completed.  Runs ``SUB_DONE`` subscription.'''
+        if self.move_latch.get():
+            if success:
+                self._run_subs(sub_type=self.SUB_DONE, timestamp=timestamp,
+                               value=value)
+
+            self._run_subs(sub_type=self._SUB_REQ_DONE, success=success,
+                           timestamp=timestamp)
+            self._reset_sub(self._SUB_REQ_DONE)
+            self.move_latch.put(0)
+
+    def move(self, position, wait=True, **kwargs):
+        tolerance = self.tolerance.get()
+
+        if tolerance < 0:
+            self.move_latch.put(1)
+            return super().move(position, wait=wait, **kwargs)
+        else:
+            status = super().move(position, wait=False, **kwargs)
+            setpoint = position
+            done_value = getattr(self, "done_value", 1)
+
+            def check_deadband(value, timestamp, **kwargs):
+                if abs(value - setpoint) < tolerance:
+                    self._done_moving(timestamp=timestamp,
+                                      success=True,
+                                      value=done_value)
+
+            def clear_deadband(*args, timestamp, **kwargs):
+                self.clear_sub(check_deadband, event_type=self.SUB_READBACK)
+
+            self.subscribe(clear_deadband, event_type=self._SUB_REQ_DONE, run=False)
+            self.move_latch.put(1)
+            self.subscribe(check_deadband, event_type=self.SUB_READBACK, run=True)
+
+            try:
+                if wait:
+                    ophyd.status.wait(status)
+            except KeyboardInterrupt:
+                self.stop()
+                raise
+
+            return status
+
+
 class DeadBandPositioner(PVPositioner):
     def __init__(self, *args, **kwargs):
+        warnings.warn("DeadBandPositioner is deprecated, use DeadbandMixin instead",
+                      DeprecationWarning)
         super().__init__(*args, **kwargs)
         self._last_status = None
         
@@ -45,7 +114,8 @@ class DeadBandPositioner(PVPositioner):
         # this is because this apprently blocks until the move finishes!
         self.setpoint.put(position, wait=False)
 
-class UgapPositioner(DeadBandPositioner):
+
+class UgapPositioner(DeadbandMixin, PVPositioner):
     readback = Cpt(EpicsSignalRO, '-Ax:Gap}Mtr.RBV')
     setpoint = Cpt(EpicsSignal, '-Ax:Gap}Mtr')
 
@@ -60,7 +130,8 @@ class UgapPositioner(DeadBandPositioner):
     emergency_open_gap = Cpt(EpicsSignalRO, '}Sts:OpenGapCmd-Sts', string=True)
     # TODO subscribe kill switch prressed and stop motion
     
-class UphasePositioner(DeadBandPositioner):
+
+class UphasePositioner(DeadbandMixin, PVPositioner):
     readback = Cpt(EpicsSignalRO, '-Ax:Phase}Mtr.RBV')
     setpoint = Cpt(EpicsSignal, '-Ax:Phase}Mtr')
 
