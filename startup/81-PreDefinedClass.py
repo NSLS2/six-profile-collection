@@ -244,7 +244,7 @@ class PreDefinedPositions(Device):
         '''
 
 
-        if from_location is not 'current_location':
+        if (from_location != 'current_location'):
             path_list = nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
         elif isinstance(self.status_list,str) and self.neighbours is not None:
             path_list=(self.status_list)
@@ -519,7 +519,7 @@ class PreDefinedPositionsGroup():
         '''
 
 
-        if from_location is not 'current_location':
+        if (from_location != 'current_location'):
             path_list = nx.shortest_path(self.nxGraph,source=from_location,target=to_location)
         elif isinstance(self.status_list,str):
             path_list = (self.status_list)

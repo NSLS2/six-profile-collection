@@ -47,14 +47,21 @@ class PGM_ES(Device):
 
 
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.19979335038944, 'groff', 82.07823104069193,'grx', -63.0, 'grlines', 500, 'm3slt_hs', -37.4,
-				 'm3slt_ha',-18], #' offset values before 20220125 m2 84.20095245038944; groff 82.08049027069194
+         'mbg': ['m2off', 84.1951147473, 'groff', 82.0717671,'grx', -63, 'grlines', 500, 'm3slt_hs', -37.8,
+				 'm3slt_ha',-17.6], # 20230914 -> 'm2off', 84.1983417173, 'groff', 82.07381828
+                 # offset before 20230127 'm2off', 84.2004597573, 'groff', 82.07204739;
+                 # offset as 20220916 -> m2 = 84.19979335038944 gr = 82.07823104069193; gr_x = -63
+                 
+         'hbg': ['m2off', 84.1991382173, 'groff',  82.1336183933033,'grx', 61.0, 'grlines', 1200, 'm3slt_hs', -38.1,
+				 'm3slt_ha',-17.8], # 20230913 -> 'm2off', 84.1991382173, 'groff',  82.1336183933033
+                 # 20230127 ->'m2off', 84.2033182673, 'groff',  82.1366541933033
+                 # 20220915 -> offset m2off 84.199606602; 'groff', 82.1314578049,'grx', 61.0,
+                 # offset values before 20220125 m2 84.201175342; groff 82.1322482849
 
-         'hbg': ['m2off', 84.199606602, 'groff', 82.1314578049,'grx', 61.0, 'grlines', 1200, 'm3slt_hs', -38,
-				 'm3slt_ha',-17.4], # offset values before 20220125 m2 84.201175342; groff 82.1322482849
-
-	 	 'ubg': ['m2off', 84.20377334307703, 'groff', 82.132248343 , 'grx', -1,'grlines', 1800, 'm3slt_hs', -37.7,
-				 'm3slt_ha',-17.8] }) #before 01/16/2020 'm2off', 84.2072359100, 'groff', 82.105016851 
+	 	 'ubg': ['m2off', 84.20149823, 'groff', 82.11328655, 'grx', -1,'grlines', 1800, 'm3slt_hs', -38.0,
+				 'm3slt_ha',-17.8] }) # at 20230127 ->'m2off', 84.20009535, 'groff', 82.1145797096
+                 # before 20220918 'm2off', 84.20377334307703, 'groff', 82.132248343, 'grx', -1
+                  #before 01/16/2020 'm2off', 84.2072359100, 'groff', 82.105016851 
                                       
 pgmjoe = PGMjoe('XF:02IDB-OP{Mono:1-Ax:9', name='pgmjoe')
 espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')

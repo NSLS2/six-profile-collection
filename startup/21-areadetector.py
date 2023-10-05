@@ -180,7 +180,7 @@ class StandardProsilicaROI(StandardProsilica):
             The roi number to act, default is 1 and it must be 1,2,3 or 4.    
         '''   
 
-        if status is 'Enable' or status is 'Disable':
+        if (status == 'Enable') or (status == 'Disable'):
             getattr(self, 'roi' + str(roi_num) + '.enablE').set(status)
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
@@ -192,8 +192,15 @@ class StandardProsilicaSaving(StandardProsilicaROI):
               write_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
               root='/nsls2/data/six/legacy')
 
+#class StandardProsilicaSaving(StandardProsilicaROI):
+#    hdf5 = Cpt(HDF5PluginWithFileStore,
+#              suffix='HDF1:',
+#              write_path_template='/tmp/tempimage/%Y/%m/%d',
+#              root='/tmp/')
 
-diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
+
+#diagon_h_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
+diagon_h_cam = StandardProsilicaSaving('XF:02IDA-BI{Diag:1-Cam:H}', name='diagon_h_cam')
 diagon_v_cam = StandardProsilicaROI('XF:02IDA-BI{Diag:1-Cam:V}', name='diagon_v_cam')
 m3_diag_cam = StandardProsilicaSaving('XF:02IDC-BI{Mir:3-Cam:13_U_1}', name='m3_diag_cam')
 extslt_cam = StandardProsilicaSaving('XF:02IDC-BI{Slt:1-Cam:15_1}', name='extslt_cam')
@@ -259,11 +266,12 @@ def name_qem(qem, chan_names, chan_numbers=None):
 #qem01 = name_qem(SIXQuadEM('XF:02IDA-BI{EM:1}EM180:', name='qem01'),
 #                 ['m1slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
-qem02 = name_qem(SIXQuadEM('XF:02IDB-BI{EM:2}EM180:', name='qem02'),
-                 ['pgmslt_u_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
+# qem2 and 3 not working 9/2/22 after power shutdown
+#qem02 = name_qem(SIXQuadEM('XF:02IDB-BI{EM:2}EM180:', name='qem02'),
+#                 ['pgmslt_u_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
-qem03 = name_qem(SIXQuadEM('XF:02IDB-BI{EM:3}EM180:', name='qem03'),
-                 ['pgmslt_d_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
+#qem03 = name_qem(SIXQuadEM('XF:02IDB-BI{EM:3}EM180:', name='qem03'),
+#                 ['pgmslt_d_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])
 
 qem04 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:4}EM180:', name='qem04'),
                  ['m3slt_{}_tey'.format(s) for s in ('in', 'out', 'bot', 'top')])

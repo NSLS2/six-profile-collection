@@ -333,16 +333,16 @@ def gas_cell_gr500():
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
 
-    cff_ideal_500 = 2.20
+    cff_ideal_500 = 2.34
     yield from mv(pgm.cff, cff_ideal_500)
     yield from mv(extslt.vg,11)
-    offset=0
+    offset= -0.1 #main peak should be at 867.2
     
-    for i in range(-4, 5):
+    for i in range(-4,5):
         yield from mv(pgm.cff,cff_ideal_500+i*0.02) #fine 0.02
         yield from mv(pgm.en,864-offset)
-        yield from sleep(30)
-        yield from scan(det_list,pgm.en,864-offset,872-offset,201)
+        yield from sleep(10)
+        yield from scan(det_list,pgm.en,864-offset,872-offset,251)
     yield from mv(pgm.cff,cff_ideal_500)
 
 
@@ -354,7 +354,7 @@ def gas_cell_gr1800():
     # yield from sleep(3600)
     # yield from beamline_align_v2()
     # yield from sleep(120)
-    cff_ideal_1800 = 4.55
+    cff_ideal_1800 = 4.35
     yield from mv(pgm.cff, cff_ideal_1800)
     yield from mv(extslt.vg,11)
     offset = 0
@@ -369,7 +369,7 @@ def gas_cell_gr1800():
 
 def gas_cell_gr1200():
     ######################### Grating 1200l/mm  ##################################
-    yield from pgm.hbg
+    #yield from pgm.hbg
     det_list=[sclr, ring_curr]
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
@@ -379,7 +379,7 @@ def gas_cell_gr1200():
     cff_ideal_1200 = 3.92
     yield from mv(pgm.cff, cff_ideal_1200)
     yield from mv(extslt.vg,12)
-    offset = 0
+    offset = 0 #main peak should be at 867.2
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
     for i in range(-4, 5):
@@ -387,13 +387,14 @@ def gas_cell_gr1200():
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
         yield from scan(det_list,pgm.en,864-offset,872-offset,401) # fine step: 401
-#    yield from mv(pgm.cff,cff_ideal_1200)
+    yield from mv(pgm.cff,cff_ideal_1200)
 
 
 def n2gascell_vs_M1roll():
     yield from mv(extslt.vg,30)
     yield from mv(extslt.hg,300)
     yield from mv(pgm.cff,2.3277)
+
     yield from mv(pgm.en,398.8)
     yield from sleep(10)
 

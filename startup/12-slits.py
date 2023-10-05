@@ -61,5 +61,6 @@ extslt = ExitSlit('XF:02IDC-OP{Slt:1-Ax:15', name='extslt')
 
 
 #The following devices have been moved to '82-PreDefinedInstances.py'
-#dcslt = BaffleSlit('XF:02IDD-ES{DC:1-Slt:1',name='dcslt')
-#m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')
+#Uncommented on Aug 24, 2023
+dcslt = BaffleSlit('XF:02IDD-ES{DC:1-Slt:1',name='dcslt')
+m4slt = BaffleSlit('XF:02IDC-OP{Mir:4-Slt:18_U_1', name='m4slt')

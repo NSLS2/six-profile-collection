@@ -11,13 +11,9 @@ shutterb_suspender = SuspendBoolHigh(EpicsSignalRO(shutterb.status.pvname), slee
 fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sleep=600)
 #fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sleep=10*60)
 
-
 def install_suspenders():
     """
     Install suspenders.
-
-    This is intended to be used after suspender have been removed,
-    such as when the beam is down, and need to be re-instated.
 
     Note that this clears any existing suspenders, so that if it is
     called twice in a row it does not register duplicates.

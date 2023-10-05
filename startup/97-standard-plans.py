@@ -19,6 +19,23 @@ def pol_V(offset=None):
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to vertical.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
+def pol_V_3rdH(offset=None):
+    yield from mv(m1_simple_fbk,0)
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,8) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,28.5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from mv(pgm.en,cur_mono_e)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nTHIS IS THE THIRD HARMONIC!!!\nFinished moving the polarization to vertical.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+
 def pol_H(offset=None):
     yield from mv(m1_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
@@ -34,6 +51,22 @@ def pol_H(offset=None):
     yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+def pol_H_3rdH(offset=None):
+    yield from mv(m1_simple_fbk,0)
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,7) # 7 = "testing H" 3rd harmonic; 5 = "testing H" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,0)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from mv(pgm.en,cur_mono_e)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nTHIS IS THE THIRD HARMONIC!!!\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 ###########################################
 epu_forw_int_mode_input = EpicsSignal('XF:02ID-ID{EPU:1-FLT}Enbl:Inp1-Sel', name = 'epu_forw_int_mode_input')
@@ -93,7 +126,7 @@ def m3_check():
         print('ATTENTION: GV 17 is closed and you cannot perform m3_check() alignment function. \n Please, open GV 17 first, and then run m3_check() again.')
     
     if (gvbt17.status.get() == 'Open'):
-        yield from mv(m3_simple_fbk,0)
+       # yield from mv(m3_simple_fbk,0)
         yield from mv(m3_pid_fbk,'OFF')
     
         sclr_enable()
@@ -232,11 +265,11 @@ def beamline_align_v3_for_suspenders():
 
 #@bpp.set_run_key_decorator('alignment')
 def beamline_align_v3():
-    yield from mv(m1_simple_fbk,0)
-    yield from mv(m3_simple_fbk,0)
+    #yield from mv(m1_simple_fbk,0)
+    #yield from mv(m3_simple_fbk,0)
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
-    yield from mv(m1_fbk,0)
+    #yield from mv(m1_fbk,0)
 
     # Comes from 43-alignment_scans.py:
     # @property
