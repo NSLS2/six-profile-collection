@@ -12,16 +12,30 @@ fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sl
 #fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sleep=10*60)
 
 
+def install_suspenders():
+    """
+    Install suspenders.
 
-RE.install_suspender(ring_suspender)
-RE.install_suspender(fe_shut_suspender)
-RE.install_suspender(shutterb_suspender)
+    This is intended to be used after suspender have been removed,
+    such as when the beam is down, and need to be re-instated.
 
-# If you remove suspenders and want to implement them back:
+    Note that this clears any existing suspenders, so that if it is
+    called twice in a row it does not register duplicates.
+    """
+    RE.clear_suspenders()
+    RE.install_suspender(ring_suspender)
+    RE.install_suspender(fe_shut_suspender)
+    RE.install_suspender(shutterb_suspender)
 
-# Before removing them:
-#suspenders_saved_for_later = RE.suspenders # DAMA: This return an immutable copy, for the fans at home concerned about mutability.
-#RE.clear_suspenders()
-# Later, to re-instate them...
-#for suspender in suspenders_saved_for_later:
-#RE.install_suspender(suspender)
+
+def clear_suspenders():
+    """
+    Alias for RE.clear_suspenders()
+
+    For convenience and symmetry with install_suspenders() above.
+    """
+    RE.clear_suspenders()
+
+
+install_suspenders()
+
