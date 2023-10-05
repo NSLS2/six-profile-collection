@@ -3,3 +3,7 @@ db/
 *~
 static/
 backupstartup/
+
+# IDEs
+.idea/
+.vscode/
