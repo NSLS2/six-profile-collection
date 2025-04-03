@@ -147,9 +147,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
     #y_val=  529.3
     #x_ideal= 3.95
 
-    x_ideal= 3.92
-    x_start= x_ideal - 0.02 * 3 #0.04#  0.02 fine step
-    x_stop=  x_ideal + 0.02 * 3 #.04# 0.02 fine step
+    x_ideal= 2.32
+
+    x_start= x_ideal - 0.02 * 3 # 0.02 fine step
+    x_stop=  x_ideal + 0.02 * 3 # 0.02 fine step
     number= 7
     yield from mv(gvbt1,'Open')
     f_string=''
@@ -172,21 +173,90 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
     #yield from mv (x_motor,x_ideal)
     print (f_string)
 
+
+def rixscam_cff_optimization_centroid_triple(cts, num_scans=1,extra_md = '' ):
+    precison_digit = 4
+    x_motor= pgm.cff
+
+    y_motor= pgm.en
+    #y_val=  529.3
+    #x_ideal= 3.95
+
+    x_ideal= 2.36
+
+    x_start= x_ideal - 0.02 * 3 # 0.02 fine step
+    x_stop=  x_ideal + 0.02 * 3 # 0.02 fine step
+    number= 7
+    yield from mv(gvbt1,'Open')
+    f_string=''
+
+    #yield from count([rixscam], md = {'reason':'dummy'})
+    yield from mv(gvbt1,'Open')
+    for i in range(number):
+        x_val = round (x_start + i * (x_stop - x_start) / (number - 1) , 4)        
+        yield from mv (x_motor,x_val)
+        yield from sleep(5)
+        yield from mv (x_motor,x_val)
+        yield from sleep(30)
+        #yield from mv (y_motor,y_val)
+        uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
+        if uid == None:
+            uid = -1
+        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+
+    yield from mv(gvbt1,'Close')
+    #yield from mv (x_motor,x_ideal)
+    
+    #yield from count([rixscam], md = {'reason':'dummy'})
+    # yield from mv(gvbt1,'Open')
+    # for i in range(number):
+    #     x_val = round (x_start + i * (x_stop - x_start) / (number - 1) , 4)        
+    #     yield from mv (x_motor,x_val)
+    #     yield from sleep(5)
+    #     yield from mv (x_motor,x_val)
+    #     yield from sleep(30)
+    #     #yield from mv (y_motor,y_val)
+    #     uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
+    #     if uid == None:
+    #         uid = -1
+    #     f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+
+    # yield from mv(gvbt1,'Close')
+    # #yield from mv (x_motor,x_ideal)
+    
+    # #yield from count([rixscam], md = {'reason':'dummy'})
+    # yield from mv(gvbt1,'Open')
+    # for i in range(number):
+    #     x_val = round (x_start + i * (x_stop - x_start) / (number - 1) , 4)        
+    #     yield from mv (x_motor,x_val)
+    #     yield from sleep(5)
+    #     yield from mv (x_motor,x_val)
+    #     yield from sleep(30)
+    #     #yield from mv (y_motor,y_val)
+    #     uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
+    #     if uid == None:
+    #         uid = -1
+    #     f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+
+    # yield from mv(gvbt1,'Close')
+    #yield from mv (x_motor,x_ideal)
+    print (f_string)
+
 def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.595896   
-    y_start = y_ideal - 0.008 * 3
-    y_stop = y_ideal + 0.008 * 3
+    y_ideal = 4.8517
+    y_start = y_ideal - 0.004 * 1
+    y_stop = y_ideal + 0.004 * 3
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal= 6.267636    
-    x_start= x_ideal - 0.004 * 3
-    x_stop = x_ideal + 0.004 * 3
+    x_ideal=  4.9044
+    x_start= x_ideal - 0.002 * 1
+    x_stop = x_ideal + 0.002 * 3
     #fine steps 0.002
-    num = 7
+    num = 5
 
     f_string=''
 
@@ -216,17 +286,18 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.4075 
-    y_start= y_ideal - 0.001 * 4
-    y_stop = y_ideal + 0.001 * 4
-    # fine step is 0.0005
+    y_ideal = 1.4169 
+    y_start= y_ideal - 0.001 * 3
+    y_stop = y_ideal + 0.001 * 3
+    # fine step is 0.0005 but it may be too small.
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.7264
-    x_start= x_ideal - 0.001 * 4
-    x_stop = x_ideal + 0.001 * 4
-    num = 9
+    x_ideal= 5.4087 
+    x_start= x_ideal - 0.001 * 3
+    x_stop = x_ideal + 0.001 * 3
+    num = 7
+
 
     f_string=''
 
@@ -286,9 +357,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 700
-    x_stop =  712
-    num = 13
+    x_start = 505
+    x_stop = 525
+    num = 21
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
@@ -313,7 +384,7 @@ def rixscam_extslit_centroid(cts, num_scans=1, extra_md = '' ):
 
 
     x_motor=extslt.vg
-    x_start = 12
+    x_start = 15
     vgs = [12,15,20,25,30]
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
@@ -336,14 +407,16 @@ def rixscam_extslit_centroid(cts, num_scans=1, extra_md = '' ):
 def rixscam_spectro_angles_dc_centroid(cts, num_scans = 1, extra_md = ' '):
     dets = [ring_curr, rixscam, sclr]
 
-    dc_positions = list(range( 398, 398-50, 50))
+    dc_positions = list(np.arange( 232.6-15, 232.6+26, 5))
     #yield from mv(gvbt1,'Open')
     
     for d in dc_positions:
+        
         yield from mv(dc.z, d)
-        yield from bps.sleep(5)
+        print('Detector z =',d)
+        yield from bps.sleep(60)
         yield from rixscam_m6_m7_2_axis_centroid(cts, extra_md = np.str(extra_md+' at dc '+ np.str(d)))
-        yield from rixscam_m7_gr_2_axis_centroid(cts, extra_md =  np.str(extra_md+' at dc '+ np.str(d)))
+        #yield from rixscam_m7_gr_2_axis_centroid(cts, extra_md =  np.str(extra_md+' at dc '+ np.str(d)))
 
 
 def rixscam_m5_roll_optimization_centroid(cts, num_scans=1,extra_md = '' ):
@@ -418,7 +491,13 @@ def stubborn_test(num_input):
     return fails
 
 
-
+def optimization():
+    yield from sleep(10)
+    yield from rixs_one_energy_1(2,120,30,575,11,0)
+    yield from sleep(10)
+    yield from rixs_one_energy_1(1,120,30,575,15,0)
+    yield from sleep(10)
+    yield from rixs_one_energy_1(1,120,30,575,20,0)
 
 
 from epics import caget 

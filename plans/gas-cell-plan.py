@@ -81,7 +81,7 @@ def mixed_gascell_vs_cff_mbg():
     yield from mv(extslt.vg,30)
     yield from mv(extslt.hg,150)
     ene_n2=400.55
-    ene_neon=867.2 
+    ene_neon=864.4
         
     yield from mv(sclr.preset_time, 1)   
 
@@ -106,11 +106,11 @@ def mixed_gascell_vs_cff_mbg():
     
     #yield from mv(extslt.vg,30)
     #yield from sleep(2)
-    for i in list(np.arange(2.18,2.321,0.02)):
+    for i in list(np.arange(2.22,2.42,0.02)):
         yield from mv(pgm.cff,i)
         yield from mv(pgm.en,864)
         yield from sleep(10)
-        yield from scan([sclr,ring_curr],pgm.en,864.0,872.0,401, md = {'reason':'mbg Ne XAS vs c_ff 30um'})
+        yield from scan([sclr,ring_curr],pgm.en,862.0,870.0,401, md = {'reason':'mbg Ne XAS vs c_ff 30um'})
 
  
     #yield from mv(m1_fbk,0) 
@@ -329,14 +329,16 @@ def neon_gascell_vs_cff():
 
 def gas_cell_gr500():
     ######################### Grating 500l/mm  ##################################
+    
     det_list=[sclr, ring_curr]
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
 
     cff_ideal_500 = 2.34
     yield from mv(pgm.cff, cff_ideal_500)
+    yield from sleep(15)
     yield from mv(extslt.vg,11)
-    offset= -0.1 #main peak should be at 867.2
+    offset= 0 #main peak should be at 867.2
     
     for i in range(-4,5):
         yield from mv(pgm.cff,cff_ideal_500+i*0.02) #fine 0.02
@@ -354,14 +356,14 @@ def gas_cell_gr1800():
     # yield from sleep(3600)
     # yield from beamline_align_v2()
     # yield from sleep(120)
-    cff_ideal_1800 = 4.35
+    cff_ideal_1800 = 4.85 # 5.24
     yield from mv(pgm.cff, cff_ideal_1800)
     yield from mv(extslt.vg,11)
     offset = 0
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
-    for i in range(-3, 4):
-        yield from mv(pgm.cff,cff_ideal_1800+i*0.025) #fine step: 0.025
+    for i in range(-4, 5):
+        yield from mv(pgm.cff,cff_ideal_1800+i*0.1) #fine step: 0.025
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
         yield from scan(det_list,pgm.en,864-offset,872-offset,401) # fine step: 401
@@ -383,7 +385,7 @@ def gas_cell_gr1200():
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
     for i in range(-4, 5):
-        yield from mv(pgm.cff,cff_ideal_1200+i*0.025) #fine step: 0.025
+        yield from mv(pgm.cff,cff_ideal_1200+i*0.05) #fine step: 0.025
         yield from mv(pgm.en,864-offset)
         yield from sleep(30)
         yield from scan(det_list,pgm.en,864-offset,872-offset,401) # fine step: 401

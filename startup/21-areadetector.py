@@ -4,7 +4,7 @@ from ophyd.quadem import QuadEM, QuadEMPort
 from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
-                   TransformPlugin, ProcessPlugin, Signal, Kind)
+                   TransformPlugin, ProcessPlugin, Signal, Kind, OverlayPlugin) # OverlayPlugin was added
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.cam import AreaDetectorCam
 from ophyd.areadetector.base import ADComponent, EpicsSignalWithRBV, ADBase
@@ -64,18 +64,20 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
             stats.kind |= Kind.normal
             stats.total.kind = Kind.hinted
         
-    #image = Cpt(ImagePlugin, 'image1:')
+    # image = Cpt(ImagePlugin, 'image1:') 
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
     stats3 = Cpt(StatsPlugin, 'Stats3:')
     stats4 = Cpt(StatsPlugin, 'Stats4:')
     stats5 = Cpt(StatsPlugin, 'Stats5:')
-    #trans1 = Cpt(TransformPlugin, 'Trans1:')
+    trans1 = Cpt(TransformPlugin, 'Trans1:')# this line was uncommendeted
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     #proc1 = Cpt(ProcessPlugin, 'Proc1:')
+    trans1 = Cpt(TransformPlugin, 'Trans1:')
+    over1 = Cpt(OverlayPlugin, 'Over1:') # this line was added
 
 
 
@@ -185,12 +187,23 @@ class StandardProsilicaROI(StandardProsilica):
         else:
             raise RuntimeError('in roi_enable status must be Enable or Disable')
 
-
 class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
               write_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
               root='/nsls2/data/six/legacy')
+
+    def describe(self):
+        res = super().describe()
+        try:
+            is_rgb = bool(self.cam.color_mode.get()) # 0 should be Mono, 2 should be RGB1, no kowledge of 1.
+        except AttributeError:
+            is_rgb == False
+        data_key = self.name + "_image"
+        if is_rgb and data_key in res:
+            res[data_key]["shape"] = (*res[data_key]["shape"], 3)
+        return res
+   
 
 #class StandardProsilicaSaving(StandardProsilicaROI):
 #    hdf5 = Cpt(HDF5PluginWithFileStore,
@@ -215,7 +228,7 @@ sc_4  = StandardProsilicaROI('XF:02IDD-BI{SC:1-Cam:S1_4}', name='sc_4')
 sc_questar_cam = StandardProsilicaSaving('XF:02IDD-BI{SC:1-Cam:S1_1}', name='sc_questar_cam')
 
 #####just commenting out this portion to see if it is breaking the ability to use the camera as a det
-for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_navitar_cam, sc_3,sc_4]:#,sc_5]:
+for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_navitar_cam, sc_3,sc_4, sc_questar_cam]:#,sc_5]:
     sts_readattrs = ['mean_value', 'sigma', 'min_value', 'max_value', 'total']  #TODO do we need all of these for general case?sudo -u csstudio sh -c "cd /opt/css/opi/production/cs-studio-xf; git pull"
     cam.read_attrs = ['stats{}'.format(j) for j in range(1, 6)]
     # If this camera has 'saving' (HDF5 plugin) set up, do some extra things:
@@ -228,6 +241,7 @@ for cam in [diagon_v_cam, diagon_h_cam, m3_diag_cam, extslt_cam, gc_diag_cam,sc_
         st.nd_array_port.set('ROI{}'.format(j))
         st.read_attrs = sts_readattrs
     cam.stats5.read_attrs = sts_readattrs
+
 
 
 #####try instead
