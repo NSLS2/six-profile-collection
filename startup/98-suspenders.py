@@ -1,7 +1,7 @@
 from bluesky.suspenders import SuspendFloor, SuspendBoolHigh         
 
 
-ring_suspender = SuspendFloor(ring_curr, 190, resume_thresh=200, sleep=600)#,
+ring_suspender = SuspendFloor(ring_curr, 380, resume_thresh=400, sleep=600)#,
                               #post_plan=beamline_align_v3_for_suspenders)
 
 shutterb_suspender = SuspendBoolHigh(EpicsSignalRO(shutterb.status.pvname), sleep=600)#,
@@ -13,6 +13,8 @@ fe_shut_suspender = SuspendBoolHigh(EpicsSignal('XF:02ID-PPS{Sh:FE}Pos-Sts'), sl
 
 def install_suspenders():
     """
+    This function has to be called outside RE
+    just use install_suspenders() !!
     Install suspenders.
 
     Note that this clears any existing suspenders, so that if it is

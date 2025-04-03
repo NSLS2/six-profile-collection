@@ -24,7 +24,7 @@ keithley_output_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}Cmd:Out-Ena', name = 'ke
 current_rbk_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}RB-MeasI', name = 'current_rbk_1B')
 voltage_rbk_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}RB-MeasV',name='voltage_rbk_1B')
 resistance_rbk_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}RB-MeasR',name='resistance_rbk_1B')
-meaure_mode_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}Meas-Sel', name = 'measure_mode_1B')
+meaure_mode_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}Meas-Sel', name = 'measure_mode_1B') ########## FIX THIS #########
 current_pulse_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}PIMV-CurrLevl', name = 'current_pulse_1B')
 time_pulse_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}PIMV-TOn', name = 'time_pulse_1B')
 interval_pulse_1B = EpicsSignal('XF:02IDD{K2636B:1-ChB}Cmd-Pulse.SCAN', name = 'interval_pulse_1B')
@@ -60,4 +60,7 @@ current_pulse_2B = EpicsSignal('XF:02IDD{K2636B:2-ChB}PIMV-CurrLevl', name = 'cu
 time_pulse_2B = EpicsSignal('XF:02IDD{K2636B:2-ChB}PIMV-TOn', name = 'time_pulse_2B')
 interval_pulse_2B = EpicsSignal('XF:02IDD{K2636B:2-ChB}Cmd-Pulse.SCAN', name = 'interval_pulse_2B')
 voltage_pulse_rbk_2B = EpicsSignal('XF:02IDD{K2636B:2-ChB}Prev-Buf', name = 'voltage_pulse_rbk_2B')
+
+#temperature_cryostat = EpicsSignal('XF:02IDD-ES{TCtrl:1-Chan:B}T-I', name = 'temperature_cryostat')
+#temperature_sample = EpicsSignal('XF:02IDD-ES{TCtrl:1-Chan:A}T-I', name = 'temperature_sample')
 

@@ -7,3 +7,4 @@ backupstartup/
 # IDEs
 .idea/
 .vscode/
+*.sqlite
