@@ -1,7 +1,7 @@
 sd.baseline = [ring_curr, gcpress,
-epu1.gap, epu1.phase, 
-feslt.hc, feslt.vc, feslt.hg, feslt.vg, 
-m1.x, m1.pit, m1.rol, 
+#epu1.gap, epu1.phase, 
+#feslt.hc, feslt.vc, feslt.hg, feslt.vg, 
+#m1.x, m1.pit, m1.rol, 
 pgm.cff, pgm.en, pgm.grx, pgm.m2pit, pgm.grpit, pgm.grlines, 
 m3slt.hs, m3slt.ha, m3slt.vs, m3slt.va,
 m3diag,
@@ -24,9 +24,9 @@ dc.z, dc.twoth]
 
 sd.baseline = [ring_curr, 
 gcpress, # voltage_dc, current_rbk,
-epu1, 
-feslt, 
-m1, 
+#epu1, 
+#feslt, 
+#m1, 
 pgm,
 #pgm.grlines, #added on 12/15/2020 DOESN'T WORK
 m3slt,

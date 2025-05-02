@@ -443,6 +443,7 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
 
     sclr_enable()
     sclr_set_time_original = (yield from bps.rd(sclr.preset_time))
+    ene_start =  pgm.en.user_readback.value
 
     if (yield from bps.rd(pzshutter)) == 0:
        print('Piezo Shutter is disabled')
@@ -471,7 +472,9 @@ def xas(dets,motor,start_en,stop_en,num_points,sec_per_point):
     print(f"!!! xas: peaks['max']: {peaks['max']}")
     E_max = peaks['max'][0]
     E_com = peaks['com']
-
+    yield from sleep(2)
+    yield from mv(pgm.en, ene_start)
+    
     if flag == 0:
        print('Piezo Shutter remains disabled')   
     if flag == 1:
