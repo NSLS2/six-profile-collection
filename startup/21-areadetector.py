@@ -190,8 +190,8 @@ class StandardProsilicaROI(StandardProsilica):
 class StandardProsilicaSaving(StandardProsilicaROI):
     hdf5 = Cpt(HDF5PluginWithFileStore,
               suffix='HDF1:',
-              write_path_template='/nsls2/data/six/legacy/prosilica/%Y/%m/%d',
-              root='/nsls2/data/six/legacy')
+              write_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/prosilica/%Y/%m/%d',
+              root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/prosilica')
 
     def describe(self):
         res = super().describe()
@@ -208,7 +208,7 @@ class StandardProsilicaSaving(StandardProsilicaROI):
 #class StandardProsilicaSaving(StandardProsilicaROI):
 #    hdf5 = Cpt(HDF5PluginWithFileStore,
 #              suffix='HDF1:',
-#              write_path_template='/tmp/tempimage/%Y/%m/%d',
+#              _template='/tmp/tempimage/%Y/%m/%d',
 #              root='/tmp/')
 
 

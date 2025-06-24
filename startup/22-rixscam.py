@@ -367,17 +367,17 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
     hdf5 = Cpt(RIXSCamHDF5PluginWithFileStore,
                suffix='HDF1:',
-               write_path_template='X:\\%Y\\%m\\%d\\',
-               read_path_template='/nsls2/data/six/assets/%Y/%m/%d',
-               root='/nsls2/data/six/assets'
+               write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
+               read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
+               root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
     )
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
     hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
                suffix='HDF2:' ,
-               write_path_template='X:\\%Y\\%m\\%d\\',
-               read_path_template='/nsls2/data/six/assets/%Y/%m/%d',
-               root='/nsls2/data/six/assets'
+               write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
+               read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
+               root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
             )
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
