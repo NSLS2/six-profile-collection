@@ -68,7 +68,7 @@ def pol_H_3rdH(offset=None):
     yield from mv(m3_pid_fbk,'ON')
     print('\nTHIS IS THE THIRD HARMONIC!!!\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
-def pol_Cp_Fe(offset=None): #offset ca. 165
+def pol_Cp_Fe(offset=None): #offset ca. 169
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
@@ -83,11 +83,11 @@ def pol_Cp_Fe(offset=None): #offset ca. 165
     yield from sleep(2)
     yield from mv(pgm.en,cur_mono_e)
     yield from sleep(2)
-    yield from mv(m1_pid_fbk,'ON')
+    #yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
-def pol_Cm_Fe(offset=None): #offset ca. 165
+def pol_Cm_Fe(offset=None): #offset ca. 172
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
@@ -102,7 +102,7 @@ def pol_Cm_Fe(offset=None): #offset ca. 165
     yield from sleep(2)
     yield from mv(pgm.en,cur_mono_e)
     yield from sleep(2)
-    yield from mv(m1_pid_fbk,'ON')
+    #yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
