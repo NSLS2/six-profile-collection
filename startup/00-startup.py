@@ -3,13 +3,31 @@ import bluesky.callbacks.mpl_plotting
 import nslsii
 import time as ttime
 from databroker import Broker
+from enum import Enum
 from nslsii.sync_experiment import sync_experiment as sync_exp
 from ophyd.signal import EpicsSignalBase
 from tiled.client import from_profile
 
 
+class ENDSTATION_ENUM(Enum):
+    SIX = "six-"
+    Keithley = "keithley-"
+
+
+print("Please select an endstation from:")
+for e in ENDSTATION_ENUM:
+    print(f"\t- {e.name}")
+endstation_choice = input("Enter your selection: ")
+try:
+    endstation_prefix = ENDSTATION_ENUM[endstation_choice]
+except KeyError as e:
+    raise Exception(
+        f"Endstation choice '{endstation_choice}' is not one of the valid options."
+    ) from e
+
+
 def sync_experiment(proposal_number):
-    sync_exp(proposal_number, beamline="six")
+    sync_exp(proposal_number, beamline="six", prefix=endstation_prefix.value)
     sync_write_paths()
 
 
@@ -104,6 +122,7 @@ nslsii.configure_base(
     bec=False,
     publish_documents_with_kafka=False,
     redis_url="info.six.nsls2.bnl.gov",
+    redis_prefix=endstation_prefix.value,
 )
 nslsii.configure_kafka_publisher(RE, beamline_name="six")
 
