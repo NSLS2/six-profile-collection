@@ -10,8 +10,8 @@ from tiled.client import from_profile
 
 
 class ENDSTATION_ENUM(Enum):
-    SIX = "six-"
-    Keithley = "keithley-"
+    SIX = "six"
+    Keithley = "keithley"
 
 
 print("Please select an endstation from:")
@@ -122,7 +122,7 @@ nslsii.configure_base(
     bec=False,
     publish_documents_with_kafka=False,
     redis_url="info.six.nsls2.bnl.gov",
-    redis_prefix=endstation_prefix.value,
+    redis_prefix=f"{endstation_prefix.value}-",
 )
 nslsii.configure_kafka_publisher(RE, beamline_name="six")
 
