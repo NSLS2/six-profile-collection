@@ -8,3 +8,6 @@ backupstartup/
 .idea/
 .vscode/
 *.sqlite
+# pixi environments
+.pixi/*
+!.pixi/config.toml
