@@ -4,10 +4,12 @@ db/
 static/
 backupstartup/
 
+__pycache__/
+
 # IDEs
 .idea/
 .vscode/
 *.sqlite
 # pixi environments
-.pixi/*
+.pixi/
 !.pixi/config.toml
