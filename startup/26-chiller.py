@@ -12,5 +12,5 @@ class PGMHeatExchanger(Device):
     flow_m2 = Cpt(EpicsSignalRO, "{Mir:2-HTEX:1}F:1-I")
     flow_pgm = Cpt(EpicsSignalRO, "{Mir:2-PGM:1}F:1-I")
 
-m1_htex = M1HeatExchanger("XF:02IDA-CT{Mir:1-HTEX:1}")
-pgm_htex = PGMHeatExchanger("XF:02IDB-CT")
+m1_htex = M1HeatExchanger("XF:02IDA-CT{Mir:1-HTEX:1}", name="m1_htex")
+pgm_htex = PGMHeatExchanger("XF:02IDB-CT", name="pgm_htex")
