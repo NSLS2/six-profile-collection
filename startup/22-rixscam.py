@@ -119,7 +119,7 @@ class FileStoreHDF5SingleIterativeWrite(FileStoreHDF5Single, FileStoreIterativeW
 
 class XIPPlugin(PluginBase):
     'A class for the centroiding plugin'
-    _suffix_re = 'XIP\d:'
+    _suffix_re = r'XIP\d:'
     _default_read_attrs = (PluginBase._default_read_attrs + (
                            'count_possible_event', 'count_above_threshold',
                            'count_below_threshold', 'count_neighbours',
