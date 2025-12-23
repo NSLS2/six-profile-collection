@@ -26,4 +26,4 @@ jobs:
           environments: test
 
       - name: Run pytest
-        run: pixi run test
+        run: pixi run tests
