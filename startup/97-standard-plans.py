@@ -68,7 +68,7 @@ def pol_H_3rdH(offset=None):
     yield from mv(m3_pid_fbk,'ON')
     print('\nTHIS IS THE THIRD HARMONIC!!!\nFinished moving the polarization to horizontal.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
-def pol_Cp_Fe(offset=None): #offset ca. 169
+def pol_Cp_Fe(offset=None): #offset ca. 166
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
@@ -83,11 +83,11 @@ def pol_Cp_Fe(offset=None): #offset ca. 169
     yield from sleep(2)
     yield from mv(pgm.en,cur_mono_e)
     yield from sleep(2)
-    #yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
-def pol_Cm_Fe(offset=None): #offset ca. 172
+def pol_Cm_Fe(offset=None): #offset ca. 169
     yield from mv(m1_pid_fbk,'OFF')
     yield from mv(m3_pid_fbk,'OFF')
     cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
@@ -102,9 +102,48 @@ def pol_Cm_Fe(offset=None): #offset ca. 172
     yield from sleep(2)
     yield from mv(pgm.en,cur_mono_e)
     yield from sleep(2)
-    #yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m1_pid_fbk,'ON')
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+def pol_Cp_Mn(offset=None): #offset ca. 1??
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,19.171)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+def pol_Cm_Mn(offset=None): #offset ca. 1??
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,-19.171)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
 
 def pol_Cp_Co(offset=None): #offset ca. 165
     yield from mv(m1_pid_fbk,'OFF')
@@ -182,6 +221,47 @@ def pol_Cm_V(offset=None): #offset ca. 147.5
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Minus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
+
+
+
+
+def pol_Cp_Eu(offset=None): #offset ca. 114
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,20.2758)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+def pol_Cm_Eu(offset=None): #offset ca. 117
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,-20.2758)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Minus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 
 
@@ -268,7 +348,7 @@ def m3_check():
         #yield from rel_scan([qem07],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3 before cff'})
         peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan8') # Good for Normal Operation
         # peaks = bluesky.callbacks.fitting.PeakStats(m3.pit.name, 'sclr_channels_chan2')  #Goof for Gas Cell
-        yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.0005,0.0005,31, md = {'reason':'checking m3'}), peaks)
+        yield from bpp.subs_wrapper(rel_scan([sclr],m3.pit,-0.001,0.001,61, md = {'reason':'checking m3'}), peaks)
         print(f'!!! m3_check: peaks["cen"]: {peaks["cen"]}')
         if peaks['cen'] is not None:
             yield from mv(m3.pit, peaks['cen'])
