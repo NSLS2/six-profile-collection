@@ -124,7 +124,7 @@ nslsii.configure_base(
     redis_url="info.six.nsls2.bnl.gov",
     redis_prefix=f"{endstation_prefix.value}-",
 )
-nslsii.configure_kafka_publisher(RE, beamline_name="six")
+# nslsii.configure_kafka_publisher(RE, beamline_name="six")
 
 bluesky.callbacks.mpl_plotting.initialize_qt_teleporter()
 
