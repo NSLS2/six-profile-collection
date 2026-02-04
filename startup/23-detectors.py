@@ -1,7 +1,8 @@
 # this startup file is for misc. detectors and monitors
 
 
-from ophyd import (EpicsSignal, EpicsSignalRO, EpicsScaler)
+from ophyd import (EpicsSignal, EpicsSignalRO, EpicsScaler, Device, Kind)
+from ophyd import Component as Cpt
 
 
 ring_curr = EpicsSignalRO('SR:OPS-BI{DCCT:1}I:Real-I', name='ring_curr')
@@ -32,4 +33,14 @@ def sclr_disable():
     sclr.channels.chan6.kind = Kind.normal
     sclr.channels.chan8.kind = Kind.normal
 
+
+# Femtoanalyzer via GPIO (EK9000)
+class Femtoanalyzer(Device):
+    signal = Cpt(EpicsSignalRO, 'XF:02ID1-ES{GPIO:1_1}AI:Ch1-I', kind=Kind.hinted)
+    gain_bit0 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch1-Cmd', kind=Kind.config)  # LSB
+    gain_bit1 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch2-Cmd', kind=Kind.config)
+    gain_bit2 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch3-Cmd', kind=Kind.config)
+    gain_bit3 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch4-Cmd', kind=Kind.config)  # MSB
+
+femto = Femtoanalyzer(name='femto')
 
