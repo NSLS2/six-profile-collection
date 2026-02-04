@@ -36,11 +36,10 @@ def sclr_disable():
 
 # Femtoanalyzer via GPIO (EK9000)
 class Femtoanalyzer(Device):
-    signal = Cpt(EpicsSignalRO, 'XF:02ID1-ES{GPIO:1_1}AI:Ch1-I', kind=Kind.hinted)
-    gain_bit0 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch1-Cmd', kind=Kind.config)  # LSB
-    gain_bit1 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch2-Cmd', kind=Kind.config)
-    gain_bit2 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch3-Cmd', kind=Kind.config)
-    gain_bit3 = Cpt(EpicsSignal, 'XF:02ID1-ES{GPIO:1_11}DO:Ch4-Cmd', kind=Kind.config)  # MSB
+    signal = Cpt(EpicsSignalRO, "AI:Ch1-I", kind=Kind.hinted)
+    gain_bit0 = Cpt(EpicsSignal, "DO:Ch1-Cmd", kind=Kind.config)  # LSB
+    gain_bit1 = Cpt(EpicsSignal, "DO:Ch2-Cmd", kind=Kind.config)
+    gain_bit2 = Cpt(EpicsSignal, "DO:Ch3-Cmd", kind=Kind.config)
+    gain_bit3 = Cpt(EpicsSignal, "DO:Ch4-Cmd", kind=Kind.config)  # MSB
 
-femto = Femtoanalyzer(name='femto')
-
+femto = Femtoanalyzer(prefix="XF:02ID1-ES{GPIO:1_1}", name="femto")
