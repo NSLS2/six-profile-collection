@@ -147,10 +147,6 @@ class Keithley2600BChannel(Device):
     run_pulse = Cpt(EpicsSignalRO, 'Cmd-Pulse', kind=Kind.omitted)
     pulse_buffer = Cpt(EpicsSignalRO, 'Prev-Buf', kind=Kind.normal)
 
-    # ===== Test Commands =====
-    load_beep_test = Cpt(EpicsSignal, 'Cmd:LoadBeepTest', kind=Kind.omitted)
-    run_beep_test = Cpt(EpicsSignal, 'Cmd:BeepTest', kind=Kind.omitted)
-
 
 # Keithley 1 Channel A
 k2600b_1a = Keithley2600BChannel('XF:02IDD{K2636B:1-ChA}', name='k2600b_1a')
