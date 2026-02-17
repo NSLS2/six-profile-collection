@@ -23,10 +23,10 @@ class PGMHeatExchanger(Device):
     # flow_m2 = Cpt(EpicsSignalRO, "{Mir:2-HTEX:1}F:1-I")
     # flow_pgm = Cpt(EpicsSignalRO, "{Mir:2-PGM:1}F:1-I")
 
-    bypass_v = Cpt(BypassPositioner, "{PGM:1-HTEX:1}CVbp:Volts")
-    flow_v = Cpt(FlowPositioner, "{PGM:1-HTEX:1}CVs:Volts")
-    flow_m2 = Cpt(EpicsSignalRO, "{Mir:2-HTEX:1}F:1-I")
-    flow_pgm = Cpt(EpicsSignalRO, "{Mir:2-PGM:1}F:1-I")
+    flow_v = Cpt(FlowPositioner, "CT{PGM:1-HTEX:1}CVbp:Volts")
+    bypass_v = Cpt(BypassPositioner, "CT{PGM:1-HTEX:1}CVs:Volts")
+    flow_m2 = Cpt(EpicsSignalRO, "CT{Mir:2-HTEX:1}F:1-I")
+    flow_pgm = Cpt(EpicsSignalRO, "CT{Mir:2-PGM:1}F:1-I")
 
 
     pressure_m2 = Cpt(EpicsSignalRO, "OP{Mir:2-WPG:1}DI-I")

@@ -310,8 +310,8 @@ qem09 = name_qem(SIXQuadEM('XF:02IDC-BI{EM:9}EM180:', name='qem09'),
 #		 ['m4_mir'])
 #                 ['m4'.format(s) for s in ('mir')])
 
-qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
-                 ['sc_diode_{}'.format(s) for s in ('1','2','3','4')])
+# qem11 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:11}EM180:', name='qem11'),
+#                  ['sc_diode_{}'.format(s) for s in ('1','2','3','4')])
 
 #JPcommented this 20210426
 #qem12 = name_qem(SIXQuadEM('XF:02IDD-BI{EM:12}EM180:', name='qem12'),

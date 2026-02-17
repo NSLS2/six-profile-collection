@@ -221,6 +221,43 @@ def pol_Cm_V(offset=None): #offset ca. 147.5
     yield from mv(m3_pid_fbk,'ON')
     print('\nFinished moving the polarization to Circular Minus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
+def pol_Cp_O(offset=None): #offset ca. 144
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,18.9357)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Plus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
+
+def pol_Cm_O(offset=None): #offset ca. 147.2
+    yield from mv(m1_pid_fbk,'OFF')
+    yield from mv(m3_pid_fbk,'OFF')
+    cur_mono_e = (yield from bps.rd(pgm.en.user_readback))
+    yield from mv(epu1.table,6) # 8 = "testing V" 3rd harmonic; 6 = "testing V" 1st harmonic
+    yield from mv(epu_table_mode,'Enable')
+    yield from sleep(2)
+    if offset is not None:
+        yield from mv(epu1.offset,offset)
+    yield from mv(epu1.phase,-18.9357)
+    yield from sleep(5)
+    yield from mv(pgm.en,cur_mono_e+1)  #TODO this is dirty trick.  figure out how to process epu.table.input
+    yield from sleep(2)
+    yield from mv(pgm.en,cur_mono_e)
+    yield from sleep(2)
+    yield from mv(m1_pid_fbk,'ON')
+    yield from mv(m3_pid_fbk,'ON')
+    print('\nFinished moving the polarization to Circular Minus.\n\tNote that the offset for epu calibration is {}eV.\n\n'.format(offset))
 
 
 
