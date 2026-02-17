@@ -149,13 +149,13 @@ class Keithley2600BChannel(Device):
 
 
 # Keithley 1 Channel A
-k2600b_1a = Keithley2600BChannel('XF:02IDD{K2636B:1-ChA}', name='k2600b_1a')
+k2636b_1a = Keithley2600BChannel('XF:02IDD{K2636B:1-ChA}', name='k2636b_1a')
 
 # Keithley 1 Channel B
-k2600b_1b = Keithley2600BChannel('XF:02IDD{K2636B:1-ChB}', name='k2600b_1b')
+k2636b_1b = Keithley2600BChannel('XF:02IDD{K2636B:1-ChB}', name='k2636b_1b')
 
 # Keithley 2 Channel A
-k2600b_2a = Keithley2600BChannel('XF:02IDD{K2636B:2-ChA}', name='k2600b_2a')
+k2636b_2a = Keithley2600BChannel('XF:02IDD{K2636B:2-ChA}', name='k2636b_2a')
 
 # Keithley 2 Channel B
-k2600b_2b = Keithley2600BChannel('XF:02IDD{K2636B:2-ChB}', name='k2600b_2b')
+k2636b_2b = Keithley2600BChannel('XF:02IDD{K2636B:2-ChB}', name='k2636b_2b')
