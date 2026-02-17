@@ -32,14 +32,24 @@ SCAN_PERIOD_MAP = {
 class Keithley2600BPositionerMixin:
     """Mixin that gets settle_time from the parent channel's measurement scan period."""
 
-    @property
-    def settle_time(self):
-        """Get settle time from parent's measurement scan period."""
+    def _get_settle_time(self):
+        """Get the effective settle time."""
         settle_time_config = getattr(self, '_settle_time', 0.0)
         if settle_time_config == 0.0 and self.parent is not None and hasattr(self.parent, 'meas_scan_period'):
             scan_str = self.parent.meas_scan_period.get()
             return SCAN_PERIOD_MAP.get(scan_str, 1.0)
         return settle_time_config
+
+    def move(self, position, wait=True, **kwargs):
+        """Override move to use dynamic settle_time from parent's meas_scan_period."""
+        # Temporarily set _settle_time to our computed value
+        original_settle_time = self._settle_time
+        self._settle_time = self._get_settle_time()
+        try:
+            return super().move(position, wait=wait, **kwargs)
+        finally:
+            # Restore original value
+            self._settle_time = original_settle_time
 
 
 class Keithley2600BVoltage(Keithley2600BPositionerMixin, PVPositionerPC):
@@ -91,7 +101,7 @@ class Keithley2600BChannel(Device):
     measured_resistance = Cpt(EpicsSignalRO, 'RB-MeasR', kind=Kind.normal)
     measured_power = Cpt(EpicsSignalRO, 'RB-MeasP', kind=Kind.normal)
     # Measurement scan period - used for settle_time in voltage/current positioners
-    meas_scan_period = Cpt(EpicsSignalRO, 'MeasCho1.SCAN', kind=Kind.config, string=True)
+    meas_scan_period = Cpt(EpicsSignalRO, '_MeasCho1.SCAN', kind=Kind.config, string=True)
 
     # ===== Source Auto Range =====
     source_auto_range_voltage_sp = Cpt(EpicsSignal, 'SP-SourAutoRangV', kind=Kind.config)
