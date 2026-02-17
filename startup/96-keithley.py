@@ -66,6 +66,17 @@ class Keithley2600BCurrent(Keithley2600BPositionerMixin, PVPositionerPC):
     readback = Cpt(EpicsSignalRO, 'RB-ILvl')
 
 
+class Keithley2600BVoltageLimit(PVPositionerPC):
+    """PVPositioner for Keithley 2600B voltage limit control."""
+    setpoint = Cpt(EpicsSignal, 'SP-LimV')
+    readback = Cpt(EpicsSignalRO, 'RB-LimV')
+
+
+class Keithley2600BCurrentLimit(PVPositionerPC):
+    """PVPositioner for Keithley 2600B current limit control."""
+    setpoint = Cpt(EpicsSignal, 'SP-LimI')
+    readback = Cpt(EpicsSignalRO, 'RB-LimI')
+
 
 class Keithley2600BChannel(Device):
     """Ophyd device for Keithley 2600B Source Meter single channel."""
@@ -83,16 +94,12 @@ class Keithley2600BChannel(Device):
     source_status = Cpt(EpicsSignalRO, 'Sour:Sts', kind=Kind.normal)
 
     # ===== Voltage Control =====
-    # Direct (immediate) control
     voltage = Cpt(Keithley2600BVoltage, '')
-    voltage_limit_setpoint = Cpt(EpicsSignal, 'SP-LimV', kind=Kind.config)
-    voltage_limit_readback = Cpt(EpicsSignalRO, 'RB-LimV', kind=Kind.config)
+    voltage_limit = Cpt(Keithley2600BVoltageLimit, '')
 
     # ===== Current Control =====
-    # Direct (immediate) control
     current = Cpt(Keithley2600BCurrent, '')
-    current_limit_setpoint = Cpt(EpicsSignal, 'SP-LimI', kind=Kind.config)
-    current_limit_readback = Cpt(EpicsSignalRO, 'RB-LimI', kind=Kind.config)
+    current_limit = Cpt(Keithley2600BCurrentLimit, '')
 
     # ===== Measurement Readbacks =====
     measure_mode = Cpt(EpicsSignal, 'Meas-Sel', kind=Kind.config)
