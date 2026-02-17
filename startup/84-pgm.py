@@ -49,16 +49,17 @@ class PGM_ES(Device):
 # on May 2024 all grating X positions have been adjusted by -2.5mm compared to previous values.
 # The GR500 was not directly checked, so if possible one would need to dobule check that -65.5mm is good (previously was -63mm).
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.1967687, 'groff', 82.072196,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.6,
-				 'm3slt_ha',-17.5], # last correction 20240523 # JP change blades 2020929 -37.8, -17.6
+         'mbg': ['m2off', 84.1967687, 'groff', 82.072196,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
+				 'm3slt_ha',-17.55], # JP changes blades 20260120 
+                 # last correction 20240523 # JP change blades 2020929 -37.8, -17.6
                  # 20240929 m2off 84.19919 groff 82.076584
                  # 20240522 -> 'm2off', 84.1951147473, 'groff', 82.0717671
                  # 20230914 -> 'm2off', 84.1983417173, 'groff', 82.07381828
                  # offset before 20230127 'm2off', 84.2004597573, 'groff', 82.07204739;
                 
                  
-         'hbg': ['m2off', 84.1962152973, 'groff',  82.133440903303,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -38.0,
-				 'm3slt_ha',-17.8], 
+         'hbg': ['m2off', 84.1962152973, 'groff',  82.133440903303,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -38.1,
+				 'm3slt_ha',-17.85], # JP changed the blades 20260120
                  # 20240930 -> 'm2off', 84.19821348730001, 'groff',  82.1369613933033
                  # 20230913 -> 'm2off', 84.1991382173, 'groff',  82.1336183933033
                  # 20230127 ->'m2off', 84.2033182673, 'groff',  82.1366541933033
