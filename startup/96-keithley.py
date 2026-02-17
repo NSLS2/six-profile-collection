@@ -8,37 +8,53 @@ from ophyd import (
     PVPositionerPC,
 )
 
+# Map EPICS SCAN field string values to seconds
+SCAN_PERIOD_MAP = {
+    "Passive": 0,
+    "Event": 0,
+    "I/O Intr": 0,
+    "300 second": 300.0,
+    "240 second": 240.0,
+    "180 second": 180.0,
+    "120 second": 120.0,
+    "60 second": 60.0,
+    "30 second": 30.0,
+    "10 second": 10.0,
+    "5 second": 5.0,
+    "2 second": 2.0,
+    "1 second": 1.0,
+    ".5 second": 0.5,
+    ".2 second": 0.2,
+    ".1 second": 0.1,
+}
 
-class Keithley2600BVoltage(PVPositionerPC):
+
+class Keithley2600BPositionerMixin:
+    """Mixin that gets settle_time from the parent channel's measurement scan period."""
+
+    @property
+    def settle_time(self):
+        """Get settle time from parent's measurement scan period."""
+        settle_time_config = getattr(self, '_settle_time', 0.0)
+        if settle_time_config == 0.0 and self.parent is not None and hasattr(self.parent, 'meas_scan_period'):
+            scan_str = self.parent.meas_scan_period.get()
+            return SCAN_PERIOD_MAP.get(scan_str, 1.0)
+        return settle_time_config
+
+
+class Keithley2600BVoltage(Keithley2600BPositionerMixin, PVPositionerPC):
     """PVPositioner for direct Keithley 2600B voltage control (immediate)."""
 
     setpoint = Cpt(EpicsSignal, 'SP-VLvl')
     readback = Cpt(EpicsSignalRO, 'RB-VLvl')
 
 
-class Keithley2600BCurrent(PVPositionerPC):
+class Keithley2600BCurrent(Keithley2600BPositionerMixin, PVPositionerPC):
     """PVPositioner for direct Keithley 2600B current control (immediate)."""
 
     setpoint = Cpt(EpicsSignal, 'SP-ILvl')
     readback = Cpt(EpicsSignalRO, 'RB-ILvl')
 
-
-class Keithley2600BVoltageRamped(PVPositioner):
-    """PVPositioner for ramped Keithley 2600B voltage control (speed-controlled)."""
-
-    setpoint = Cpt(EpicsSignal, 'Val:SP-E_u')
-    readback = Cpt(EpicsSignalRO, 'RB-VLvl')
-    done = Cpt(EpicsSignalRO, 'DMOV-E')
-    done_value = 1
-
-
-class Keithley2600BCurrentRamped(PVPositioner):
-    """PVPositioner for ramped Keithley 2600B current control (speed-controlled)."""
-
-    setpoint = Cpt(EpicsSignal, 'Val:SP-I_u')
-    readback = Cpt(EpicsSignalRO, 'RB-ILvl')
-    done = Cpt(EpicsSignalRO, 'DMOV-I')
-    done_value = 1
 
 
 class Keithley2600BChannel(Device):
@@ -59,20 +75,12 @@ class Keithley2600BChannel(Device):
     # ===== Voltage Control =====
     # Direct (immediate) control
     voltage = Cpt(Keithley2600BVoltage, '')
-    # Ramped (speed-controlled) control
-    voltage_ramped = Cpt(Keithley2600BVoltageRamped, '')
-    voltage_ramp_speed = Cpt(EpicsSignal, 'Speed-E', kind=Kind.config)
-    voltage_ramp_stop = Cpt(EpicsSignal, 'STOP-E', kind=Kind.omitted)
     voltage_limit_setpoint = Cpt(EpicsSignal, 'SP-LimV', kind=Kind.config)
     voltage_limit_readback = Cpt(EpicsSignalRO, 'RB-LimV', kind=Kind.config)
 
     # ===== Current Control =====
     # Direct (immediate) control
     current = Cpt(Keithley2600BCurrent, '')
-    # Ramped (speed-controlled) control
-    current_ramped = Cpt(Keithley2600BCurrentRamped, '')
-    current_ramp_speed = Cpt(EpicsSignal, 'Speed-I', kind=Kind.config)
-    current_ramp_stop = Cpt(EpicsSignal, 'STOP-I', kind=Kind.omitted)
     current_limit_setpoint = Cpt(EpicsSignal, 'SP-LimI', kind=Kind.config)
     current_limit_readback = Cpt(EpicsSignalRO, 'RB-LimI', kind=Kind.config)
 
@@ -82,6 +90,8 @@ class Keithley2600BChannel(Device):
     measured_current = Cpt(EpicsSignalRO, 'RB-MeasI', kind=Kind.hinted)
     measured_resistance = Cpt(EpicsSignalRO, 'RB-MeasR', kind=Kind.normal)
     measured_power = Cpt(EpicsSignalRO, 'RB-MeasP', kind=Kind.normal)
+    # Measurement scan period - used for settle_time in voltage/current positioners
+    meas_scan_period = Cpt(EpicsSignalRO, 'MeasCho1.SCAN', kind=Kind.config, string=True)
 
     # ===== Source Auto Range =====
     source_auto_range_voltage_sp = Cpt(EpicsSignal, 'SP-SourAutoRangV', kind=Kind.config)
