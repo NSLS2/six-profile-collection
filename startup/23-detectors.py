@@ -44,3 +44,4 @@ class Femtoanalyzer(Device):
     gain_bit3 = Cpt(EpicsSignal, '11}DO:Ch4-Cmd', kind=Kind.config)  # Pin13 Most Significant Bit 
 
 femto = Femtoanalyzer(prefix="XF:02ID1-ES{GPIO:1_", name="femto")
+
