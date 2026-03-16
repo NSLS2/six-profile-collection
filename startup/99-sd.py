@@ -55,26 +55,10 @@ dc,
 
 
 optional = [
-"voltage_dc_1A",
-"current_dc_1A",
-"voltage_dc_sp_rbk_1A",
-"current_dc_sp_rbk_1A",
-"current_rbk_1A",
-"voltage_rbk_1A",
-"current_pulse_1A",
-"time_pulse_1A",
-"interval_pulse_1A",
-"voltage_pulse_rbk_1A",
-"voltage_dc_1B",
-"current_dc_1B",
-"voltage_dc_sp_rbk_1B",
-"current_dc_sp_rbk_1B",
-"current_rbk_1B",
-"voltage_rbk_1B",
-"current_pulse_1B",
-"time_pulse_1B",
-"interval_pulse_1B",
-"voltage_pulse_rbk_1B"
+    "k2636b_1a",
+    "k2636b_1b",
+#   "k2636b_2a",
+#   "k2636b_2b"
 ]
 
 for device_name in optional:

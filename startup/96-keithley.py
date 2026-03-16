@@ -105,7 +105,7 @@ class Keithley2600BChannel(Device):
     measure_mode = Cpt(EpicsSignal, 'Meas-Sel', kind=Kind.config)
     measured_voltage = Cpt(EpicsSignalRO, 'RB-MeasV', kind=Kind.hinted)
     measured_current = Cpt(EpicsSignalRO, 'RB-MeasI', kind=Kind.hinted)
-    measured_resistance = Cpt(EpicsSignalRO, 'RB-MeasR', kind=Kind.normal)
+    measured_resistance = Cpt(EpicsSignalRO, 'RB-MeasR', kind=Kind.hinted)
     measured_power = Cpt(EpicsSignalRO, 'RB-MeasP', kind=Kind.normal)
     # Measurement scan period - used for settle_time in voltage/current positioners
     meas_scan_period = Cpt(EpicsSignalRO, '_MeasCho1.SCAN', kind=Kind.config, string=True)

@@ -150,9 +150,9 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
 
     x_ideal= 2.36
     
-    x_start= x_ideal - 0.02 * 1 # 0.02 fine step
-    x_stop=  x_ideal + 0.02 * 1# 0.02 fine step
-    number= 3
+    x_start= x_ideal - 0.02 * 2 # 0.02 fine step
+    x_stop=  x_ideal + 0.02 * 2 # 0.02 fine step
+    number= 5
     yield from mv(gvbt1,'Open')
     f_string=''
 
@@ -179,17 +179,17 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.734385
-    y_start = y_ideal - 0.004 * 11
-    y_stop = y_ideal - 0.004 * 7
+    y_ideal = 5.540905 
+    y_start = y_ideal - 0.004 * 3
+    y_stop = y_ideal + 0.004 * 3
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal=  6.496243 
-    x_start= x_ideal - 0.002 * 11
-    x_stop = x_ideal - 0.002 * 7
+    x_ideal=  5.915815 
+    x_start= x_ideal - 0.002 * 3
+    x_stop = x_ideal + 0.002 * 3
     #fine steps 0.002
-    num = 5
+    num = 7
     
     f_string=''
 
@@ -219,17 +219,17 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.415700
-    y_start= y_ideal - 0.001 * 3
-    y_stop = y_ideal + 0.001 * 3
+    y_ideal = 1.4147
+    y_start= y_ideal + 0.001 * 2
+    y_stop = y_ideal + 0.001 * 7
     # fine step is 0.0005 but it may be too small.
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.986919
-    x_start= x_ideal - 0.001 * 3
-    x_stop = x_ideal + 0.001 * 3
-    num = 7
+    x_ideal= 6.1551
+    x_start= x_ideal + 0.001 * 2
+    x_stop = x_ideal + 0.001 * 7
+    num = 6
 
 
     f_string=''
@@ -287,9 +287,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 394
-    x_stop = 410
-    num = 17
+    x_start = 356
+    x_stop = 370
+    num = 15
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     

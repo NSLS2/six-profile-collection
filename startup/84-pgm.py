@@ -50,7 +50,7 @@ class PGM_ES(Device):
 # The GR500 was not directly checked, so if possible one would need to dobule check that -65.5mm is good (previously was -63mm).
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
          'mbg': ['m2off', 84.1967687, 'groff', 82.072196,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
-				 'm3slt_ha',-17.55], # JP changes blades 20260120 
+				 'm3slt_ha',-17.55], # JP changes blades 20260120 before -37.6 / -17.5
                  # last correction 20240523 # JP change blades 2020929 -37.8, -17.6
                  # 20240929 m2off 84.19919 groff 82.076584
                  # 20240522 -> 'm2off', 84.1951147473, 'groff', 82.0717671
