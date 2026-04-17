@@ -8,7 +8,7 @@ from ophyd import Component as Cpt
 ring_curr = EpicsSignalRO('SR:OPS-BI{DCCT:1}I:Real-I', name='ring_curr')
 
 gcpress = EpicsSignalRO('XF:02IDC-VA{BT:16-TCG:16_1}P-I', name = 'gc_tcg_pressure') 
-
+nVmeter = EpicsSignalRO('XF:02ID1-ES{Nanovmeter:1}fetch', name='nVmeter')
 
 #sclr = ScalerCH('XF:02ID1-ES:1{Sclr:1}scaler1', name = 'sclr')
 sclr = EpicsScaler('XF:02ID1-ES:1{Sclr:1}scaler1', name = 'sclr')
