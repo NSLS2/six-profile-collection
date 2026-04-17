@@ -361,13 +361,13 @@ class RIXSSingleTrigger(SingleTrigger):
         def _on_status_done(status=None):
             hdf5_num_captured_after = self.hdf5.num_captured.get()
             hdf2_num_captured_after = self.hdf2.num_captured.get()
-            hdf5_match = hdf5_num_captured_after == num_images_set
-            hdf2_match = hdf2_num_captured_after == num_images_set
+            hdf5_expected = hdf5_num_captured_before + num_images_set
+            hdf5_match = hdf5_num_captured_after == hdf5_expected
+            hdf2_match = hdf2_num_captured_after == 1
             print(
                 f"[RIXSCam DEBUG] trigger status DONE at t={ttime.time():.4f} | "
-                f"hdf5.num_captured={hdf5_num_captured_after} ({'OK' if hdf5_match else 'BEHIND'}) | "
-                f"hdf2.num_captured={hdf2_num_captured_after} ({'OK' if hdf2_match else 'BEHIND'}) | "
-                f"expected={num_images_set}"
+                f"hdf5.num_captured={hdf5_num_captured_after} (expected {hdf5_expected}, {'OK' if hdf5_match else 'BEHIND'}) | "
+                f"hdf2.num_captured={hdf2_num_captured_after} (expected 1, {'OK' if hdf2_match else 'BEHIND'})"
             )
 
         self._status.add_callback(_on_status_done)
