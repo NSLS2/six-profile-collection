@@ -344,8 +344,39 @@ class RIXSSingleTrigger(SingleTrigger):
             raise RuntimeError("This detector is not ready to trigger."
                                "Call the stage() method before triggering.")
 
+        # --- DEBUG: print state at trigger entry ---
+        num_images_set = self.cam.num_images.get()
+        hdf5_num_captured_before = self.hdf5.num_captured.get()
+        hdf2_num_captured_before = self.hdf2.num_captured.get()
+        print(
+            f"[RIXSCam DEBUG] trigger() called at t={ttime.time():.4f} | "
+            f"cam.num_images={num_images_set} | "
+            f"hdf5.num_captured (before acquire)={hdf5_num_captured_before} | "
+            f"hdf2.num_captured (before acquire)={hdf2_num_captured_before}"
+        )
+
         self._status = self._status_type(self)
+
+        # --- DEBUG: subscribe a callback so we know exactly when the status completes ---
+        def _on_status_done(status=None):
+            hdf5_num_captured_after = self.hdf5.num_captured.get()
+            hdf2_num_captured_after = self.hdf2.num_captured.get()
+            hdf5_match = hdf5_num_captured_after == num_images_set
+            hdf2_match = hdf2_num_captured_after == num_images_set
+            print(
+                f"[RIXSCam DEBUG] trigger status DONE at t={ttime.time():.4f} | "
+                f"hdf5.num_captured={hdf5_num_captured_after} ({'OK' if hdf5_match else 'BEHIND'}) | "
+                f"hdf2.num_captured={hdf2_num_captured_after} ({'OK' if hdf2_match else 'BEHIND'}) | "
+                f"expected={num_images_set}"
+            )
+
+        self._status.add_callback(_on_status_done)
+
         self._acquisition_signal.put(1, wait=False)
+        print(
+            f"[RIXSCam DEBUG] acquisition signal sent (acquire=1) at t={ttime.time():.4f}"
+        )
+
         # Here we do away with the `dispatch` method used in `SingleTrigger` as
         # that gives the same field to multiple datafiles which DB can't handle
         self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
