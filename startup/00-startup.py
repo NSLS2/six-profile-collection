@@ -7,6 +7,8 @@ from enum import Enum
 from nslsii.sync_experiment import sync_experiment as sync_exp
 from ophyd.signal import EpicsSignalBase
 from tiled.client import from_profile
+from redis_json_dict import RedisJSONDict
+from bluesky.run_engine import RunEngine
 
 
 class ENDSTATION_ENUM(Enum):
@@ -116,13 +118,14 @@ EpicsSignalBase.set_defaults(timeout=10, connection_timeout=10)
 #    publish_documents_with_kafka=True,
 #    redis_url="info.six.nsls2.bnl.gov",
 # )
+redis_client = nslsii.utils.open_redis_client(redis_ssl=True, redis_url="xf02id1-six-redis1.nsls2.bnl.gov", redis_port=6380)
+md = RedisJSONDict(redis_client, prefix=f"{endstation_prefix.value}-")
+RE = RunEngine(md, call_returns_result=False)
 nslsii.configure_base(
     get_ipython().user_ns,
     tiled_inserter,
     bec=False,
     publish_documents_with_kafka=False,
-    redis_url="info.six.nsls2.bnl.gov",
-    redis_prefix=f"{endstation_prefix.value}-",
 )
 
 # this has been uncommented based on TS
