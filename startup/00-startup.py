@@ -15,13 +15,18 @@ class ENDSTATION_ENUM(Enum):
     SIX = "six"
     Keithley = "keithley"
 
+endstation_to_redis_db = {
+    ENDSTATION_ENUM.SIX: 0,
+    ENDSTATION_ENUM.Keithley: 1,
+}
+
 
 print("Please select an endstation from:")
 for e in ENDSTATION_ENUM:
     print(f"\t- {e.name}")
 endstation_choice = input("Enter your selection: ")
 try:
-    endstation_prefix = ENDSTATION_ENUM[endstation_choice]
+    endstation = ENDSTATION_ENUM[endstation_choice]
 except KeyError as e:
     raise Exception(
         f"Endstation choice '{endstation_choice}' is not one of the valid options."
@@ -29,7 +34,7 @@ except KeyError as e:
 
 
 def sync_experiment(proposal_number):
-    sync_exp(proposal_number, beamline="six", prefix=endstation_prefix.value)
+    sync_exp(proposal_number, beamline="six", redis_db=endstation_to_redis_db[endstation], redis_ssl=True)
     sync_write_paths()
 
 
@@ -111,21 +116,15 @@ def whichproposal():
 
 
 EpicsSignalBase.set_defaults(timeout=10, connection_timeout=10)
-# nslsii.configure_base(
-#    get_ipython().user_ns,
-#    "six",
-#    bec=False,
-#    publish_documents_with_kafka=True,
-#    redis_url="info.six.nsls2.bnl.gov",
-# )
-redis_client = nslsii.utils.open_redis_client(redis_ssl=True, redis_url="xf02id1-six-redis1.nsls2.bnl.gov", redis_port=6380)
-md = RedisJSONDict(redis_client, prefix=f"{endstation_prefix.value}-")
-RE = RunEngine(md, call_returns_result=False)
 nslsii.configure_base(
     get_ipython().user_ns,
     tiled_inserter,
     bec=False,
     publish_documents_with_kafka=False,
+    redis_url="xf02id1-six-redis1.nsls2.bnl.gov",
+    redis_port=6380,
+    redis_ssl=True,
+    redis_db=endstation_to_redis_db[endstation],
 )
 
 # this has been uncommented based on TS
