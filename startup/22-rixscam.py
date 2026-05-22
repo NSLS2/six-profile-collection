@@ -585,5 +585,6 @@ def rixscam_asleep():
     print('RIXSCam HVs are set to 20V. Remember to run rixscam_awake() before resuming operation.')
 
 def rixscam_awake():
-    yield from rixscam.set_LS_high_voltages()
+    #yield from rixscam.set_LS_high_voltages()
+    yield from rixscam.set_LS() # 2026/05 -- with this command, we reset ALL voltages for low temp operation, in case some changes were done in between
     print('RIXSCam HVs are set to LS standard values. You can now use the detector for centroiding mode.')

@@ -1,11 +1,54 @@
 from ophyd import Component as Cpt, Device, EpicsMotor, EpicsSignalRO, EpicsSignal
 
+class EpicsMotorWithKillSignal(EpicsMotor):
+    m2pit_kill = Cpt(EpicsSignal, "-Ax:9_MP}Cmd:Kill-Cmd")
+    grpit_kill = Cpt(EpicsSignal, "-Ax:9_GP}Cmd:Kill-Cmd")
+
+    # position
+    user_readback = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.RBV", kind="hinted", auto_monitor=True)
+    user_setpoint = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.VAL", limits=True, auto_monitor=True)
+
+    # calibration dial <-> user
+    user_offset = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.OFF", kind="config", auto_monitor=True)
+    user_offset_dir = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.DIR", kind="config", auto_monitor=True)
+    offset_freeze_switch = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.FOFF", kind="omitted", auto_monitor=True)
+    set_use_switch = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.SET", kind="omitted", auto_monitor=True)
+
+    # configuration
+    velocity = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.VELO", kind="config", auto_monitor=True)
+    acceleration = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.ACCL", kind="config", auto_monitor=True)
+    motor_egu = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.EGU", kind="config", auto_monitor=True)
+
+    # motor status
+    motor_is_moving = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.MOVN", kind="omitted", auto_monitor=True)
+    motor_done_move = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.DMOV", kind="omitted", auto_monitor=True)
+    high_limit_switch = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.HLS", kind="omitted", auto_monitor=True)
+    low_limit_switch = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.LLS", kind="omitted", auto_monitor=True)
+    high_limit_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HLM", kind="omitted", auto_monitor=True)
+    low_limit_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.LLM", kind="omitted", auto_monitor=True)
+    direction_of_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.TDIR", kind="omitted", auto_monitor=True)
+
+    # commands
+    motor_stop = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.STOP", kind="omitted")
+    home_forward = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HOMF", kind="omitted")
+    home_reverse = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HOMR", kind="omitted")
+
+    def set(self, *args, **kwargs):
+        self.m2pit_kill.put(1)
+        self.grpit_kill.put(1)
+        return super().set(*args, **kwargs)
+
+
 class PGM(PreDefinedPositions):
     cff = Cpt(EpicsMotor, '-Ax:9_Cff}Mtr')
     en = Cpt(EpicsMotor, '-Ax:9_Eng}Mtr')
-    grx = Cpt(EpicsMotor, '-Ax:9_GT}Trans:Mtr')
+    grx = Cpt(EpicsMotorWithKillSignal, '')
+    #grx = Cpt(EpicsMotor, '-Ax:9_GT}Trans:Mtr')
+
     m2pit = Cpt(EpicsMotor, '-Ax:9_MP}Mtr')
+    #m2pit_kill = Cpt(EpicsSignal, '-Ax:9_MP}Cmd:Kill-Cmd')
     grpit = Cpt(EpicsMotor, '-Ax:9_GP}Mtr')
+    #grpit_kill = Cpt(EpicsSignal, '-Ax:9_GP}Cmd:Kill-Cmd')
 
     gr500 = Cpt(EpicsSignalRO, '-Ax:9_GT}Trans:GT1Inp')
     gr1200 = Cpt(EpicsSignalRO, '-Ax:9_GT}Trans:GT2Inp')
@@ -49,17 +92,19 @@ class PGM_ES(Device):
 # on May 2024 all grating X positions have been adjusted by -2.5mm compared to previous values.
 # The GR500 was not directly checked, so if possible one would need to dobule check that -65.5mm is good (previously was -63mm).
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.1967687, 'groff', 82.072196,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
+         'mbg': ['m2off', 84.19707849, 'groff',  82.05456407999,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
 				 'm3slt_ha',-17.55], # JP changes blades 20260120 before -37.6 / -17.5
-                 # last correction 20240523 # JP change blades 2020929 -37.8, -17.6
-                 # 20240929 m2off 84.19919 groff 82.076584
+                 # 20250911 -> 'm2off', 84.1967687, 'groff', 82.072196
+                 # 20240929 -> 'm2off', 84.19919, 'groff', 82.076584
                  # 20240522 -> 'm2off', 84.1951147473, 'groff', 82.0717671
                  # 20230914 -> 'm2off', 84.1983417173, 'groff', 82.07381828
                  # offset before 20230127 'm2off', 84.2004597573, 'groff', 82.07204739;
                 
                  
-         'hbg': ['m2off', 84.1962152973, 'groff',  82.133440903303,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -38.1,
-				 'm3slt_ha',-17.85], # JP changed the blades 20260120
+         'hbg': ['m2off', 84.1950958673, 'groff',   82.13405124330299,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -38.1,
+				 'm3slt_ha',-17.85], # New offset done on 20260521 # JP changed the blades 20260120
+                 # 20260521 ->'m2off', 84.1950958673, 'groff',  82.13405124330299
+                 # 20250911 ->'m2off', 84.1962152973, 'groff',  82.133440903303
                  # 20240930 -> 'm2off', 84.19821348730001, 'groff',  82.1369613933033
                  # 20230913 -> 'm2off', 84.1991382173, 'groff',  82.1336183933033
                  # 20230127 ->'m2off', 84.2033182673, 'groff',  82.1366541933033
@@ -80,5 +125,4 @@ espgm = PGM_ES('XF:02IDD-ES{Mono:2-Ax:',name='espgm')
 # pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
 #           'mbg': ['m2off', 84.20549404, 'groff', 82.07813352 ,'grx', -63.0, 'grlines', 500], #'offset values changed on 08/11/2019 ['m2off', 84.20033028, 'groff', 82.0737638 ,'grx', -63.0, 'grlines', 500]
 #  	       'ubg': ['m2off', 84.20861191, 'groff', 82.1055395916 , 'grx', -1,'grlines', 1800] }) #before 08/10/2019 'ubg': ['m2off', 84.20265344, 'groff', 82.1012242016 , 'grx', -1,'grlines', 1800] })
-
 

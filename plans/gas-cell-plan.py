@@ -334,7 +334,7 @@ def gas_cell_gr500():
     yield from mv(sclr.preset_time, 1)
     yield from mv(extslt.hg,150)
 
-    cff_ideal_500 = 2.34
+    cff_ideal_500 = 2.32
     yield from mv(pgm.cff, cff_ideal_500)
     yield from sleep(15)
     yield from mv(extslt.vg,11)
@@ -378,10 +378,10 @@ def gas_cell_gr1200():
     # yield from sleep(3600)
     # yield from beamline_align_v2()
     # yield from sleep(120)
-    cff_ideal_1200 = 3.92
+    cff_ideal_1200 = 3.90
     yield from mv(pgm.cff, cff_ideal_1200)
     yield from mv(extslt.vg,12)
-    offset = 0 #main peak should be at 867.2
+    offset = 0.0 #main peak should be at 867.2
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
     for i in range(-4, 5):
