@@ -90,8 +90,10 @@ class TiledInserter:
 tiled_writing_client = from_profile(
     "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"]
 )["six"]["raw"]
+tiled_writing_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 tiled_inserter = TiledInserter()
 c = tiled_reading_client = from_profile("nsls2")["six"]["raw"]
+c.context.http_client.headers['tiled-qos'] = 'acquisition'
 db = Broker(c)
 
 
