@@ -350,8 +350,8 @@ class RIXSSingleTrigger(SingleTrigger):
     def _centroid_key(self, column):
         return f"{self.name}_centroids_{column}"
 
-    def _centroid_image(self):
-        data = np.ascontiguousarray(self.image2.array_data.get(), dtype='<f4')
+    def _centroid_image(self, value):
+        data = np.ascontiguousarray(value, dtype='<f4')
         expected_columns = len(self.xip_centroid_columns)
         if data.ndim != 2 or data.shape[1] != expected_columns:
             raise RuntimeError(
@@ -369,11 +369,7 @@ class RIXSSingleTrigger(SingleTrigger):
             return
 
         try:
-            counter_value = int(value)
-            if counter_value == 0:
-                return
-
-            self._centroid_cache.append(self._centroid_image())
+            self._centroid_cache.append(self._centroid_image(value))
             self._centroid_timestamp = kwargs.get('timestamp') or ttime.time()
 
         except Exception as exc:
@@ -394,7 +390,7 @@ class RIXSSingleTrigger(SingleTrigger):
         self._centroid_subscription = None
         self._centroid_timestamp = None
         if self._centroid_enabled():
-            self._centroid_subscription = self.image2.array_counter.subscribe(
+            self._centroid_subscription = self.image2.array_data.subscribe(
                 self._centroid_collection, run=False
             )
         return ret
@@ -468,7 +464,7 @@ class RIXSSingleTrigger(SingleTrigger):
     def unstage(self):
         subscription = getattr(self, '_centroid_subscription', None)
         if subscription is not None:
-            self.image2.array_counter.unsubscribe(subscription)
+            self.image2.array_data.unsubscribe(subscription)
             self._centroid_subscription = None
         return super().unstage()
 
