@@ -87,6 +87,7 @@ def rixscam_acquire_w_shutter_count(Ei_vals, m7_pit_vals, num_rixs_im, extra_md 
         
     print('Checking m7 now')
     if m7_pit_vals != None:
+   
         print('\tm7 is okay')
         if len(Ei_vals) == len(m7_pit_vals):
            pass
@@ -148,10 +149,10 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
     #y_val=  529.3
     #x_ideal= 3.95
 
-    x_ideal= 2.38
+    x_ideal= 2.41
     
-    x_start= x_ideal - 0.02 * 3 # 0.02 fine step
-    x_stop=  x_ideal + 0.02 * 3 # 0.02 fine step
+    x_start= x_ideal - 0.01 * 3 # 0.02 fine step
+    x_stop=  x_ideal + 0.01 * 3 # 0.02 fine step
     number= 7
     yield from mv(gvbt1,'Open')
     f_string=''
@@ -179,13 +180,13 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.555469  
+    y_ideal = 5.118311
     y_start = y_ideal - 0.005 * 3
     y_stop = y_ideal + 0.005 * 3
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal=  6.232712
+    x_ideal=  5.282519
     x_start= x_ideal - 0.0025 * 3
     x_stop = x_ideal + 0.0025 * 3
     #fine steps 0.002
@@ -219,16 +220,16 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.415345
-    y_start= y_ideal - 0.0005 * 3
-    y_stop = y_ideal + 0.0005 * 3
+    y_ideal = 1.414887
+    y_start= y_ideal - 0.001 * 3
+    y_stop = y_ideal + 0.001 * 3
     # fine step is 0.0005 but it may be too small.
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.549500
-    x_start= x_ideal - 0.0005 * 3
-    x_stop = x_ideal + 0.0005 * 3
+    x_ideal= 5.118318
+    x_start= x_ideal - 0.001 * 3
+    x_stop = x_ideal + 0.001 * 3
     num = 7
 
 
@@ -287,9 +288,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 700
-    x_stop = 715
-    num = 16
+    x_start = 692
+    x_stop = 706
+    num = 15
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     

@@ -57,6 +57,7 @@ dc,
 optional = [
     "k2636b_1a",
     "k2636b_1b",
+    "nVmeter",
 #   "k2636b_2a",
 #   "k2636b_2b"
 ]
