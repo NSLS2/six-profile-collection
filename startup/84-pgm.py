@@ -1,54 +1,24 @@
 from ophyd import Component as Cpt, Device, EpicsMotor, EpicsSignalRO, EpicsSignal
 
 class EpicsMotorWithKillSignal(EpicsMotor):
-    m2pit_kill = Cpt(EpicsSignal, "-Ax:9_MP}Cmd:Kill-Cmd")
-    grpit_kill = Cpt(EpicsSignal, "-Ax:9_GP}Cmd:Kill-Cmd")
-
-    # position
-    user_readback = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.RBV", kind="hinted", auto_monitor=True)
-    user_setpoint = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.VAL", limits=True, auto_monitor=True)
-
-    # calibration dial <-> user
-    user_offset = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.OFF", kind="config", auto_monitor=True)
-    user_offset_dir = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.DIR", kind="config", auto_monitor=True)
-    offset_freeze_switch = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.FOFF", kind="omitted", auto_monitor=True)
-    set_use_switch = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.SET", kind="omitted", auto_monitor=True)
-
-    # configuration
-    velocity = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.VELO", kind="config", auto_monitor=True)
-    acceleration = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.ACCL", kind="config", auto_monitor=True)
-    motor_egu = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.EGU", kind="config", auto_monitor=True)
-
-    # motor status
-    motor_is_moving = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.MOVN", kind="omitted", auto_monitor=True)
-    motor_done_move = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.DMOV", kind="omitted", auto_monitor=True)
-    high_limit_switch = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.HLS", kind="omitted", auto_monitor=True)
-    low_limit_switch = Cpt(EpicsSignalRO, "-Ax:9_GT}Trans:Mtr.LLS", kind="omitted", auto_monitor=True)
-    high_limit_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HLM", kind="omitted", auto_monitor=True)
-    low_limit_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.LLM", kind="omitted", auto_monitor=True)
-    direction_of_travel = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.TDIR", kind="omitted", auto_monitor=True)
-
-    # commands
-    motor_stop = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.STOP", kind="omitted")
-    home_forward = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HOMF", kind="omitted")
-    home_reverse = Cpt(EpicsSignal, "-Ax:9_GT}Trans:Mtr.HOMR", kind="omitted")
 
     def set(self, *args, **kwargs):
-        self.m2pit_kill.put(1)
-        self.grpit_kill.put(1)
+        if self.parent is not None and hasattr(self.parent, "m2pit_kill"):
+            self.parent.m2pit_kill.put(1)
+        if self.parent is not None and hasattr(self.parent, "grpit_kill"):
+            self.parent.grpit_kill.put(1)
         return super().set(*args, **kwargs)
 
 
 class PGM(PreDefinedPositions):
     cff = Cpt(EpicsMotor, '-Ax:9_Cff}Mtr')
     en = Cpt(EpicsMotor, '-Ax:9_Eng}Mtr')
-    grx = Cpt(EpicsMotorWithKillSignal, '')
-    #grx = Cpt(EpicsMotor, '-Ax:9_GT}Trans:Mtr')
-
+    grx = Cpt(EpicsMotorWithKillSignal, '-Ax:9_GT}Trans:Mtr') #202060622 -- Change implemented by Thomas to kill m2.pit and gr.pit before moving gr.x. Tested. It works.
+    #grx = Cpt(EpicsMotor, '-Ax:9_GT}Trans:Mtr') #202060622 -- This "old" line needs to be commented, if the above "grx with kill option" is active. 
     m2pit = Cpt(EpicsMotor, '-Ax:9_MP}Mtr')
-    #m2pit_kill = Cpt(EpicsSignal, '-Ax:9_MP}Cmd:Kill-Cmd')
+    m2pit_kill = Cpt(EpicsSignal, '-Ax:9_MP}Cmd:Kill-Cmd')
     grpit = Cpt(EpicsMotor, '-Ax:9_GP}Mtr')
-    #grpit_kill = Cpt(EpicsSignal, '-Ax:9_GP}Cmd:Kill-Cmd')
+    grpit_kill = Cpt(EpicsSignal, '-Ax:9_GP}Cmd:Kill-Cmd')
 
     gr500 = Cpt(EpicsSignalRO, '-Ax:9_GT}Trans:GT1Inp')
     gr1200 = Cpt(EpicsSignalRO, '-Ax:9_GT}Trans:GT2Inp')

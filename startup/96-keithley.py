@@ -159,3 +159,7 @@ k2636b_2a = Keithley2600BChannel('XF:02IDD{K2636B:2-ChA}', name='k2636b_2a')
 
 # Keithley 2 Channel B
 k2636b_2b = Keithley2600BChannel('XF:02IDD{K2636B:2-ChB}', name='k2636b_2b')
+
+
+## Define k2812 nanovoltmeter 
+# k2182a = Cpt(EpicsSignalRO, 'XF:02ID1-ES{Nanovmeter:1}fetch', name='k2182a') ## this seems to be defined already somewhere else as 'nVmeter'... we need to find out where!!!!
