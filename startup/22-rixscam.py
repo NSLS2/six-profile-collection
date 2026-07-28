@@ -353,11 +353,13 @@ class RIXSSingleTrigger(SingleTrigger):
     def _centroid_image(self, value):
         data = np.ascontiguousarray(value, dtype='<f4')
         expected_columns = len(self.xip_centroid_columns)
-        if data.ndim != 2 or data.shape[1] != expected_columns:
+        if (data.ndim != 1 and data.ndim != 2) or data.shape[0] != expected_columns:
             raise RuntimeError(
                 "Expected Image2 centroid array with shape "
-                f"(n, {expected_columns}), got {data.shape}."
+                f"({expected_columns}, n) or ({expected_columns},), got {data.shape}."
             )
+        if data.ndim == 1:
+            data = data[:, np.newaxis]
         return data
 
     def _centroid_collection(self, value=None, old_value=None, **kwargs):
@@ -417,7 +419,7 @@ class RIXSSingleTrigger(SingleTrigger):
         # that gives the same field to multiple datafiles which DB can't handle
         self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
         if centroid_enabled:
-            self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
+            #self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
             return self._status & centroid_status
         return self._status
 
@@ -435,7 +437,7 @@ class RIXSSingleTrigger(SingleTrigger):
             for i, col in enumerate(self.xip_centroid_columns):
                 key = self._centroid_key(col)
                 ret[key] = {
-                    'value': [np.ascontiguousarray(frame[:, i], dtype='<f4')
+                    'value': [np.ascontiguousarray(frame[i, :], dtype='<f4')
                               for frame in self._centroid_cache],
                     'timestamp': timestamp,
                 }
@@ -444,6 +446,10 @@ class RIXSSingleTrigger(SingleTrigger):
 
     def describe(self):
         ret = super().describe()
+
+        image_key = f"{self.name}_image"
+        if image_key in ret and "dtype_numpy" not in ret[image_key]:
+            ret[image_key]["dtype_numpy"] = np.dtype(np.uint16).str
 
         if self._centroid_enabled():
             fpp = (self._centroid_frames_per_point or
@@ -499,12 +505,12 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
     )
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
-    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
-               suffix='HDF2:' ,
-               write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
-               read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
-               root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
-            )
+    # hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
+    #            suffix='HDF2:' ,
+    #            write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
+    #            read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
+    #            root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
+    #         )
     # Expected to be routed from the XIP plugin
     image2 = Cpt(ImagePlugin, suffix="image2:")
 
@@ -670,14 +676,14 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         if mode == 'image':
             self.read_attrs = ['hdf5']
             yield from mv(self.centroid_enable,False)
-            yield from mv(self.hdf2.enable, 'Disable',
+            yield from mv(#self.hdf2.enable, 'Disable',
                           self.xip.enable, 'Disable',
                           self.image2.enable, 'Disable')
 
         elif mode == 'centroid':
-            self.read_attrs = ['hdf5', 'hdf2', 'xip']
+            self.read_attrs = ['hdf5', 'xip']
             yield from mv(self.centroid_enable,True)
-            yield from mv(self.hdf2.enable, 'Enable',
+            yield from mv(#self.hdf2.enable, 'Enable',
                           self.xip.enable, 'Enable',
                           self.image2.enable, 'Enable')
 
@@ -689,11 +695,11 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
 rixscam.xip.enable.set('Enable')
-rixscam.hdf2.enable.set('Enable')
+#rixscam.hdf2.enable.set('Enable')
 rixscam.image2.enable.set('Enable')
 
 #rixscam.read_attrs = ['hdf5']
-rixscam.read_attrs = ['hdf5','hdf2', 'xip'] 
+rixscam.read_attrs = ['hdf5', 'xip'] 
 #rixscam.read_attrs = ['hdf2', 'xip']
 
 #TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs
