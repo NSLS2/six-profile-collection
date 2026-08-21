@@ -1,5 +1,6 @@
+import numpy as np
 from ophyd.areadetector import AreaDetector, HDF5Plugin
-from ophyd.areadetector.plugins import PluginBase
+from ophyd.areadetector.plugins import PluginBase, ImagePlugin
 from ophyd.areadetector.cam import ADCpt
 
 from ophyd.areadetector.filestore_mixins import (FileStoreHDF5IterativeWrite,
@@ -9,6 +10,7 @@ from ophyd.areadetector.trigger_mixins import SingleTrigger
 from ophyd import (Component as Cpt, EpicsSignal, EpicsSignalRO, Device)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.signal import Signal
+from ophyd.status import Status
 from ophyd.device import Staged
 from ophyd.sim import NullStatus
 from databroker.assets.handlers_base import HandlerBase
@@ -337,28 +339,160 @@ class RIXSSingleTrigger(SingleTrigger):
 
     This avoids the `dispatch` attribute entirely, but requires that both hdf5
     and hdf2 attributes are included for the detector. It only generates the
-    hdf2 field if self.centroid is true.
+    hdf2 field if self.centroid_enable is true. In centroid mode, it also
+    reads the XIP centroid table from Image2 and emits each column directly in
+    the event document as a ragged array.
     '''
+
+    def _centroid_enabled(self):
+        return bool(self.centroid_enable.get())
+
+    def _centroid_key(self, column):
+        return f"{self.name}_centroids_{column}"
+
+    def _centroid_image(self, value):
+        data = np.ascontiguousarray(value, dtype='<f4')
+        if data.ndim == 1:
+            data = data.reshape((7, -1))
+        expected_columns = len(self.xip_centroid_columns)
+        if (data.ndim != 1 and data.ndim != 2) or data.shape[0] != expected_columns:
+            raise RuntimeError(
+                "Expected Image2 centroid array with shape "
+                f"({expected_columns}, n) or ({expected_columns},), got {data.shape}."
+            )
+        if data.ndim == 1:
+            data = data[:, np.newaxis]
+        return data
+
+    def _centroid_collection(self, value=None, old_value=None, **kwargs):
+        status = self._centroid_status
+        if status is None:
+            return
+
+        if value is None:
+            return
+
+        try:
+            self._centroid_cache.append(self._centroid_image(value))
+            self._centroid_timestamp = kwargs.get('timestamp') or ttime.time()
+
+        except Exception as exc:
+            self._centroid_status = None
+            status.set_exception(exc)
+            return
+
+        if len(self._centroid_cache) == self._centroid_frames_per_point:
+            self._centroid_status = None
+            status.set_finished()
+
+
+    def stage(self):
+        ret = super().stage()
+        self._centroid_status = None
+        self._centroid_cache = []
+        self._centroid_frames_per_point = 0
+        self._centroid_subscription = None
+        self._centroid_timestamp = None
+        if self._centroid_enabled():
+            self._centroid_subscription = self.image2.array_data.subscribe(
+                self._centroid_collection, run=False
+            )
+        return ret
+
     def trigger(self):
         if self._staged != Staged.yes:
             raise RuntimeError("This detector is not ready to trigger."
                                "Call the stage() method before triggering.")
 
         self._status = self._status_type(self)
+        centroid_enabled = self._centroid_enabled()
+        if centroid_enabled:
+            self._centroid_cache = []
+            self._centroid_frames_per_point = int(self.cam.num_images.get())
+            self._centroid_timestamp = ttime.time()
+            centroid_status = Status(obj=self)
+            self._centroid_status = centroid_status
+            if self._centroid_frames_per_point <= 0:
+                self._centroid_status = None
+                centroid_status.set_finished()
+
         self._acquisition_signal.put(1, wait=False)
         # Here we do away with the `dispatch` method used in `SingleTrigger` as
         # that gives the same field to multiple datafiles which DB can't handle
         self.hdf5.generate_datum('rixscam_image', ttime.time(), {})
-        if self.centroid_enable:
-            self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
+        if centroid_enabled:
+            #self.hdf2.generate_datum('rixscam_centroids', ttime.time(), {})
+            return self._status & centroid_status
         return self._status
+
+    def read(self):
+        ret = super().read()
+
+        if self._centroid_enabled():
+            if len(self._centroid_cache) != self._centroid_frames_per_point:
+                raise RuntimeError(
+                    "RIXSCam centroid read requested before all Image2 frames "
+                    "were collected."
+                )
+
+            timestamp = self._centroid_timestamp or ttime.time()
+            for i, col in enumerate(self.xip_centroid_columns):
+                key = self._centroid_key(col)
+                ret[key] = {
+                    'value': [np.ascontiguousarray(frame[i, :], dtype='<f4').tolist()
+                              for frame in self._centroid_cache],
+                    'timestamp': timestamp,
+                }
+
+        return ret
+
+    def describe(self):
+        ret = super().describe()
+
+        image_key = f"{self.name}_image"
+        if image_key in ret and "dtype_numpy" not in ret[image_key]:
+            ret[image_key]["dtype_numpy"] = np.dtype(np.uint16).str
+
+        if self._centroid_enabled():
+            fpp = (self._centroid_frames_per_point or
+                   int(self.cam.num_images.get()))
+            for col in self.xip_centroid_columns:
+                key = self._centroid_key(col)
+                source = getattr(self.image2.array_data, 'pvname',
+                                 self.image2.array_data.name)
+                ret[key] = {
+                    'source': f'PV:{source}#{col}',
+                    'dtype': 'array',
+                    'dtype_str': '<f4',
+                    'shape': [fpp, None],
+                }
+
+        return ret
+
+    def unstage(self):
+        subscription = getattr(self, '_centroid_subscription', None)
+        if subscription is not None:
+            self.image2.array_data.unsubscribe(subscription)
+            self._centroid_subscription = None
+        return super().unstage()
 
 
 class RIXSCam(RIXSSingleTrigger, AreaDetector):
 
+    xip_centroid_columns = (
+        "x",
+        "y",
+        "x_eta",
+        "y_eta",
+        "y_eta_iso",
+        "sum_regions",
+        "XIP_mode",
+    )
+    """Column names produced by the XIPPlugin"""
+
     exposure = Cpt(TriggeredCamExposure, '')
 
-    centroid_enable = Cpt(Signal, value=False)
+    centroid_enable = Cpt(Signal, value=True)
 
     xip = Cpt(XIPPlugin, suffix='XIP1:')
 
@@ -373,12 +507,14 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
     )
 
 # Once the hdf2 IOC issues are sorted then Uncomment out the next 6 lines
-    hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
-               suffix='HDF2:' ,
-               write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
-               read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
-               root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
-            )
+    # hdf2 = Cpt(RIXSCamHDF5PluginForXIP,
+    #            suffix='HDF2:' ,
+    #            write_path_template=f'Z:\\{RE.md["cycle"]}\\{RE.md["data_session"]}\\assets\\rixscam\\%Y\\%m\\%d\\',
+    #            read_path_template=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam/%Y/%m/%d',
+    #            root=f'/nsls2/data/six/proposals/{RE.md["cycle"]}/{RE.md["data_session"]}/assets/rixscam'
+    #         )
+    # Expected to be routed from the XIP plugin
+    image2 = Cpt(ImagePlugin, suffix="image2:")
 
     set_node = Cpt(EpicsSignal, 'cam1:SEQ_NODE_SELECTION')
     # Delays
@@ -542,12 +678,16 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
         if mode == 'image':
             self.read_attrs = ['hdf5']
             yield from mv(self.centroid_enable,False)
-            yield from mv(self.hdf2.enable, 'Disable', self.xip.enable, 'Disable')
+            yield from mv(#self.hdf2.enable, 'Disable',
+                          self.xip.enable, 'Disable',
+                          self.image2.enable, 'Disable')
 
         elif mode == 'centroid':
-            self.read_attrs = ['hdf5', 'hdf2', 'xip']
+            self.read_attrs = ['hdf5', 'xip']
             yield from mv(self.centroid_enable,True)
-            yield from mv(self.hdf2.enable, 'Enable', self.xip.enable, 'Enable')
+            yield from mv(#self.hdf2.enable, 'Enable',
+                          self.xip.enable, 'Enable',
+                          self.image2.enable, 'Enable')
 
         else:
             raise ValueError("The input parameter, mode, needs to be 'image' or\
@@ -557,10 +697,11 @@ class RIXSCam(RIXSSingleTrigger, AreaDetector):
 rixscam = RIXSCam('XF:02ID1-ES{RIXSCam}:', name='rixscam')
 rixscam.hdf5.read_attrs = []
 rixscam.xip.enable.set('Enable')
-rixscam.hdf2.enable.set('Enable')
+#rixscam.hdf2.enable.set('Enable')
+rixscam.image2.enable.set('Enable')
 
 #rixscam.read_attrs = ['hdf5']
-rixscam.read_attrs = ['hdf5','hdf2', 'xip'] 
+rixscam.read_attrs = ['hdf5', 'xip'] 
 #rixscam.read_attrs = ['hdf2', 'xip']
 
 #TODO once ioc for LS mode threshold works, add threshold and energy values to config attrs

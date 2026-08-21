@@ -7,6 +7,7 @@ from enum import Enum
 from nslsii.sync_experiment import sync_experiment as sync_exp
 from ophyd.signal import EpicsSignalBase
 from tiled.client import from_profile
+from bluesky_tiled_plugins import TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
 
@@ -74,7 +75,7 @@ class TiledInserter:
         error = None
         for attempt in range(ATTEMPTS):
             try:
-                tiled_writing_client.post_document(name, doc)
+                tiled_writing_client_raw.post_document(name, doc)
             except Exception as exc:
                 print("Document saving failure:", repr(exc))
                 error = exc
@@ -89,12 +90,23 @@ class TiledInserter:
 # Define tiled catalog
 tiled_writing_client = from_profile(
     "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"]
-)["six"]["raw"]
-tiled_writing_client.context.http_client.headers['tiled-qos'] = 'acquisition'
+)["six"]
+tiled_writing_client_raw = tiled_writing_client["raw"]
+tiled_writing_client_raw.context.http_client.headers['tiled-qos'] = 'acquisition'
+tiled_writing_client_sql = tiled_writing_client["migration"]
+tiled_writing_client_sql.context.http_client.headers['tiled-qos'] = 'acquisition'
 tiled_inserter = TiledInserter()
-c = tiled_reading_client = from_profile("nsls2")["six"]["raw"]
+tw = TiledWriter(
+        tiled_writing_client_sql,
+        backup_directory="/tmp/tiled_backup",
+        spec_to_mimetype={
+            "AD_HDF5": "application/x-hdf5",
+            "AD_TIFF": "multipart/related;type=image/tiff",
+        })
+tiled_reading_client_raw = from_profile("nsls2")["six"]["raw"]
+c = tiled_reading_client_sql = from_profile("nsls2")["six"]["migration"]
 c.context.http_client.headers['tiled-qos'] = 'acquisition'
-db = Broker(c)
+db = Broker(tiled_reading_client_raw)
 
 
 # check the current logged in + active user
@@ -128,6 +140,7 @@ nslsii.configure_base(
     redis_ssl=True,
     redis_db=endstation_to_redis_db[endstation],
 )
+RE.subscribe(tw)
 
 # this has been uncommented based on TS
 nslsii.configure_kafka_publisher(RE, beamline_name="six")
