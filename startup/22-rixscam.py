@@ -352,6 +352,8 @@ class RIXSSingleTrigger(SingleTrigger):
 
     def _centroid_image(self, value):
         data = np.ascontiguousarray(value, dtype='<f4')
+        if data.ndim == 1:
+            data = data.reshape((7, -1))
         expected_columns = len(self.xip_centroid_columns)
         if (data.ndim != 1 and data.ndim != 2) or data.shape[0] != expected_columns:
             raise RuntimeError(
@@ -437,7 +439,7 @@ class RIXSSingleTrigger(SingleTrigger):
             for i, col in enumerate(self.xip_centroid_columns):
                 key = self._centroid_key(col)
                 ret[key] = {
-                    'value': [np.ascontiguousarray(frame[i, :], dtype='<f4')
+                    'value': [np.ascontiguousarray(frame[i, :], dtype='<f4').tolist()
                               for frame in self._centroid_cache],
                     'timestamp': timestamp,
                 }
