@@ -149,7 +149,7 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
     #y_val=  529.3
     #x_ideal= 3.95
 
-    x_ideal= 2.41
+    x_ideal= 2.40
     
     x_start= x_ideal - 0.01 * 3 # 0.02 fine step
     x_stop=  x_ideal + 0.01 * 3 # 0.02 fine step
@@ -180,15 +180,15 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     precison_digit = 4
     dets = [ring_curr, rixscam]
     y_motor= espgm.m7pit
-    y_ideal = 5.118311
-    y_start = y_ideal - 0.005 * 3
-    y_stop = y_ideal + 0.005 * 3
+    y_ideal = 5.554995 
+    y_start = y_ideal - 0.01 * 3
+    y_stop = y_ideal + 0.01 * 3
     #fine steps 0.004
 
     x_motor=  espgm.grpit
-    x_ideal=  5.282519
-    x_start= x_ideal - 0.0025 * 3
-    x_stop = x_ideal + 0.0025 * 3
+    x_ideal=  5.953896 
+    x_start= x_ideal - 0.005 * 3
+    x_stop = x_ideal + 0.005 * 3
     #fine steps 0.002
     num = 7
     
@@ -220,14 +220,14 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
     dets = [ ring_curr, rixscam]
     precison_digit = 4
     y_motor= m6.pit
-    y_ideal = 1.414887
+    y_ideal = 1.4142
     y_start= y_ideal - 0.001 * 3
     y_stop = y_ideal + 0.001 * 3
     # fine step is 0.0005 but it may be too small.
 	#CHANGED STEP TO 0.001 and 4 on each side
 
     x_motor=  espgm.m7pit
-    x_ideal= 5.118318
+    x_ideal= 5.5382
     x_start= x_ideal - 0.001 * 3
     x_stop = x_ideal + 0.001 * 3
     num = 7
@@ -288,9 +288,9 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
     """
 
     x_motor=pgm.en
-    x_start = 692
-    x_stop = 706
-    num = 15
+    x_start = 510
+    x_stop = 530
+    num = 21
 
     extslt_vg_value = np.round(extslt.vg.user_readback.value,0)	
     
