@@ -71,7 +71,7 @@ pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
                  # offset before 20230127 'm2off', 84.2004597573, 'groff', 82.07204739;
                 
                  
-         'hbg': ['m2off', 84.1950958673, 'groff',   82.13405124330299,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -38.1,
+         'hbg': ['m2off', 84.1950958673, 'groff',   82.13405124330299,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -37.95,
 				 'm3slt_ha',-17.85], # New offset done on 20260521 # JP changed the blades 20260120
                  # 20260521 ->'m2off', 84.1950958673, 'groff',  82.13405124330299
                  # 20250911 ->'m2off', 84.1962152973, 'groff',  82.133440903303
