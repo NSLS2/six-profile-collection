@@ -352,16 +352,14 @@ class RIXSSingleTrigger(SingleTrigger):
 
     def _centroid_image(self, value):
         data = np.ascontiguousarray(value, dtype='<f4')
-        if data.ndim == 1:
-            data = data.reshape((7, -1))
         expected_columns = len(self.xip_centroid_columns)
-        if (data.ndim != 1 and data.ndim != 2) or data.shape[0] != expected_columns:
+        if data.ndim == 1:
+            data = data.reshape((-1, expected_columns)).T
+        if data.ndim != 2 or data.shape[0] != expected_columns:
             raise RuntimeError(
                 "Expected Image2 centroid array with shape "
-                f"({expected_columns}, n) or ({expected_columns},), got {data.shape}."
+                f"({expected_columns}, n), got {data.shape}."
             )
-        if data.ndim == 1:
-            data = data[:, np.newaxis]
         return data
 
     def _centroid_collection(self, value=None, old_value=None, **kwargs):
