@@ -356,10 +356,10 @@ def gas_cell_gr1800():
     # yield from sleep(3600)
     # yield from beamline_align_v2()
     # yield from sleep(120)
-    cff_ideal_1800 = 4.85 # 5.24
+    cff_ideal_1800 = 5.0 # 5.24
     yield from mv(pgm.cff, cff_ideal_1800)
     yield from mv(extslt.vg,11)
-    offset = 0
+    offset = 0.0
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
     for i in range(-4, 5):
@@ -381,7 +381,7 @@ def gas_cell_gr1200():
     cff_ideal_1200 = 3.95
     yield from mv(pgm.cff, cff_ideal_1200)
     yield from mv(extslt.vg,12)
-    offset = 3.1 #main peak should be at 867.2
+    offset = 0 #main peak should be at 867.2
 
     # yield from scan(det_list,pgm.en,864-offset,872-offset,401)
     for i in range(-4, 5):

@@ -10,6 +10,7 @@ from tiled.client import from_profile
 from bluesky_tiled_plugins import TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
+import httpx
 
 
 class ENDSTATION_ENUM(Enum):
@@ -51,9 +52,9 @@ def sync_write_paths():
     rixscam.hdf5.write_path_template = rixscam_wp
     rixscam.hdf5.read_path_template = rixscam_rp
     rixscam.hdf5.reg_root = rixscam_root
-    rixscam.hdf2.write_path_template = rixscam_wp
-    rixscam.hdf2.read_path_template = rixscam_rp
-    rixscam.hdf2.reg_root = rixscam_root
+    #rixscam.hdf2.write_path_template = rixscam_wp  # Commented out Oct. 8, 2026 as we no longer use
+    #rixscam.hdf2.read_path_template = rixscam_rp
+    #rixscam.hdf2.reg_root = rixscam_root
 
     diagon_h_cam.hdf5.write_path_template = prosilica_wp
     diagon_h_cam.hdf5.reg_root = prosilica_root
@@ -89,7 +90,7 @@ class TiledInserter:
 
 # Define tiled catalog
 tiled_writing_client = from_profile(
-    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"]
+    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout=httpx.Timeout(connect=5, read=120, write=120, pool=5) # Added Oct. 8, 2026
 )["six"]
 tiled_writing_client_raw = tiled_writing_client["raw"]
 tiled_writing_client_raw.context.http_client.headers['tiled-qos'] = 'acquisition'

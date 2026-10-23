@@ -62,8 +62,10 @@ class PGM_ES(Device):
 # on May 2024 all grating X positions have been adjusted by -2.5mm compared to previous values.
 # The GR500 was not directly checked, so if possible one would need to dobule check that -65.5mm is good (previously was -63mm).
 pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
-         'mbg': ['m2off', 84.19707849, 'groff',  82.05456407999,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
-				 'm3slt_ha',-17.55], # JP changes blades 20260120 before -37.6 / -17.5
+         'mbg': ['m2off', 84.19254599, 'groff',  82.06729687999,'grx', -65.5, 'grlines', 500, 'm3slt_hs', -37.7,
+				 'm3slt_ha',-17.55], # 20260915
+                 # 'm2off', 84.19707849, 'groff',  82.05456407999
+                 # 20260521 JP changes blades 20260120 before -37.6 / -17.5
                  # 20250911 -> 'm2off', 84.1967687, 'groff', 82.072196
                  # 20240929 -> 'm2off', 84.19919, 'groff', 82.076584
                  # 20240522 -> 'm2off', 84.1951147473, 'groff', 82.0717671
@@ -71,8 +73,10 @@ pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
                  # offset before 20230127 'm2off', 84.2004597573, 'groff', 82.07204739;
                 
                  
-         'hbg': ['m2off', 84.1950958673, 'groff',   82.13405124330299,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -37.95,
-				 'm3slt_ha',-17.85], # New offset done on 20260521 # JP changed the blades 20260120
+         'hbg': ['m2off', 84.193546, 'groff',   82.128350,'grx', 58.0, 'grlines', 1200, 'm3slt_hs', -37.95, #-38.1
+				 'm3slt_ha',-17.85], 
+
+                 # 20260915 -> 'm2off', 84.193546, 'groff',   82.128350 -> last one of JP :)
                  # 20260521 ->'m2off', 84.1950958673, 'groff',  82.13405124330299
                  # 20250911 ->'m2off', 84.1962152973, 'groff',  82.133440903303
                  # 20240930 -> 'm2off', 84.19821348730001, 'groff',  82.1369613933033
@@ -81,8 +85,9 @@ pgm = PGM('XF:02IDB-OP{Mono:1', name='pgm', locations = {
                  # 20220915 -> offset m2off 84.199606602; 'groff', 82.1314578049,'grx', 61.0,
                  # offset values before 20220125 m2 84.201175342; groff 82.1322482849
 
-	 	 'ubg': ['m2off', 84.189207, 'groff', 82.076322, 'grx', -3.5,'grlines', 1800, 'm3slt_hs', -37.3,
-				 'm3slt_ha',-18.2] }) # changed on 20250911
+	 	 'ubg': ['m2off',   84.194257, 'groff',82.09908233, 'grx', 0,'grlines', 1800, 'm3slt_hs', -38,
+				 'm3slt_ha',-18.5] }) # changed on 20250911
+                # until 20260916 'm2off', 84.189207, 'groff'82.076322, 
                  # 20250911 -> 'm2off', 84.19988039699999, 'groff', 82.07982024 
                  #at 20240523 'm2off', 84.20149823, 'groff', 82.11328655
                  # at 20230127 ->'m2off', 84.20009535, 'groff', 82.1145797096
