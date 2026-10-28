@@ -2,7 +2,7 @@ import numpy as np
 from ophyd.areadetector import AreaDetector, HDF5Plugin
 from ophyd.areadetector.plugins import PluginBase, ImagePlugin
 from ophyd.areadetector.cam import ADCpt
-
+from ophyd.areadetector.trigger_mixins import ADTriggerStatus
 from ophyd.areadetector.filestore_mixins import (FileStoreHDF5IterativeWrite,
                                                  FileStorePluginBase,
                                                  FileStoreIterativeWrite)
@@ -11,6 +11,7 @@ from ophyd import (Component as Cpt, EpicsSignal, EpicsSignalRO, Device)
 from ophyd.areadetector.base import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.signal import Signal
 from ophyd.status import Status
+from ophyd.utils import StatusTimeoutError
 from ophyd.device import Staged
 from ophyd.sim import NullStatus
 from databroker.assets.handlers_base import HandlerBase
@@ -85,9 +86,6 @@ class AreaDetectorHDF5SingleHandler(HDF5SingleHandler):
         super(AreaDetectorHDF5SingleHandler, self).__init__(
             fpath=fpath, template=template, filename=filename,
             key=hardcoded_key, frame_per_point=frame_per_point)
-
-
-#db.reg.register_handler('AD_HDF5_SINGLE', AreaDetectorHDF5SingleHandler)
 
 
 class FileStoreHDF5Single(FileStorePluginBase):
@@ -333,6 +331,43 @@ class RIXSCamHDF5PluginForXIP(HDF5Plugin, FileStoreHDF5SingleIterativeWrite):
         self._generate_resource(resource_kwargs)
 
 
+class RIXSCamTriggerStatus(ADTriggerStatus):
+    # Based on HXN profile collection eiger
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.done:
+            self.target_count = self._read_target_count()
+            self.current_count = self._read_current_count()
+
+    def _read_target_count(self):
+        signal = self.device.cam.num_images
+        readback = getattr(signal, 'readback', signal)
+        try:
+            return readback.get()
+        except Exception:
+            return 'unknown'
+
+    def _read_current_count(self):
+        camera = self.device.cam
+        signal = getattr(camera, 'num_images_counter', None)
+        if signal is None:
+            signal = camera.array_counter
+        try:
+            return signal.get()
+        except Exception:
+            return 'unknown'
+
+    def _handle_failure(self):
+        if isinstance(self.exception(timeout=0), StatusTimeoutError):
+            target_count = self._read_target_count()
+            current_count = self._read_current_count()
+            print(
+                "Failed to observe next batch before timeout: "
+                f"observed {current_count} of {target_count} frames"
+            )
+        super()._handle_failure()
+
+
 class RIXSSingleTrigger(SingleTrigger):
     '''Modifies the `trigger` attribute so that it triggers the 2 hdf5 files
     independently.
@@ -343,6 +378,9 @@ class RIXSSingleTrigger(SingleTrigger):
     reads the XIP centroid table from Image2 and emits each column directly in
     the event document as a ragged array.
     '''
+
+    _status_type = RIXSCamTriggerStatus
+    acquisition_timeout_margin = 30 #seconds
 
     def _centroid_enabled(self):
         return bool(self.centroid_enable.get())
@@ -366,6 +404,9 @@ class RIXSSingleTrigger(SingleTrigger):
         status = self._centroid_status
         if status is None:
             return
+        if status.done:
+            self._centroid_status = None
+            return
 
         if value is None:
             return
@@ -383,7 +424,26 @@ class RIXSSingleTrigger(SingleTrigger):
             self._centroid_status = None
             status.set_finished()
 
+    def _acquisition_timeout(self):
+        acquisition_time_per_image = max(
+            float(self.cam.acquire_time.get()),
+            float(self.cam.acquire_period.get()),
+        )
+        return (int(self.cam.num_images.get()) * acquisition_time_per_image
+                + self.acquisition_timeout_margin)
 
+    def _centroid_status_callback(self, status):
+        if not isinstance(status.exception(timeout=0), StatusTimeoutError):
+            return
+        observed = len(self._centroid_cache)
+        expected = self._centroid_frames_per_point
+        print(
+            "Failed to observe next batch before timeout: "
+            f"observed {observed} of {expected} centroid frames"
+        )
+        if self._centroid_status is status:
+            self._centroid_status = None
+    
     def stage(self):
         ret = super().stage()
         self._centroid_status = None
@@ -402,14 +462,16 @@ class RIXSSingleTrigger(SingleTrigger):
             raise RuntimeError("This detector is not ready to trigger."
                                "Call the stage() method before triggering.")
 
-        self._status = self._status_type(self)
+        timeout = self._acquisition_timeout()
+        self._status = self._status_type(self, timeout=timeout)
         centroid_enabled = self._centroid_enabled()
         if centroid_enabled:
             self._centroid_cache = []
             self._centroid_frames_per_point = int(self.cam.num_images.get())
             self._centroid_timestamp = ttime.time()
-            centroid_status = Status(obj=self)
+            centroid_status = Status(obj=self, timeout=timeout)
             self._centroid_status = centroid_status
+            centroid_status.add_callback(self._centroid_status_callback)
             if self._centroid_frames_per_point <= 0:
                 self._centroid_status = None
                 centroid_status.set_finished()
