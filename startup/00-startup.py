@@ -7,7 +7,8 @@ from enum import Enum
 from nslsii.sync_experiment import sync_experiment as sync_exp
 from ophyd.signal import EpicsSignalBase
 from tiled.client import from_profile
-from bluesky_tiled_plugins import TiledWriter
+from bluesky.callbacks.buffer import BufferingWrapper
+from bluesky_tiled_plugins import TiledInserter, TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
 import httpx
@@ -70,24 +71,7 @@ def sync_write_paths():
     sc_questar_cam.hdf5.reg_root = prosilica_root
 
 
-class TiledInserter:
-    def insert(self, name, doc):
-        ATTEMPTS = 20
-        error = None
-        for attempt in range(ATTEMPTS):
-            try:
-                tiled_writing_client_raw.post_document(name, doc)
-            except Exception as exc:
-                print("Document saving failure:", repr(exc))
-                error = exc
-            else:
-                break
-            ttime.sleep(2)
-        else:
-            # Out of attempts
-            raise error
-
-
+TILED_BACKUP_ROOT = "/nsls2/data/six/shared/config/bluesky/tiled_backup"
 # Define tiled catalog
 tiled_writing_client = from_profile(
     "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout=httpx.Timeout(connect=5, read=120, write=120, pool=5) # Added Oct. 8, 2026
@@ -96,14 +80,20 @@ tiled_writing_client_raw = tiled_writing_client["raw"]
 tiled_writing_client_raw.context.http_client.headers['tiled-qos'] = 'acquisition'
 tiled_writing_client_sql = tiled_writing_client["migration"]
 tiled_writing_client_sql.context.http_client.headers['tiled-qos'] = 'acquisition'
-tiled_inserter = TiledInserter()
+tiled_inserter = TiledInserter(
+    tiled_writing_client_raw,
+    "six",
+    backup_directory=f"{TILED_BACKUP_ROOT}/raw",
+)
+tiled_inserter = BufferingWrapper(tiled_inserter)  # in-process queue: RE never blocks
 tw = TiledWriter(
         tiled_writing_client_sql,
-        backup_directory="/tmp/tiled_backup",
+        backup_directory=f"{TILED_BACKUP_ROOT}/sql",
         spec_to_mimetype={
             "AD_HDF5": "application/x-hdf5",
             "AD_TIFF": "multipart/related;type=image/tiff",
         })
+tw = BufferingWrapper(tw)  # in-process queue: RE never blocks
 tiled_reading_client_raw = from_profile("nsls2")["six"]["raw"]
 c = tiled_reading_client_sql = from_profile("nsls2")["six"]["migration"]
 c.context.http_client.headers['tiled-qos'] = 'acquisition'
