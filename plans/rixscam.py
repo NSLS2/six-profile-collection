@@ -46,12 +46,12 @@ def rixscam_acquire_w_shutter(Ei_vals, m7_pit_vals, num_rixs_im, extra_md = ' ' 
             uid = yield from count([rixscam, sclr, ring_curr],num=1, md = {'reason':'{}'. format(md_string)}) 
                 
             if uid == None:
-                uid = db[-1].start['scan_id']#+1+j+scan_num_cor
-                f_string += 'scan no ' + str(db[uid].start['scan_id'])  + ' ' + str(md_string) + '\n'
+                uid = scan_id_of(-1)#+1+j+scan_num_cor
+                f_string += 'scan no ' + str(uid)  + ' ' + str(md_string) + '\n'
                 print(md_string)
                 #f_string += 'scan no ' + str(uid) + ': E = ' + str(np.round(Ei_vals[i],3)) + '\n'
             else:
-                f_string += 'scan no ' + str(db[uid].start['scan_id'])  + ' ' + str(md_string) + '\n'
+                f_string += 'scan no ' + str(scan_id_of(uid))  + ' ' + str(md_string) + '\n'
                 #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': E = ' + str(np.round(Ei_vals[i],3)) + '\n'
          
         #DARKS
@@ -60,7 +60,7 @@ def rixscam_acquire_w_shutter(Ei_vals, m7_pit_vals, num_rixs_im, extra_md = ' ' 
             uid = yield from count([rixscam, sclr, ring_curr],num=1, md = {'reason':'gv:sc1 dark'})        
             if uid == None:
                uid = -1
-            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+            f_string += 'scan no ' + str(scan_id_of(uid)) + ':  dark \n'
         yield from mv(gvbt1,'Close')
         yield from mv(gvsc1,'Open')
 
@@ -117,12 +117,12 @@ def rixscam_acquire_w_shutter_count(Ei_vals, m7_pit_vals, num_rixs_im, extra_md 
             uid = yield from count([rixscam, sclr, ring_curr],num=1, md = {'reason':'{}'. format(md_string)}) 
                 
             if uid == None:
-                uid = db[-1].start['scan_id']#+1+j+scan_num_cor
-                f_string += 'scan no ' + str(db[uid].start['scan_id'])  + ' ' + str(md_string) + '\n'
+                uid = scan_id_of(-1)#+1+j+scan_num_cor
+                f_string += 'scan no ' + str(uid)  + ' ' + str(md_string) + '\n'
                 print(md_string)
                 #f_string += 'scan no ' + str(uid) + ': E = ' + str(np.round(Ei_vals[i],3)) + '\n'
             else:
-                f_string += 'scan no ' + str(db[uid].start['scan_id'])  + ' ' + str(md_string) + '\n'
+                f_string += 'scan no ' + str(scan_id_of(uid))  + ' ' + str(md_string) + '\n'
                 #f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': E = ' + str(np.round(Ei_vals[i],3)) + '\n'
          
         #DARKS
@@ -131,7 +131,7 @@ def rixscam_acquire_w_shutter_count(Ei_vals, m7_pit_vals, num_rixs_im, extra_md 
             uid = yield from count([rixscam, sclr, ring_curr],num=1, md = {'reason':'gv:sc1 dark'})        
             if uid == None:
                uid = -1
-            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ':  dark \n'
+            f_string += 'scan no ' + str(scan_id_of(uid)) + ':  dark \n'
         yield from mv(gvbt1,'Close')
         yield from mv(gvsc1,'Open')
 
@@ -169,7 +169,7 @@ def rixscam_cff_optimization_centroid(cts, num_scans=1,extra_md = '' ):
         uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
            uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': pgm.cff = ' + str(x_val) + '\n'
 
     yield from mv(gvbt1,'Close')
     #yield from mv (x_motor,x_ideal)
@@ -205,7 +205,7 @@ def rixscam_m7_gr_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
             uid = yield from count(dets, num=cts, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
             if uid == None:
                 uid = -1
-            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': gr_pit = ' + str(x_val) + \
+            f_string += 'scan no ' + str(scan_id_of(uid)) + ': gr_pit = ' + str(x_val) + \
                         ' , m7_pit = ' + str(y_val) + '\n'
 
     yield from mv(gvbt1,'Close')
@@ -247,7 +247,7 @@ def rixscam_m6_m7_2_axis_centroid(cts, num_scans=1, extra_md = ' '):
             uid = yield from count(dets, num=cts, md = {'reason':' m7-gr scan {}'. format(extra_md)})        
             if uid == None:
                 uid = -1
-            f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': m7_pit = ' + str(x_val) + \
+            f_string += 'scan no ' + str(scan_id_of(uid)) + ': m7_pit = ' + str(x_val) + \
                         ' , m6_pit = ' + str(y_val) + '\n'
 
     yield from mv(gvbt1,'Close')
@@ -274,7 +274,7 @@ def rixscam_dc_optimization_centroid(cts, num_scans=1, extra_md = '' ):
         uid = yield from count(dets,num=cts, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': dc_z = ' + str(x_val) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': dc_z = ' + str(x_val) + '\n'
 
 
     yield from mv(gvbt1,'Close')
@@ -306,7 +306,7 @@ def rixscam_pgm_en_centroid(cts, num_scans=1, extra_md = '' ):
         #uid = yield from count([rixscam],num=1, md = {'reason':'{} energy calibration - {}um vg'.format(extra_md, extslt_vg_value)})        
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm_en = ' + str(x_val) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': pgm_en = ' + str(x_val) + '\n'
    
     yield from mv(gvbt1,'Close')
     print (f_string)
@@ -331,7 +331,7 @@ def rixscam_extslit_centroid(cts, num_scans=1, extra_md = '' ):
         uid = yield from count([rixscam], num=cts, md = {'reason':'{} resolution - {}um vg'.format(extra_md, extslt_vg_value)})          
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': extslit_vg = ' + str(i) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': extslit_vg = ' + str(i) + '\n'
    
     yield from mv(gvbt1,'Close')
     print (f_string)
@@ -369,7 +369,7 @@ def rixscam_m5_roll_optimization_centroid(cts, num_scans=1,extra_md = '' ):
         uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': pgm.cff = ' + str(x_val) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': pgm.cff = ' + str(x_val) + '\n'
 
 
     yield from mv(gvbt1,'Close')
@@ -395,7 +395,7 @@ def rixscam_m6_mask_study_centroid(cts, num_scans=1,extra_md = '' ):
         uid = yield from count([rixscam],num=cts, md = {'reason':' {}'. format(extra_md)})        
         if uid == None:
             uid = -1
-        f_string += 'scan no ' + str(db[uid].start['scan_id']) + ': m6_mask = ' + str(x_val) + '\n'
+        f_string += 'scan no ' + str(scan_id_of(uid)) + ': m6_mask = ' + str(x_val) + '\n'
 
 
     yield from mv(gvbt1,'Close')
