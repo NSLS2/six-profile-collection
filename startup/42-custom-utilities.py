@@ -118,7 +118,7 @@ def current_plan_time(start_time,start_scan_id,last_uid,total_num_scans):
         time_taken = (last_stop_time - start_time)
         scans_remaining = total_num_scans - scans_complete
         time_per_scan = time_taken/scans_complete
-        time_remaining = scans_remaining*time_per_scan-(time.time()-last_stop_time)
+        time_remaining = max(0, scans_remaining*time_per_scan-(time.time()-last_stop_time))
         estimated_completion_time = time.time() + time_remaining
     
         print ('Completed scan {} of {}, time taken = {}, average time per scan = {}'.format(scans_complete,total_num_scans, 
