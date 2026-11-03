@@ -12,7 +12,6 @@ from tiled.client import from_profile
 from bluesky_tiled_plugins import BufferingWrapper, TiledInserter, TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
-import httpx
 
 
 class ENDSTATION_ENUM(Enum):
@@ -75,7 +74,7 @@ def sync_write_paths():
 TILED_BACKUP_ROOT = "/nsls2/data/six/shared/config/bluesky/tiled_backup"
 # Define tiled catalog
 tiled_writing_client = from_profile(
-    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout=httpx.Timeout(connect=5, read=120, write=120, pool=5) # Added Oct. 8, 2026
+    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout={"connect": 5, "read": 120, "write": 120, "pool": 5} # Added Oct. 8, 2026
 )["six"]
 tiled_writing_client_raw = tiled_writing_client["raw"]
 tiled_writing_client_raw.context.http_client.headers['tiled-qos'] = 'acquisition'
