@@ -19,6 +19,8 @@ def scan_info(scan_id,source='all'):
         
     '''
 
+    flush_tiled()  # wait for buffered documents to reach Tiled
+
     if source in ['all','baseline','header']:
         hdr=db[scan_id]
         f_string='*************************************************************************\n'
@@ -137,6 +139,7 @@ def scan_dets(*scan_no):
     '''Enter scan id numbers to print settings for primary stream detectors'''
    
     
+    flush_tiled()  # wait for buffered documents to reach Tiled
     xtr_str = ''
     for scan in scan_no:
         if 'reason' in db[scan].start:
