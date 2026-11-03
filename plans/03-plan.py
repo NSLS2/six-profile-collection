@@ -2566,7 +2566,7 @@ def detectorz():
         yield from mvr(dc.z,-5)
         uid = yield from count([rixscam],md = {'reason':'carbon-tape dc_z scans'})
         flush_tiled()
-        x_val = db[uid].table('baseli5.24235')['dc_z'][1]
+        x_val = db[uid].table('baseline')['dc_z'][1]
         f_string = 'scan no ' + str(scan_id_of(uid)) + ': dc_z = ' + str(x_val) + \
                     ' , i = ' + str(i) + '\n'
         print(f_string)
