@@ -2564,9 +2564,9 @@ def detectorz():
     f_string = ''
     for i in range (0,75,1):
         yield from mvr(dc.z,-5)
-        yield from count([rixscam],md = {'reason':'carbon-tape dc_z scans'})
-        x_val = db[-1].table('baseli5.24235')['dc_z'][1]
-        f_string = 'scan no ' + str(scan_id_of(-1)) + ': dc_z = ' + str(x_val) + \
+        uid = yield from count([rixscam],md = {'reason':'carbon-tape dc_z scans'})
+        x_val = db[uid].table('baseli5.24235')['dc_z'][1]
+        f_string = 'scan no ' + str(scan_id_of(uid)) + ': dc_z = ' + str(x_val) + \
                     ' , i = ' + str(i) + '\n'
         print(f_string)
     yield from mv(shutter_B,'Close')
@@ -2580,9 +2580,9 @@ def detectorvexit():
     f_string = ''
     for i in range (0,4,1):
         yield from mvr(extslt.vg,-10)
-        yield from count([rixscam],md = {'reason':'carbon-tape extslt.vg scans'})
-        x_val = db[-1].table('baseline')['extslt_vg'][1]
-        f_string = 'scan no ' + str(scan_id_of(-1)) + ': extslt_vg = ' + str(x_val) + \
+        uid = yield from count([rixscam],md = {'reason':'carbon-tape extslt.vg scans'})
+        x_val = db[uid].table('baseline')['extslt_vg'][1]
+        f_string = 'scan no ' + str(scan_id_of(uid)) + ': extslt_vg = ' + str(x_val) + \
                     ' , i = ' + str(i) + '\n'
         print(f_string)
     yield from mv(shutter_B,'Close')

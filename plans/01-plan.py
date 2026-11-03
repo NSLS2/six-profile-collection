@@ -4,8 +4,8 @@ def opt_m1_m3_alignment(i):
         yield from bp.rel_set(m1.x,+0.5*i,wait=True) 
         yield from bp.rel_set(m1.pit,-9.05*i,wait=True) 
         yield from bp.rel_set(m3.pit,-0.00052*i,wait=True)
-        yield from relative_scan(d,m3.pit,-0.0005,0.0005,15)
-        s=db.get_table(db[-1])
+        uid = yield from relative_scan(d,m3.pit,-0.0005,0.0005,15)
+        s=db.get_table(db[uid])
         max_m3=s.m3_pit[s.gc_diag_grid.idxmax()]
         yield from bp.mv(m3.pit,max_m3)
         yield from bp.sleep(5)
@@ -15,13 +15,13 @@ def m3_focus():
 
     for i in range(0,6,1):
         yield from bp.mv(extslt.hc,-4.8-0.1*i)
-        yield from relative_scan(d,m3.pit,-0.0015,0.0005,25)
-        s=db.get_table(db[-1])
+        uid = yield from relative_scan(d,m3.pit,-0.0015,0.0005,25)
+        s=db.get_table(db[uid])
         max_m3=s.m3_pit[s.gc_diag_grid.idxmax()]
         yield from bp.mv(m3.pit,max_m3)
         yield from bp.sleep(5)
-        yield from relative_scan(d,m3.pit,-0.0005,0.0005,15)
-        s=db.get_table(db[-1])
+        uid = yield from relative_scan(d,m3.pit,-0.0005,0.0005,15)
+        s=db.get_table(db[uid])
         max_m3=s.m3_pit[s.gc_diag_grid.idxmax()]
         yield from bp.sleep(5)
         yield from bp.mv(m3.pit,max_m3)
