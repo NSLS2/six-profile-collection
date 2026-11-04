@@ -55,6 +55,7 @@ def master_plan():
 
 # Data export function
 def save_scan2csv(first_id, last_id):
+    flush_tiled()  # wait for buffered documents to reach Tiled
     for scanid in range(first_id, last_id+1,1):
         df=db.get_table(db[scanid])
         #df.to_csv('~/Scans/scan_%d.csv' % scanid)

@@ -1,3 +1,5 @@
+import collections
+import logging
 import os
 import bluesky.callbacks.mpl_plotting
 import nslsii
@@ -7,7 +9,7 @@ from enum import Enum
 from nslsii.sync_experiment import sync_experiment as sync_exp
 from ophyd.signal import EpicsSignalBase
 from tiled.client import from_profile
-from bluesky_tiled_plugins import TiledWriter
+from bluesky_tiled_plugins import BufferingWrapper, TiledInserter, TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
 import httpx2 as httpx
@@ -70,40 +72,46 @@ def sync_write_paths():
     sc_questar_cam.hdf5.reg_root = prosilica_root
 
 
-class TiledInserter:
-    def insert(self, name, doc):
-        ATTEMPTS = 20
-        error = None
-        for attempt in range(ATTEMPTS):
-            try:
-                tiled_writing_client_raw.post_document(name, doc)
-            except Exception as exc:
-                print("Document saving failure:", repr(exc))
-                error = exc
-            else:
-                break
-            ttime.sleep(2)
-        else:
-            # Out of attempts
-            raise error
-
-
+TILED_BACKUP_ROOT = "/nsls2/data/six/shared/config/bluesky/tiled_backup"
 # Define tiled catalog
 tiled_writing_client = from_profile(
-    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout=httpx.Timeout(connect=5, read=120, write=120, pool=5) # Added Oct. 8, 2026
+    "nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_SIX"], timeout={"connect": 5, "read": 120, "write": 120, "pool": 5} # Added Oct. 8, 2026
 )["six"]
 tiled_writing_client_raw = tiled_writing_client["raw"]
 tiled_writing_client_raw.context.http_client.headers['tiled-qos'] = 'acquisition'
 tiled_writing_client_sql = tiled_writing_client["migration"]
 tiled_writing_client_sql.context.http_client.headers['tiled-qos'] = 'acquisition'
-tiled_inserter = TiledInserter()
+tiled_inserter = TiledInserter(
+    tiled_writing_client_raw,
+    "six",
+    backup_directory=f"{TILED_BACKUP_ROOT}/raw",
+)
+tiled_inserter = BufferingWrapper(tiled_inserter)  # in-process queue: RE never blocks
 tw = TiledWriter(
         tiled_writing_client_sql,
-        backup_directory="/tmp/tiled_backup",
+        backup_directory=f"{TILED_BACKUP_ROOT}/sql",
         spec_to_mimetype={
             "AD_HDF5": "application/x-hdf5",
             "AD_TIFF": "multipart/related;type=image/tiff",
         })
+tw = BufferingWrapper(tw)  # in-process queue: RE never blocks
+
+
+def flush_tiled(timeout=30):
+    """Block until all queued documents have been written to Tiled.
+
+    Documents are written to Tiled in background threads. Call this before
+    reading back a run that was just taken.
+
+    Raises RuntimeError if a buffer does not drain within ``timeout``
+    seconds or its worker thread has died.
+    """
+    for label, buffer in (("raw", tiled_inserter), ("migration", tw)):
+        if not buffer.flush(timeout):
+            raise RuntimeError(
+                f"Tiled {label} buffer was not flushed within {timeout} s "
+                "(timed out or its worker thread died)."
+            )
 tiled_reading_client_raw = from_profile("nsls2")["six"]["raw"]
 c = tiled_reading_client_sql = from_profile("nsls2")["six"]["migration"]
 c.context.http_client.headers['tiled-qos'] = 'acquisition'
@@ -142,6 +150,70 @@ nslsii.configure_base(
     redis_db=endstation_to_redis_db[endstation],
 )
 RE.subscribe(tw)
+
+
+class _RunTracker:
+    """Remember the scan_id and start/stop times of recent runs, by start uid.
+
+    The Tiled writers are buffered, so a run may not be in Tiled yet when a
+    plan reads it back. Plans that only need a run's scan_id or times get them
+    from here instead of from ``db``. The RunEngine calls subscribers before
+    ``open_run``/``close_run`` return, so a uid returned by a scan plan is
+    already known here. Only the uid, scan_id and two timestamps are kept,
+    for at most ``maxlen`` runs started by this session's RunEngine.
+    """
+
+    def __init__(self, maxlen=10_000):
+        self._maxlen = maxlen
+        self._runs = collections.OrderedDict()
+
+    def __call__(self, name, doc):
+        # Never raise: an exception in a subscriber would abort the scan.
+        try:
+            if name == "start":
+                self._runs[doc["uid"]] = {
+                    "scan_id": doc.get("scan_id"),
+                    "start_time": doc.get("time"),
+                    "stop_time": None,
+                }
+                while len(self._runs) > self._maxlen:
+                    self._runs.popitem(last=False)
+            elif name == "stop":
+                run = self._runs.get(doc.get("run_start"))
+                if run is not None:
+                    run["stop_time"] = doc.get("time")
+        except Exception:
+            logging.getLogger(__name__).exception("_RunTracker failed on %r", name)
+
+    def _get(self, uid):
+        """Look up by start uid, or by negative index (-1 = latest run)."""
+        if isinstance(uid, int) and uid < 0:
+            try:
+                return list(self._runs.values())[uid]
+            except IndexError:
+                raise KeyError(
+                    f"Fewer than {-uid} runs started in this session"
+                ) from None
+        try:
+            return self._runs[uid]
+        except KeyError:
+            raise KeyError(
+                f"Run {uid!r} was not started in this session (or is too old); "
+                "read it from db instead"
+            ) from None
+
+    def scan_id_of(self, uid):
+        return self._get(uid)["scan_id"]
+
+    def run_times(self, uid):
+        run = self._get(uid)
+        return run["start_time"], run["stop_time"]
+
+
+_run_tracker = _RunTracker()
+RE.subscribe(_run_tracker)
+scan_id_of = _run_tracker.scan_id_of  # scan_id_of(uid) or scan_id_of(-1)
+run_times = _run_tracker.run_times  # run_times(uid) -> (start_time, stop_time)
 
 # this has been uncommented based on TS
 nslsii.configure_kafka_publisher(RE, beamline_name="six")

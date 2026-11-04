@@ -19,6 +19,8 @@ def scan_info(scan_id,source='all'):
         
     '''
 
+    flush_tiled()  # wait for buffered documents to reach Tiled
+
     if source in ['all','baseline','header']:
         hdr=db[scan_id]
         f_string='*************************************************************************\n'
@@ -70,12 +72,15 @@ def scan_info(scan_id,source='all'):
 
 
 ###plan time utilities###
-def current_plan_time(start_scan_id,total_num_scans):
+def current_plan_time(start_time,start_scan_id,last_uid,total_num_scans):
     ''' 
     For plans that involve multiple seperate scans this determines the expected finishing time, based on the time taken so far and the total number of scans.
 
     It assumes that all scans will take the same amount of time. So it will be less accurate when a plan involves scans of different length and will be more 
     accurate the more scans have already taken place.
+
+    It reads the run times and scan_ids from this session's run tracker (scan_id_of/run_times), not from
+    Tiled, so it works while the Tiled writes are still buffered.
 
     It can be added to scan plans to print out the time taken and the time left after each 'scan', this requires the lines below just before the first scan to 
     define the start scan id:
@@ -85,31 +90,37 @@ def current_plan_time(start_scan_id,total_num_scans):
         total_num_scans=XXXX
 
     #THE FIRST SCAN SHOULD HAVE THE FOLLOWING IN FRONT OF THE YIELD FROM.
-        uid_id=yield from 'first scan in plan (can be inside a loop)'
+        uid=yield from 'first scan in plan (can be inside a loop)'
     
     #THE FIRST SCAN SHOULD AVE THE FOLLOWING AFTER THE FIRST SCAN YIELD FROM.
         if uid is not None and start_scan_id is None:
-            start_scan_id = db[uid].start['scan_id']
+            start_scan_id = scan_id_of(uid)
+            start_time = run_times(uid)[0]
 
     #THE FOLLOWING SHOULD BE PLACED AFTER EACH SCAN IN THE PLAN TO PRINT OUT THE TIME TAKEN AND TIME REMAINING.
-        if start_scan_id is not None: current_plan_time(start_scan_id,total_num_scans)
+        if start_scan_id is not None: current_plan_time(start_time,start_scan_id,uid,total_num_scans)
 
 
     Parameters
     ----------
+    start_time : float
+        The start time of the first scan.
     start_scan_id : integer
         The scan_id for the first scan.
+    last_uid : string
+        The uid of the scan that has just finished.
     total_num_scans : integer
         The total number of scans in the plan.
 
         
     '''
-    if int(start_scan_id) < db[-2].start['scan_id']:
-        time_taken = (db[-2].stop['time'] - db[int(start_scan_id)].start['time'])
-        scans_complete = (db[-2].start['scan_id'] - int(start_scan_id))
+    last_stop_time = run_times(last_uid)[1]
+    scans_complete = scan_id_of(last_uid) - int(start_scan_id) + 1
+    if scans_complete > 0 and last_stop_time is not None:
+        time_taken = (last_stop_time - start_time)
         scans_remaining = total_num_scans - scans_complete
         time_per_scan = time_taken/scans_complete
-        time_remaining = scans_remaining*time_per_scan-(time.time()-db[-2].stop['time'])
+        time_remaining = max(0, scans_remaining*time_per_scan-(time.time()-last_stop_time))
         estimated_completion_time = time.time() + time_remaining
     
         print ('Completed scan {} of {}, time taken = {}, average time per scan = {}'.format(scans_complete,total_num_scans, 
@@ -128,6 +139,7 @@ def scan_dets(*scan_no):
     '''Enter scan id numbers to print settings for primary stream detectors'''
    
     
+    flush_tiled()  # wait for buffered documents to reach Tiled
     xtr_str = ''
     for scan in scan_no:
         if 'reason' in db[scan].start:

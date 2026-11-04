@@ -62,9 +62,10 @@ def multi_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=None,
         uid=yield from scan(detectors,*args,num, per_step=per_step, md=md)
 
         if (initial_scan_id == 'current scan_id') and (uid is not None):
-            initial_scan_id = db[uid].start['scan_id']
+            initial_scan_id = scan_id_of(uid)
+            initial_start_time = run_times(uid)[0]
         
-        if (initial_scan_id != 'current scan_id'): current_plan_time(initial_scan_id,total_num_scans)
+        if (initial_scan_id != 'current scan_id') and (uid is not None): current_plan_time(initial_start_time,initial_scan_id,uid,total_num_scans)
 
     yield from mv(motorO,initial_posO)
     
@@ -129,9 +130,10 @@ def multi_rel_scan(detectors,numO,motorO,startO,stopO,*args,num=None, per_step=N
         uid=yield from rel_scan(detectors,*args,num, per_step=per_step, md=md)
 
         if (initial_scan_id == 'current scan_id') and (uid is not None):
-            initial_scan_id = db[uid].start['scan_id']
+            initial_scan_id = scan_id_of(uid)
+            initial_start_time = run_times(uid)[0]
 
-        if (initial_scan_id != 'current scan_id'): current_plan_time(initial_scan_id,total_num_scans)
+        if (initial_scan_id != 'current scan_id') and (uid is not None): current_plan_time(initial_start_time,initial_scan_id,uid,total_num_scans)
                 
     yield from mv(motorO,initial_posO)
 
@@ -191,9 +193,10 @@ def multi_grid_scan(detectors,motorO,startO,stopO,numO,*args,per_step=None, md=N
         uid=yield from grid_scan(detectors,*args, per_step=per_step, md=md)
 
         if (initial_scan_id == 'current scan_id') and (uid is not None):
-            initial_scan_id = db[uid].start['scan_id']
+            initial_scan_id = scan_id_of(uid)
+            initial_start_time = run_times(uid)[0]
 
-        if initial_scan_id != 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
+        if (initial_scan_id != 'current scan_id') and (uid is not None): current_plan_time(initial_start_time,initial_scan_id,uid,total_num_scans)
 
     yield from mv(motorO,initial_posO)
     
@@ -266,9 +269,10 @@ def multi_rel_grid_scan(detectors,motorO,startO,stopO,numO,*args,num=None, per_s
         uid=yield from rel_grid_scan(detectors,*args, per_step=per_step, md=md)
 
         if (initial_scan_id == 'current scan_id') and (uid is not None):
-            initial_scan_id = db[uid].start['scan_id']
+            initial_scan_id = scan_id_of(uid)
+            initial_start_time = run_times(uid)[0]
 
-        if initial_scan_id != 'current scan_id': current_plan_time(initial_scan_id,total_num_scans)
+        if (initial_scan_id != 'current scan_id') and (uid is not None): current_plan_time(initial_start_time,initial_scan_id,uid,total_num_scans)
                 
     yield from mv(motorO,initial_posO)
 
