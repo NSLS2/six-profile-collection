@@ -12,6 +12,7 @@ from tiled.client import from_profile
 from bluesky_tiled_plugins import BufferingWrapper, TiledInserter, TiledWriter
 from redis_json_dict import RedisJSONDict
 from bluesky.run_engine import RunEngine
+import httpx2 as httpx
 
 
 class ENDSTATION_ENUM(Enum):
